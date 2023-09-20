@@ -1,52 +1,35 @@
 angular.module("umbraco").controller("customBlockController", function ($scope, editorState, eventsService) {
-    
-    function stringify(obj) {
-        let cache = [];
-        let str = JSON.stringify(obj, function (key, value) {
-            if (key == "_parentForm" || key == "__scope" || key == "$block") { //skip keys that will give us unneeded circular reference, like grid in grid
-                return;
+
+    function fetchData(dataToFetch) {
+        fetch('/umbraco/api/CustomPreview/RenderPartial', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(dataToFetch)
+        }).then((response) => {
+            if (response.ok) {
+                return response.json();
             }
-            if (typeof value === "object" && value !== null) {
-                if (cache.indexOf(value) !== -1) {
-                    // Circular reference found, discard key
-                    return;
-                }
-                // Store value in our collection
-                cache.push(value);
-            }
-            return value;
+            throw new Error('Something went wrong');
+        }).then(json => {
+            $scope.$apply(() => {
+                $scope.html = json.html;
+            });
+        }).catch((error) => {
+            console.log(error)
         });
-        cache = null; // reset the cache
-        return str;
     }
 
-    $scope.$watch('block.data', function (newValue, oldValue) {
-        if (newValue !== oldValue) {
+    $scope.$watch('block.data', function (newValue) {
+        if (newValue) {
             const json = stringify(newValue);
-            
 
             const data = {
                 ScopeChange: json,
                 ControllerName: $scope.block.label
             };
-            fetch('/umbraco/api/CustomPreview/RenderPartial', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            }).then((response) => {
-                if (response.ok) {
-                    return response.json();
-                }
-                throw new Error('Something went wrong');
-            }).then(json => {
-                $scope.$apply(function () {
-                    $scope.html = json.html;
-                });
-            }).catch((error) => {
-                console.log(error)
-            });
+            fetchData(data);
         }
     }, true);
 
@@ -55,25 +38,27 @@ angular.module("umbraco").controller("customBlockController", function ($scope, 
             ScopeChange: JSON.stringify($scope.block.data),
             ControllerName: $scope.block.label
         };
-        fetch('/umbraco/api/CustomPreview/RenderPartial', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(data)
-        }).then((response) => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error('Something went wrong');
-        }).then(json => {
-            $scope.html = json.html;
-        }).catch((error) => {
-            console.log(error)
-        });
-        
-    }, 10)
+        fetchData(data);
+    }, 10);
 });
+
+function stringify(obj) {
+    let cache = [];
+    return JSON.stringify(obj, function (key, value) {
+        const unneededKeys = ["_parentForm", "__scope", "$block"];
+        if (unneededKeys.includes(key)) {
+            return;
+        }
+        if (typeof value === "object" && value !== null) {
+            if (cache.indexOf(value) !== -1) {
+                return;
+            }
+            cache.push(value);
+        }
+        return value;
+    });
+}
+
 
 angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
     return {
@@ -107,6 +92,8 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                             oldScript.parentNode.replaceChild(scriptTag, oldScript);
 
                             const el = element[0];
+                            // create getELementById since that's normally only supported on document
+                            // and we are faking a document so most scripts will keep running.
                             el.getElementById = function (id) { return el.querySelector(`#${id}`) };
                             window[funcName](el);
                             console.log(funcName);

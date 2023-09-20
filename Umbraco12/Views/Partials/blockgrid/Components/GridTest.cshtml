@@ -8,14 +8,12 @@
     <br />
 }
 @Model.Content.Date
-@try
+
+@if (ViewBag.blockPreview != null)
 {
-    //@await Html.GetBlockGridHtmlAsync(Model.Content.SecondSillyGrid);
+    <p style="color:red">Jeg er kun synlig i backoffice</p>
 }
-catch (Exception ex)
-{
-    <p>@ex.Message</p>
-}
+
 <p>Silly javascript:<span id="span"></span></p>
 <script>
    
