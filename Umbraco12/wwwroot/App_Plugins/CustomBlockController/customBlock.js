@@ -33,13 +33,6 @@ angular.module("umbraco").controller("customBlockController", function ($scope, 
         }
     }, true);
 
-    setTimeout(() => {
-        const data = {
-            ScopeChange: JSON.stringify($scope.block.data),
-            ControllerName: $scope.block.label
-        };
-        fetchData(data);
-    }, 10);
 });
 
 function stringify(obj) {
@@ -70,8 +63,9 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
             var scriptsProcessed = false;
 
             scope.$watch('executeScripts', function (htmlContent) {
-                console.log('debug')
-                if (htmlContent && !scriptsProcessed) {
+
+                if (htmlContent && !scriptsProcessed && htmlContent != element[0].innerHTML) {
+
                     element.html(htmlContent);
 
                     var scripts = Array.from(element[0].getElementsByTagName("script"));
@@ -96,14 +90,12 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                             // and we are faking a document so most scripts will keep running.
                             el.getElementById = function (id) { return el.querySelector(`#${id}`) };
                             window[funcName](el);
-                            console.log(funcName);
                         }
 
 
                     });
-                    scriptsProcessed = true;
                 }
-                else if (htmlContent) {
+                else if (htmlContent && htmlContent != element[0].innerHTML) {
                     element.html(htmlContent);
                 }
             });
