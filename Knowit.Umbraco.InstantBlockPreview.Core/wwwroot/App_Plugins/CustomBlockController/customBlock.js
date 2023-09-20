@@ -20,7 +20,7 @@ angular.module("umbraco").controller("customBlockController", function ($scope, 
             console.log(error)
         });
     }
-
+    // watch block.data for changes and call api to get the html
     $scope.$watch('block.data', function (newValue) {
         if (newValue) {
             const json = stringify(newValue);
@@ -35,6 +35,7 @@ angular.module("umbraco").controller("customBlockController", function ($scope, 
 
 });
 
+// try to prevent circular references, which may occour if you for instance put a grid in a grid or a block list in a grid etc.
 function stringify(obj) {
     let cache = [];
     return JSON.stringify(obj, function (key, value) {
@@ -52,19 +53,17 @@ function stringify(obj) {
     });
 }
 
-
+// angular won't let us add <script> tags to the inner html of elements.. So we'll force it
 angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
     return {
-        restrict: 'A',
+        restrict: 'A', // no idea, ask chat gpt
         scope: {
             executeScripts: '='
         },
         link: function (scope, element) {
-            var scriptsProcessed = false;
-
             scope.$watch('executeScripts', function (htmlContent) {
 
-                if (htmlContent && !scriptsProcessed && htmlContent != element[0].innerHTML) {
+                if (htmlContent && htmlContent != element[0].innerHTML) {
 
                     element.html(htmlContent);
 
@@ -78,6 +77,9 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                             const r = (Math.floor(Math.random() * 100000) + 1).toString();
                             const funcName = `jsInjection_${r}`
 
+                            // we wrap the inlined script in a function so it can be called with the element as a parameter
+                            // we are faking a document so most scripts will keep running.
+                            // randomly generated function name to avoid collisions
                             scriptTag.textContent = `
                             function ${funcName}(document) {
                                 ${script}
@@ -87,16 +89,12 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
 
                             const el = element[0];
                             // create getELementById since that's normally only supported on document
-                            // and we are faking a document so most scripts will keep running.
                             el.getElementById = function (id) { return el.querySelector(`#${id}`) };
                             window[funcName](el);
                         }
 
 
                     });
-                }
-                else if (htmlContent && htmlContent != element[0].innerHTML) {
-                    element.html(htmlContent);
                 }
             });
         }
