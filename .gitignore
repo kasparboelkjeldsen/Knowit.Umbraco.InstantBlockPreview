@@ -293,3 +293,6 @@ __pycache__/
 !**/[Uu]mbraco/[Dd]eveloper/[Pp]ackages
 
 .vs/
+/Umbraco12/wwwroot/App_Plugins/CustomBlockController/customBlock.js
+/Umbraco12/wwwroot/App_Plugins/CustomBlockController/defaultView.html
+/Umbraco12/wwwroot/App_Plugins/CustomBlockController/package.manifest
