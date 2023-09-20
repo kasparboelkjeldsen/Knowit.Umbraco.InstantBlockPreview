@@ -1,0 +1,47 @@
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockGridItem<ContentModels.GridTest>>;
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+
+<h2>@Model.Content.Text</h2>
+@if (Model.Content.Image != null)
+{
+    <img id="image" src="@Model.Content.Image.Url()" />
+    <br />
+}
+@Model.Content.Date
+@try
+{
+    //@await Html.GetBlockGridHtmlAsync(Model.Content.SecondSillyGrid);
+}
+catch (Exception ex)
+{
+    <p>@ex.Message</p>
+}
+<p>Silly javascript:<span id="span"></span></p>
+<script>
+   
+    function counter(i) {
+        document.getElementById("span").innerText = i;
+        setTimeout(function () { counter(i + 1); }, 1000);
+    }
+    counter(1);
+    
+    let imageElem = document.getElementById('image');
+
+    imageElem.addEventListener('mouseover', function(e) {
+        e.target.style.border = '2px solid black';
+    });
+
+    imageElem.addEventListener('mouseout', function(e) {
+        e.target.style.border = '';
+    });
+
+</script>
+<style>
+    img {
+        max-width:500px;
+        border-radius: 25px;
+    }
+    h2 {
+        background: grey;
+    }
+</style>
