@@ -55,7 +55,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 string formattedViewPath = string.Format("{0}.cshtml", controllerName);
 
                 ViewEngineResult viewResult;
-
+#if DEBUG
+                views.Clear();
+#endif
                 // check if we have already instantiated the view (compiled it), if not, do it now
                 if (!views.ContainsKey(formattedViewPath))
                 {
