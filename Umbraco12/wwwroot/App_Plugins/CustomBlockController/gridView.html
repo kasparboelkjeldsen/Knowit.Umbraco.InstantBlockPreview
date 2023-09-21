@@ -1,0 +1,29 @@
+﻿<div class="custom-block" style="cursor:pointer" block-type="grid" ng-controller="customBlockController">
+    <button class="custom-block-edit" ng-click="block.edit()">Rediger</button>
+    <style>
+        #contentDiv {
+            overflow: hidden;
+        }
+
+        .custom-block-edit {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            background: #cdffff;
+            padding: 10px;
+            opacity: 0.3;
+            border-radius: 10px;
+            z-index: 99999;
+            cursor: pointer;
+        }
+
+        .custom.custom-block-edit:hover {
+            background-color: #ffffff;
+        }
+
+        .custom-block:hover .custom-block-edit {
+            opacity: 1;
+        }
+    </style>
+    <div id="contentDiv" execute-scripts="html" ng-cloak>Loading...</div>
+</div>

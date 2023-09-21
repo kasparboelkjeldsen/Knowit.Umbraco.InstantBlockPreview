@@ -23,14 +23,16 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
         private readonly ITempDataProvider _tempDataProvider;
         private readonly BlockEditorConverter _blockEditorConverter;
         private string ModelsNamespace = "Umbraco.Cms.Web.Common.PublishedModels"; // todo, get from config
-        private string ViewPath = "~/Views/Partials/blockgrid/Components/"; // todo, get from config
-
+        private string GridViewPath = "~/Views/Partials/blockgrid/Components/"; // todo, get from config
+        private string ListViewPath = "~/Views/Partials/blocklist/Components/"; // todo, get from config
         static Dictionary<string, (Type, Type, Type)> controllerToTypes = new Dictionary<string, (Type, Type, Type)>();
         static Dictionary<string, ViewEngineResult> views = new Dictionary<string, ViewEngineResult>(); 
         public class SC
         {
             public string? ScopeChange { get; set; }
             public string? ControllerName { get; set; }
+
+            public string? BlockType { get; set; }
         }
 
         public GridViewRenderingController(BlockEditorConverter blockEditorConverter, IRazorViewEngine razorViewEngine, ITempDataProvider tempDataProvider)
@@ -44,30 +46,31 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
         public async Task<IActionResult> RenderPartial(SC scope)
         {
             var scopeChange = scope.ScopeChange;
-            var controllerName = scope.ControllerName;
+            var controllerName = scope.ControllerName[0].ToString().ToUpper() + scope.ControllerName.Substring(1);
             string htmlString = "";
 
             try
             {
                 // hide the crazy
-                object blockGridItemInstance = InstantiateFromJson(scopeChange, controllerName);
+                object blockGridItemInstance = InstantiateFromJson(scopeChange, controllerName, scope.BlockType);
 
                 string formattedViewPath = string.Format("{0}.cshtml", controllerName);
-
+                var viewPath = (scope.BlockType == "grid" ? GridViewPath : ListViewPath) + formattedViewPath;
                 ViewEngineResult viewResult;
 #if DEBUG
                 views.Clear();
 #endif
                 // check if we have already instantiated the view (compiled it), if not, do it now
-                if (!views.ContainsKey(formattedViewPath))
+                if (!views.ContainsKey(viewPath))
                 {
-                    viewResult = _razorViewEngine.GetView("", ViewPath + formattedViewPath, false);
+                    
+                    viewResult = _razorViewEngine.GetView("", viewPath, false);
 
                     if (viewResult.View != null)
                         views.Add(formattedViewPath, viewResult);
                     else return BadRequest(new { html = "could't find view" });
                 }
-                else viewResult = views[formattedViewPath];
+                else viewResult = views[viewPath];
 
                 var actionContext = new ActionContext(ControllerContext.HttpContext, new RouteData(), new ActionDescriptor());
 
@@ -96,7 +99,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
             return Ok(new { html = htmlString });
         }
 
-        private object InstantiateFromJson(string? scopeChange, string? controllerName)
+        private object InstantiateFromJson(string? scopeChange, string? controllerName, string? blockType)
         {
             // try to deserialize to BlockItemData, while ignoring all errors
             BlockItemData? bid = JsonConvert.DeserializeObject<BlockItemData>(scopeChange!, new JsonSerializerSettings()
@@ -112,7 +115,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
 
             // we cannot avoid using some reflection to make this dynamic
             Type? controllerType, blockItemType, blockElementType;
-            if (!controllerToTypes.ContainsKey(controllerName!))
+            if (!controllerToTypes.ContainsKey(blockType + controllerName!))
             {
                 // we assume the models are in the same assembly as umbraco for now
                 // todo, read the config and if models are moved to different project, find correct assembly to load
@@ -120,13 +123,14 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 // get the typed model of the controller/view
                 controllerType = assembly!.GetType($"{ModelsNamespace!}.{controllerName!}");
                 // create generic type BlockGridItem<T> where T is the typed model
-                blockItemType = typeof(BlockGridItem<>);
+                blockItemType = blockType == "grid" ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
                 blockElementType = blockItemType.MakeGenericType(controllerType);
+                controllerToTypes.Add(blockType + controllerName, (controllerType, blockItemType, blockElementType));
             }
             else
             {
                 // or just load everything from the static dictionary since we've done this all before
-                (controllerType, blockItemType, blockElementType) = controllerToTypes[controllerName];
+                (controllerType, blockItemType, blockElementType) = controllerToTypes[blockType + controllerName];
             }
 
             // shut up the warnings, we know it's dangerous
@@ -153,3 +157,4 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
         }
     }
 }
+

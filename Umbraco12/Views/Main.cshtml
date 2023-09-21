@@ -6,3 +6,35 @@
 }
 
 @await Html.GetBlockGridHtmlAsync(Model.Grid)
+@await Html.GetBlockListHtmlAsync(Model.BlockList)
+
+<style>
+    .ac_title {
+        display: block;
+        padding: 10px;
+        background: #eee;
+        border-bottom: 1px solid #aaa;
+    }
+
+        .ac_title:hover {
+            background: #ddd;
+            cursor: pointer;
+        }
+
+    .ac_content {
+        display: none;
+        border: 1px solid black;
+        border-top: none;
+        padding: 10px;
+    }
+
+        .ac_content.visible {
+            display: block;
+        }
+</style>
+
+<script>
+    document.querySelectorAll('.ac_title').forEach(ac => ac.addEventListener('click', e => {
+        e.target.nextElementSibling.classList.toggle('visible')
+    }));
+</script>

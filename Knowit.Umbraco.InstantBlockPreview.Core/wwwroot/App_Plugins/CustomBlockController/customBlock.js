@@ -1,4 +1,5 @@
 angular.module("umbraco").controller("customBlockController", function ($scope, editorState, eventsService) {
+    var blockType = $attrs.blockType;
 
     function fetchData(dataToFetch) {
         fetch('/umbraco/api/CustomPreview/RenderPartial', {
@@ -23,11 +24,13 @@ angular.module("umbraco").controller("customBlockController", function ($scope, 
     // watch block.data for changes and call api to get the html
     $scope.$watch('block.data', function (newValue) {
         if (newValue) {
+            console.log($scope.block)
             const json = stringify(newValue);
 
             const data = {
                 ScopeChange: json,
-                ControllerName: $scope.block.label
+                ControllerName: $scope.block.label,
+                BlockType: blockType,
             };
             fetchData(data);
         }

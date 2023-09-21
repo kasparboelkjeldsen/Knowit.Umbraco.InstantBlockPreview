@@ -15,9 +15,6 @@
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 	</ItemGroup>
 	<ItemGroup>
-	  <Folder Include="wwwroot\App_Plugins\" />
-	</ItemGroup>
-	<ItemGroup>
 		<None Update="wwwroot\**\*">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</None>
@@ -27,6 +24,9 @@
 			<Pack>true</Pack>
 			<PackagePath>content\wwwroot</PackagePath>
 		</Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <None Remove="wwwroot\App_Plugins\CustomBlockController\listView.html" />
 	</ItemGroup>
 
 </Project>
