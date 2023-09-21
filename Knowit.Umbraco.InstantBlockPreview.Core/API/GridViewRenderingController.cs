@@ -25,13 +25,13 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
         private readonly BlockEditorConverter _blockEditorConverter;
         private string GridViewPath = "~/Views/Partials/blockgrid/Components/"; // todo, get from config
         private string ListViewPath = "~/Views/Partials/blocklist/Components/"; // todo, get from config
-        static ConcurrentDictionary<string, (Type, Type, Type)> controllerToTypes = new ConcurrentDictionary<string, (Type, Type, Type)>();
+
+        static readonly ConcurrentDictionary<string, (Type, Type, Type)> controllerToTypes = new();
         
         public class SC
         {
             public string? ScopeChange { get; set; }
             public string? ControllerName { get; set; }
-
             public string? BlockType { get; set; }
         }
 
@@ -45,8 +45,13 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
         [HttpPost("umbraco/api/CustomPreview/RenderPartial")]
         public async Task<IActionResult> RenderPartial(SC scope)
         {
+            if(scope.ControllerName == null || scope.ScopeChange == null || scope.BlockType == null)
+            {
+                return BadRequest(new { html = "Missing parameters" });
+            }
+
             var scopeChange = scope.ScopeChange;
-            var controllerName = scope.ControllerName[0].ToString().ToUpper() + scope.ControllerName.Substring(1);
+            var controllerName = scope.ControllerName![0].ToString().ToUpper() + scope.ControllerName.Substring(1);
             string htmlString = "";
 
             try
@@ -54,12 +59,10 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 // hide the crazy
                 object blockGridItemInstance = InstantiateFromJson(scopeChange, controllerName, scope.BlockType);
 
-                string formattedViewPath = string.Format("{0}.cshtml", controllerName);
+                var formattedViewPath = string.Format("{0}.cshtml", controllerName);
                 var viewPath = (scope.BlockType == "grid" ? GridViewPath : ListViewPath) + formattedViewPath;
-                ViewEngineResult viewResult;
 
-                viewResult = _razorViewEngine.GetView("", viewPath, false);
-
+                ViewEngineResult viewResult = _razorViewEngine.GetView("", viewPath, false);
 
                 var actionContext = new ActionContext(ControllerContext.HttpContext, new RouteData(), new ActionDescriptor());
 
@@ -75,7 +78,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
 
                 // render the view and convert to string
                 var viewContext = new ViewContext(actionContext, viewResult.View!, viewData, new TempDataDictionary(actionContext.HttpContext, _tempDataProvider), sw, new HtmlHelperOptions());
+                
                 await viewResult.View!.RenderAsync(viewContext);
+
                 htmlString = sw.ToString();
 
             }
@@ -98,25 +103,26 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                     e.ErrorContext.Handled = true;
                 })
             });
-
+            var controllerKey = blockType + controllerName;
             // convert to IPublishedElement
             var model = _blockEditorConverter.ConvertToElement(bid!, PropertyCacheLevel.Element, true);
 
             // we cannot avoid using some reflection to make this dynamic
             Type? controllerType, blockItemType, blockElementType;
-            if (!controllerToTypes.ContainsKey(blockType + controllerName!))
+            if (!controllerToTypes.ContainsKey(controllerKey))
             {
                 // get the typed model of the controller/view
-                controllerType = model.GetType();
+                controllerType = model!.GetType();
                 // create generic type BlockGridItem<T> where T is the typed model
                 blockItemType = blockType == "grid" ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
                 blockElementType = blockItemType.MakeGenericType(controllerType);
-                controllerToTypes.TryAdd(blockType + controllerName, (controllerType, blockItemType, blockElementType));
+
+                controllerToTypes.TryAdd(controllerKey, (controllerType, blockItemType, blockElementType));
             }
             else
             {
                 // or just load everything from the static dictionary since we've done this all before
-                (controllerType, blockItemType, blockElementType) = controllerToTypes[blockType + controllerName];
+                (controllerType, blockItemType, blockElementType) = controllerToTypes[controllerKey];
             }
 
             // shut up the warnings, we know it's dangerous
