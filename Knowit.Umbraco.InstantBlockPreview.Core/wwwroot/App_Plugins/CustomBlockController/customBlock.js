@@ -1,4 +1,4 @@
-angular.module("umbraco").controller("customBlockController", function ($scope, editorState, eventsService) {
+angular.module("umbraco").controller("customBlockController", function ($scope, $attrs, editorState, eventsService) {
     var blockType = $attrs.blockType;
 
     function fetchData(dataToFetch) {
@@ -29,7 +29,7 @@ angular.module("umbraco").controller("customBlockController", function ($scope, 
 
             const data = {
                 ScopeChange: json,
-                ControllerName: $scope.block.label,
+                ControllerName: $scope.block.content.contentTypeAlias,
                 BlockType: blockType,
             };
             fetchData(data);

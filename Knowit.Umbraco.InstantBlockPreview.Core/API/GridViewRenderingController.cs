@@ -22,7 +22,6 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
         private readonly IRazorViewEngine _razorViewEngine;
         private readonly ITempDataProvider _tempDataProvider;
         private readonly BlockEditorConverter _blockEditorConverter;
-        private string ModelsNamespace = "Umbraco.Cms.Web.Common.PublishedModels"; // todo, get from config
         private string GridViewPath = "~/Views/Partials/blockgrid/Components/"; // todo, get from config
         private string ListViewPath = "~/Views/Partials/blocklist/Components/"; // todo, get from config
         static Dictionary<string, (Type, Type, Type)> controllerToTypes = new Dictionary<string, (Type, Type, Type)>();
@@ -117,11 +116,8 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
             Type? controllerType, blockItemType, blockElementType;
             if (!controllerToTypes.ContainsKey(blockType + controllerName!))
             {
-                // we assume the models are in the same assembly as umbraco for now
-                // todo, read the config and if models are moved to different project, find correct assembly to load
-                var assembly = Assembly.GetEntryAssembly();
                 // get the typed model of the controller/view
-                controllerType = assembly!.GetType($"{ModelsNamespace!}.{controllerName!}");
+                controllerType = model.GetType();
                 // create generic type BlockGridItem<T> where T is the typed model
                 blockItemType = blockType == "grid" ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
                 blockElementType = blockItemType.MakeGenericType(controllerType);
