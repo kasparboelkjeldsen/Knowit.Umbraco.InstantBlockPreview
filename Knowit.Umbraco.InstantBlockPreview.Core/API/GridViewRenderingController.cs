@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
+using System.Collections.Concurrent;
 using System.Reflection;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models.Blocks;
@@ -24,8 +25,8 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
         private readonly BlockEditorConverter _blockEditorConverter;
         private string GridViewPath = "~/Views/Partials/blockgrid/Components/"; // todo, get from config
         private string ListViewPath = "~/Views/Partials/blocklist/Components/"; // todo, get from config
-        static Dictionary<string, (Type, Type, Type)> controllerToTypes = new Dictionary<string, (Type, Type, Type)>();
-        static Dictionary<string, ViewEngineResult> views = new Dictionary<string, ViewEngineResult>(); 
+        static ConcurrentDictionary<string, (Type, Type, Type)> controllerToTypes = new ConcurrentDictionary<string, (Type, Type, Type)>();
+        
         public class SC
         {
             public string? ScopeChange { get; set; }
@@ -56,20 +57,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 string formattedViewPath = string.Format("{0}.cshtml", controllerName);
                 var viewPath = (scope.BlockType == "grid" ? GridViewPath : ListViewPath) + formattedViewPath;
                 ViewEngineResult viewResult;
-#if DEBUG
-                views.Clear();
-#endif
-                // check if we have already instantiated the view (compiled it), if not, do it now
-                if (!views.ContainsKey(viewPath))
-                {
-                    
-                    viewResult = _razorViewEngine.GetView("", viewPath, false);
 
-                    if (viewResult.View != null)
-                        views.Add(formattedViewPath, viewResult);
-                    else return BadRequest(new { html = "could't find view" });
-                }
-                else viewResult = views[viewPath];
+                viewResult = _razorViewEngine.GetView("", viewPath, false);
+
 
                 var actionContext = new ActionContext(ControllerContext.HttpContext, new RouteData(), new ActionDescriptor());
 
@@ -121,7 +111,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 // create generic type BlockGridItem<T> where T is the typed model
                 blockItemType = blockType == "grid" ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
                 blockElementType = blockItemType.MakeGenericType(controllerType);
-                controllerToTypes.Add(blockType + controllerName, (controllerType, blockItemType, blockElementType));
+                controllerToTypes.TryAdd(blockType + controllerName, (controllerType, blockItemType, blockElementType));
             }
             else
             {
