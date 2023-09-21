@@ -125,17 +125,16 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 (controllerType, blockItemType, blockElementType) = controllerToTypes[controllerKey];
             }
 
-            // shut up the warnings, we know it's dangerous
-
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
-            ConstructorInfo ctor = blockElementType.GetConstructor(new[]
+            // create our constructor from this signature
+            // public BlockGridItem(Udi contentUdi, T content, Udi settingsUdi, IPublishedElement settings)
+            // public BlockListItem(Udi contentUdi, T content, Udi settingsUdi, IPublishedElement settings)
+            ConstructorInfo? ctor = blockElementType.GetConstructor(new[]
             {
-                        typeof(Udi),
-                        controllerType,
-                        typeof(Udi),
-                        typeof(IPublishedElement)
-                    });
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                typeof(Udi),
+                controllerType,
+                typeof(Udi),
+                typeof(IPublishedElement)
+            });
 
             // use reflection to instantiate our BlockGridItem<T> with the typed model
             object blockGridItemInstance = ctor!.Invoke(new object[]
