@@ -57,11 +57,13 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
             try
             {
                 // hide the crazy
-                object blockGridItemInstance = InstantiateFromJson(scopeChange, controllerName, scope.BlockType);
+                object blockItemInstance = InstantiateFromJson(scopeChange, controllerName, scope.BlockType);
 
                 var formattedViewPath = string.Format("{0}.cshtml", controllerName);
+
                 var viewPath = (scope.BlockType == "grid" ? GridViewPath : ListViewPath) + formattedViewPath;
 
+                // compile the view
                 ViewEngineResult viewResult = _razorViewEngine.GetView("", viewPath, false);
 
                 var actionContext = new ActionContext(ControllerContext.HttpContext, new RouteData(), new ActionDescriptor());
@@ -69,7 +71,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 // build Model and viewbag
                 ViewDataDictionary viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
                 {
-                    Model = blockGridItemInstance
+                    Model = blockItemInstance
                 };
 
                 viewData["blockPreview"] = true;
@@ -82,7 +84,6 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 await viewResult.View!.RenderAsync(viewContext);
 
                 htmlString = sw.ToString();
-
             }
             catch (Exception e)
             {
