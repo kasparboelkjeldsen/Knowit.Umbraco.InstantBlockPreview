@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Models.Blocks;
 using Umbraco.Cms.Core.Models.PublishedContent;
@@ -90,6 +91,11 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 htmlString = e.Message;
                 return BadRequest(new { html = htmlString });
             }
+            // Clear href attributes
+            htmlString = Regex.Replace(htmlString, @"href\s*=\s*[""'].*?[""']", "", RegexOptions.IgnoreCase);
+
+            // Clear onclick attributes
+            htmlString = Regex.Replace(htmlString, @"onclick\s*=\s*[""'].*?[""']", "", RegexOptions.IgnoreCase);
 
             return Ok(new { html = htmlString });
         }
