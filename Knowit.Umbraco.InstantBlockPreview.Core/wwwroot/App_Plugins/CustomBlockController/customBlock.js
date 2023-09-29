@@ -70,11 +70,19 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
 
                     element.html(htmlContent);
 
-                    var scripts = Array.from(element[0].getElementsByTagName("script"));
+                    const scripts = Array.from(element[0].getElementsByTagName("script"));
+
+                    const injections = [];
+                    scripts.forEach(function (oldScript) {
+                        if (oldScript.src) {
+                            injections.push(oldScript.src);
+                        }
+                    });
+
                     scripts.forEach(function (oldScript) {
                         var scriptTag = document.createElement('script');
                         if (oldScript.src) {
-                            scriptTag.src = oldScript.src;
+
                         } else {
                             const script = (oldScript.innerText || oldScript.textContent);
                             const r = (Math.floor(Math.random() * 100000) + 1).toString();
@@ -84,16 +92,33 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                             // we are faking a document so most scripts will keep running.
                             // randomly generated function name to avoid collisions
                             scriptTag.textContent = `
-                            function ${funcName}(document) {
-                                ${script}
+                            function ${funcName}(doc, scriptUrls, realDoc) {
+                                let document = doc.getRootNode();
+                                
+                                try {
+                                    scriptUrls.forEach(url => {
+                                        let script = realDoc.createElement('script');
+                                        script.src = url;
+                                        document.appendChild(script);
+                                    });
+                                setTimeout(() => {
+                                    ${script}
+
+                                },500) 
+                                
+
+                                } catch (e${r}) { console.log(e${r}) }
                             }`;
+                            // todo, make this less stupid
 
                             oldScript.parentNode.replaceChild(scriptTag, oldScript);
 
                             const el = element[0];
                             // create getELementById since that's normally only supported on document
                             el.getElementById = function (id) { return el.querySelector(`#${id}`) };
-                            window[funcName](el);
+
+                            window[funcName](el, injections, document);
+                            console.log(document)
                         }
 
 

@@ -14,8 +14,19 @@
     <p style="color:red">Jeg er kun synlig i backoffice</p>
 }
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <p>Silly javascript:<span id="span"></span></p>
+<button id="swal">SWAL!</button>
 <script>
+
+    document.getElementById('swal').addEventListener('click', () => {
+        Swal.fire(
+            'Good job!',
+            'You clicked the button!',
+            'success'
+        )
+    });
    
     function counter(i) {
         document.getElementById("span").innerText = i;
