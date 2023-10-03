@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
 using Newtonsoft.Json;
+using StackExchange.Profiling.Internal;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -31,7 +32,8 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
         
         public class SC
         {
-            public string? ScopeChange { get; set; }
+            public string? Content { get; set; }
+            public string? Settings { get; set; }
             public string? ControllerName { get; set; }
             public string? BlockType { get; set; }
         }
@@ -46,19 +48,20 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
         [HttpPost("umbraco/api/CustomPreview/RenderPartial")]
         public async Task<IActionResult> RenderPartial(SC scope)
         {
-            if(scope.ControllerName == null || scope.ScopeChange == null || scope.BlockType == null)
+            if(scope == null || scope.ControllerName == null || scope.Content == null || scope.BlockType == null)
             {
                 return BadRequest(new { html = "Missing parameters" });
             }
-
-            var scopeChange = scope.ScopeChange;
+   
+            var content = scope.Content;
+            var settings = scope.Settings;
             var controllerName = scope.ControllerName![0].ToString().ToUpper() + scope.ControllerName.Substring(1);
             string htmlString = "";
 
             try
             {
                 // hide the crazy
-                object blockItemInstance = InstantiateFromJson(scopeChange, controllerName, scope.BlockType);
+                object blockItemInstance = InstantiateFromJson(content, settings, controllerName, scope.BlockType);
 
                 var formattedViewPath = string.Format("{0}.cshtml", controllerName);
 
@@ -100,16 +103,19 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
             return Ok(new { html = htmlString });
         }
 
-        private object InstantiateFromJson(string? scopeChange, string? controllerName, string? blockType)
+        private object InstantiateFromJson(string? content, string? settings, string? controllerName, string? blockType)
         {
             // try to deserialize to BlockItemData, while ignoring all errors
-            BlockItemData? bid = JsonConvert.DeserializeObject<BlockItemData>(scopeChange!, new JsonSerializerSettings()
+            BlockItemData? bid = JsonConvert.DeserializeObject<BlockItemData>(content!);
+
+            IPublishedElement? settingsModel = null;
+
+            if (settings.HasValue())
             {
-                Error = new EventHandler<Newtonsoft.Json.Serialization.ErrorEventArgs>((sender, e) =>
-                {
-                    e.ErrorContext.Handled = true;
-                })
-            });
+                BlockItemData? set = JsonConvert.DeserializeObject<BlockItemData>(settings!);
+                settingsModel = _blockEditorConverter.ConvertToElement(set!, PropertyCacheLevel.Element, true);
+            }
+            
             var controllerKey = blockType + controllerName;
             // convert to IPublishedElement
             var model = _blockEditorConverter.ConvertToElement(bid!, PropertyCacheLevel.Element, true);
@@ -140,7 +146,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 typeof(Udi),
                 controllerType,
                 typeof(Udi),
-                typeof(IPublishedElement)
+                settingsModel != null ? settingsModel.GetType() : typeof(IPublishedElement)
             });
 
             // use reflection to instantiate our BlockGridItem<T> with the typed model
@@ -149,7 +155,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                         Udi.Create("element"),
                 model!,
                         Udi.Create("element"),
-                        null! //todo something something block settings
+                settingsModel! //todo something something block settings
             });
             return blockGridItemInstance;
         }

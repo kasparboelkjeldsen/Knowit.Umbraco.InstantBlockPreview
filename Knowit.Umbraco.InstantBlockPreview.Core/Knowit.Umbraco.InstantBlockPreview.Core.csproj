@@ -26,7 +26,7 @@
 		</Content>
 	</ItemGroup>
 	<ItemGroup>
-	  <None Remove="wwwroot\App_Plugins\CustomBlockController\listView.html" />
+	  <None Remove="wwwroot\App_Plugins\Knowit.Umbraco.InstantBlockPreview\listView.html" />
 	</ItemGroup>
 
 </Project>

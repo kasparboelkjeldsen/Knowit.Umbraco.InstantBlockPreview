@@ -24,11 +24,11 @@ angular.module("umbraco").controller("customBlockController", function ($scope, 
     // watch block.data for changes and call api to get the html
     $scope.$watch('block.data', function (newValue) {
         if (newValue) {
-            console.log($scope.block)
-            const json = stringify(newValue);
 
+            const json = stringify(newValue);
             const data = {
-                ScopeChange: json,
+                Content: json,
+                Settings: stringify($scope.block.settingsData),
                 ControllerName: $scope.block.content.contentTypeAlias,
                 BlockType: blockType,
             };
@@ -36,6 +36,19 @@ angular.module("umbraco").controller("customBlockController", function ($scope, 
         }
     }, true);
 
+    $scope.$watch('block.settingsData', function (newValue) {
+        if (newValue) {
+
+            const json = stringify(newValue);
+            const data = {
+                Content: stringify($scope.block.data),
+                Settings: json,
+                ControllerName: $scope.block.content.contentTypeAlias,
+                BlockType: blockType,
+            };
+            fetchData(data);
+        }
+    }, true);
 });
 
 // try to prevent circular references, which may occour if you for instance put a grid in a grid or a block list in a grid etc.

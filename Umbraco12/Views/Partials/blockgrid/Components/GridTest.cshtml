@@ -1,23 +1,25 @@
 ﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockGridItem<ContentModels.GridTest>>;
 @using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
 
-<h2>@Model.Content.Text</h2>
-@if (Model.Content.Image != null)
-{
-    <img id="image" src="@Model.Content.Image.Url()" />
-    <br />
-}
-@Model.Content.Date
+<div style="background: #@Model.Settings?.Value("backgroundColor")">
+    <h2>@Model.Content.Text</h2>
+    @if (Model.Content.Image != null)
+    {
+        <img id="image" src="@Model.Content.Image.Url()" />
+        <br />
+    }
+    @Model.Content.Date
 
-@if (ViewBag.blockPreview != null)
-{
-    <p style="color:red">Jeg er kun synlig i backoffice</p>
-}
+    @if (ViewBag.blockPreview != null)
+    {
+        <p style="color:red">Jeg er kun synlig i backoffice</p>
+    }
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-<p>Silly javascript:<span id="span"></span></p>
-<button id="swal">SWAL!</button>
+    <p>Silly javascript:<span id="span"></span></p>
+    <button id="swal">SWAL!</button>
+</div>
 <script>
 
     document.getElementById('swal').addEventListener('click', () => {
