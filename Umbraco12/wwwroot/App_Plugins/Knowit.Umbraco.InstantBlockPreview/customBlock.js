@@ -1,55 +1,81 @@
-angular.module("umbraco").controller("customBlockController", function ($scope, $attrs, editorState, eventsService) {
-    var blockType = $attrs.blockType;
+angular.module("umbraco").controller("customBlockController", [
+    '$scope',
+    '$attrs',
+    'editorState',
+    'eventsService',
+    function ($scope, $attrs, editorState, eventsService) {
+        const blockType = $attrs.blockType;
+        const renderType = 'app';
+        let appInitialized = false;
 
-    function fetchData(dataToFetch) {
-        fetch('/umbraco/api/CustomPreview/RenderPartial', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(dataToFetch)
-        }).then((response) => {
-            if (response.ok) {
-                return response.json();
-            }
-            throw new Error('Something went wrong');
-        }).then(json => {
+        const apiEndpoints = {
+            renderPartial: '/umbraco/api/CustomPreview/RenderPartial',
+            renderAppComponent: '/umbraco/api/CustomPreview/RenderAppComponent',
+            refreshAppComponent: '/umbraco/api/CustomPreview/RefreshAppComponent'
+        };
+
+        function fetchData(endpoint, dataToFetch) {
+            return fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(dataToFetch)
+            })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    }
+                    throw new Error('Something went wrong');
+                });
+        }
+
+        function updateHtml(json) {
             $scope.$apply(() => {
                 $scope.html = json.html;
             });
-        }).catch((error) => {
-            console.log(error)
-        });
+        }
+
+        function initApp(dataToFetch) {
+            if (!appInitialized) {
+                fetchData(apiEndpoints.renderAppComponent, dataToFetch)
+                    .then(json => {
+                        updateHtml(json);
+                        return fetchData(apiEndpoints.refreshAppComponent, dataToFetch);
+                    })
+                    .then(json => {
+                        setTimeout(() => window.reloadPreview(JSON.parse(json.json)), 100);
+                        appInitialized = true;
+                    })
+                    .catch(error => console.log(error));
+            }
+            else {
+                fetchData(apiEndpoints.refreshAppComponent, dataToFetch)
+                    .then(json => window.reloadPreview(JSON.parse(json.json)))
+                    .catch(error => console.log(error));
+            }
+        }
+
+        function handleBlockDataChange(newValue, settingsData) {
+            console.log('new', newValue)
+            if (newValue) {
+                const data = {
+                    Content: JSON.stringify(newValue),
+                    Settings: JSON.stringify(settingsData),
+                    ControllerName: $scope.block.content.contentTypeAlias,
+                    BlockType: blockType
+                };
+
+                renderType === 'app' ? initApp(data) : fetchData(apiEndpoints.renderPartial, data).then(updateHtml).catch(error => console.log(error));
+            }
+        }
+
+        $scope.$watch('block.data', (newValue) => handleBlockDataChange(newValue, $scope.block.settingsData), true);
+
+        $scope.$watch('block.settingsData', (newValue) => handleBlockDataChange($scope.block.data, newValue), true);
     }
-    // watch block.data for changes and call api to get the html
-    $scope.$watch('block.data', function (newValue) {
-        if (newValue) {
+]);
 
-            const json = stringify(newValue);
-            const data = {
-                Content: json,
-                Settings: stringify($scope.block.settingsData),
-                ControllerName: $scope.block.content.contentTypeAlias,
-                BlockType: blockType,
-            };
-            fetchData(data);
-        }
-    }, true);
-
-    $scope.$watch('block.settingsData', function (newValue) {
-        if (newValue) {
-
-            const json = stringify(newValue);
-            const data = {
-                Content: stringify($scope.block.data),
-                Settings: json,
-                ControllerName: $scope.block.content.contentTypeAlias,
-                BlockType: blockType,
-            };
-            fetchData(data);
-        }
-    }, true);
-});
 
 // try to prevent circular references, which may occour if you for instance put a grid in a grid or a block list in a grid etc.
 function stringify(obj) {
@@ -84,13 +110,15 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                     element.html(htmlContent);
 
                     const scripts = Array.from(element[0].getElementsByTagName("script"));
-
+                    const links = Array.from(element[0].getElementsByTagName("link"));
                     const injections = [];
+
                     scripts.forEach(function (oldScript) {
                         if (oldScript.src) {
                             injections.push(oldScript.src);
                         }
                     });
+                    
 
                     scripts.forEach(function (oldScript) {
                         var scriptTag = document.createElement('script');
@@ -117,7 +145,7 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                                 setTimeout(() => {
                                     ${script}
 
-                                },500) 
+                                },100) 
                                 
 
                                 } catch (e${r}) { console.log(e${r}) }
@@ -131,6 +159,7 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                             el.getElementById = function (id) { return el.querySelector(`#${id}`) };
 
                             window[funcName](el, injections, document);
+                            console.log(document)
                         }
 
 

@@ -1,0 +1,13 @@
+﻿<script src="~/dist/vueExample/js/chunk-vendors.js"></script>
+<script src="~/dist/vueExample/js/app.js"></script>
+
+@{
+    Random r = new Random();
+    string appName = "app" + r.Next(1000000);
+}
+<div id="@appName"></div>
+
+<script>
+    const el = document.querySelector('#@appName');
+    window.initPreview(el);
+</script>

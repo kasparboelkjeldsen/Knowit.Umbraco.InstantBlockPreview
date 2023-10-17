@@ -29,6 +29,12 @@ namespace Umbraco12
         /// </remarks>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddCors(options =>
+            {
+                options.AddPolicy("_myAllowSpecificOrigins",
+                             builder => builder.SetIsOriginAllowed((host) => true).AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            });
+
             services.AddUmbraco(_env, _config)
                 .AddBackOffice()
                 .AddWebsite()
@@ -48,7 +54,7 @@ namespace Umbraco12
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            app.UseCors("_myAllowSpecificOrigins");
             app.UseUmbraco()
                 .WithMiddleware(u =>
                 {
@@ -62,5 +68,7 @@ namespace Umbraco12
                     u.UseWebsiteEndpoints();
                 });
         }
+
+
     }
 }
