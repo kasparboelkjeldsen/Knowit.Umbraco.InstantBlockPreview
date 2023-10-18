@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StackExchange.Profiling.Internal;
@@ -32,9 +33,11 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
         private readonly ITempDataProvider _tempDataProvider;
         private readonly BlockEditorConverter _blockEditorConverter;
         private readonly IApiElementBuilder _apiElementBuilder;
-        private string GridViewPath = "~/Views/Partials/blockgrid/Components/"; // todo, get from config
-        private string ListViewPath = "~/Views/Partials/blocklist/Components/"; // todo, get from config
+        private readonly IConfiguration _configuration;
+        
+        private PackageSettings? _settings { get; set; }
 
+        private static readonly Random random = new Random();
         static readonly ConcurrentDictionary<string, (Type, Type, Type)> controllerToTypes = new();
         
         public class SC
@@ -47,15 +50,19 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
             public string? ControllerName { get; set; }
             [JsonProperty("blockType")]
             public string? BlockType { get; set; }
+
+            [JsonProperty("isApp")]
+            public bool IsApp { get; set; }
         }
 
-        public GridViewRenderingController(BlockEditorConverter blockEditorConverter, IRazorViewEngine razorViewEngine, ITempDataProvider tempDataProvider, IApiElementBuilder apiElementBuilder)
+        public GridViewRenderingController(BlockEditorConverter blockEditorConverter, IRazorViewEngine razorViewEngine, ITempDataProvider tempDataProvider, IApiElementBuilder apiElementBuilder, IConfiguration configuration)
         {
             _razorViewEngine = razorViewEngine;
             _blockEditorConverter = blockEditorConverter;
             _tempDataProvider = tempDataProvider;
             _apiElementBuilder = apiElementBuilder;
-            
+            _configuration = configuration;
+            _settings = _configuration.GetSection("Knowit.Umbraco.InstantBlockPreview")?.Get<PackageSettings>();
         }
 
         [HttpPost("umbraco/api/CustomPreview/RenderPartial")]
@@ -70,7 +77,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
             var settings = scope.Settings;
             var controllerName = scope.ControllerName![0].ToString().ToUpper() + scope.ControllerName.Substring(1);
             string htmlString = "";
-
+            string seed = random.Next(int.MaxValue).ToString();
             try
             {
                 // hide the crazy
@@ -78,7 +85,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 
                 var formattedViewPath = string.Format("{0}.cshtml", controllerName);
 
-                var viewPath = (scope.BlockType == "grid" ? GridViewPath : ListViewPath) + formattedViewPath;
+                var viewPath = scope.IsApp ? _settings!.AppViewPath : (scope.BlockType == "grid" ? _settings!.GridViewPath : _settings!.BlockViewPath) + formattedViewPath;
 
                 // compile the view
                 ViewEngineResult viewResult = _razorViewEngine.GetView("", viewPath, false);
@@ -90,8 +97,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
                 {
                     Model = blockItemInstance
                 };
-
+                
                 viewData["blockPreview"] = true;
+                viewData["seed"] = seed;
 
                 await using var sw = new StringWriter();
 
@@ -113,68 +121,11 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
             // Clear onclick attributes
             htmlString = Regex.Replace(htmlString, @"onclick\s*=\s*[""'].*?[""']", "", RegexOptions.IgnoreCase);
 
-            return Ok(new { html = htmlString });
-        }
-
-        [HttpPost("umbraco/api/CustomPreview/RenderAppComponent")]
-        public async Task<IActionResult> RenderAppComponent(SC scope)
-        {
-            if (scope == null || scope.ControllerName == null || scope.Content == null || scope.BlockType == null)
-            {
-                return BadRequest(new { html = "Missing parameters" });
-            }
-
-            string htmlString = "";
-            var content = scope.Content;
-            var settings = scope.Settings;
-            var controllerName = scope.ControllerName![0].ToString().ToUpper() + scope.ControllerName.Substring(1);
-            
-            try
-            {
-              
-                var formattedViewPath = "RenderingPreview.cshtml";
-
-                var viewPath = "~/Views/Rendering/" + formattedViewPath;
-                var blockItemInstance = InstantiateAsContentDeliveryApiResponse(content, settings, controllerName, scope.BlockType);
-        
-                // compile the view
-                ViewEngineResult viewResult = _razorViewEngine.GetView("", viewPath, false);
-
-                var actionContext = new ActionContext(ControllerContext.HttpContext, new RouteData(), new ActionDescriptor());
-
-                // build Model and viewbag
-                ViewDataDictionary viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
-                {
-                    //Model = blockItemInstance
-                };
-
-                viewData["blockPreview"] = true;
-                viewData["json"] = JsonConvert.SerializeObject(blockItemInstance);
-                await using var sw = new StringWriter();
-
-                // render the view and convert to string
-                var viewContext = new ViewContext(actionContext, viewResult.View!, viewData, new TempDataDictionary(actionContext.HttpContext, _tempDataProvider), sw, new HtmlHelperOptions());
-
-                await viewResult.View!.RenderAsync(viewContext);
-
-                htmlString = sw.ToString();
-            }
-            catch (Exception e)
-            {
-                htmlString = e.Message;
-                return BadRequest(new { html = htmlString });
-            }
-            // Clear href attributes
-            htmlString = Regex.Replace(htmlString, @"href\s*=\s*[""'].*?[""']", "", RegexOptions.IgnoreCase);
-
-            // Clear onclick attributes
-            htmlString = Regex.Replace(htmlString, @"onclick\s*=\s*[""'].*?[""']", "", RegexOptions.IgnoreCase);
-
-            return Ok(new { html = htmlString });
+            return Ok(new { html = htmlString, seed });
         }
 
         [HttpPost("umbraco/api/CustomPreview/RefreshAppComponent")]
-        public async Task<IActionResult> RefreshAppComponent(SC scope)
+        public IActionResult RefreshAppComponent(SC scope)
         {
             if (scope == null || scope.ControllerName == null || scope.Content == null || scope.BlockType == null)
             {
@@ -184,15 +135,17 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
             var content = scope.Content;
             var settings = scope.Settings;
 
-            var cacheBusterUdi = Udi.Create("element",Guid.NewGuid());
-            
+            // as we are (ab)using content delivery api, we need to bust the cache so it will refresh every time
+            // changing the udi is only an issue if we were saving the data, but as we are just using it to generate previews
+            // everything is fine
+            var cacheBusterUdi = Udi.Create("element", Guid.NewGuid());
+
             JObject jsonObj = JObject.Parse(content);
-            jsonObj["udi"] = cacheBusterUdi.ToString();  
-            content = jsonObj.ToString(); 
+            jsonObj["udi"] = cacheBusterUdi.ToString();
+            content = jsonObj.ToString();
 
             var controllerName = scope.ControllerName![0].ToString().ToUpper() + scope.ControllerName.Substring(1);
-            //{"contentTypeKey":"7af7238a-7e27-4e9d-bbe6-d4fccfef450c","udi":"umb://element/b4a305a56723470c9dad72c763137795","image":[{"key":"fba34d70-8f21-425f-b7a9-6c96e7b60564","mediaKey":"2c281bb6-19d9-4609-935e-5e3cb6cd0b62","crops":[],"focalPoint":{"left":0.5,"top":0.5}}],"date":"","text":"YO!"}
-            //{"contentTypeKey":"7af7238a-7e27-4e9d-bbe6-d4fccfef450c","udi":"umb://element/b4a305a56723470c9dad72c763137795","image":[{"key":"c457c031-ecf2-4156-a6a5-e123e1ca7bf2","mediaKey":"6513dc9c-7463-4d84-89fb-a155048d8e09","crops":[],"focalPoint":{"left":0.5,"top":0.5}}],"date":null,"text":"YO!"}
+
             var blockItemInstance = InstantiateAsContentDeliveryApiResponse(content, settings, controllerName, scope.BlockType);
 
             return Ok(new { json = JsonConvert.SerializeObject(blockItemInstance) });
@@ -203,8 +156,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
 
             if(model is BlockGridItem blockGridModel)
             {
-                var test = _apiElementBuilder.Build(blockGridModel.Content);
-
+                // borrowed from umbracos source code
                 ApiBlockGridItem CreateApiBlockGridItem(BlockGridItem item)
                 => new ApiBlockGridItem(
                     _apiElementBuilder.Build(item.Content),
@@ -225,12 +177,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
 
                 return new ApiBlockGridModel(blockGridModel.GridColumns ?? 12, new List<ApiBlockGridItem>() { CreateApiBlockGridItem(blockGridModel) });
             }
-
-
+            // todo: add support for other models like BlockListItem
             return model;
         }
-
-
 
         private object InstantiateFromJson(string? content, string? settings, string? controllerName, string? blockType)
         {
@@ -281,12 +230,18 @@ namespace Knowit.Umbraco.InstantBlockPreview.Core.API
             // use reflection to instantiate our BlockGridItem<T> with the typed model
             object blockGridItemInstance = ctor!.Invoke(new object[]
             {
-                        Udi.Create("element",Guid.NewGuid()),
+                Udi.Create("element",Guid.NewGuid()),
                 model!,
-                        Udi.Create("element",Guid.NewGuid()),
+                Udi.Create("element",Guid.NewGuid()),
                 settingsModel! //todo something something block settings
             });
             return blockGridItemInstance;
+        }
+
+        [HttpGet("umbraco/api/CustomPreview/Settings")]
+        public IActionResult GetSettings()
+        {
+            return Ok(_settings);
         }
     }
 }

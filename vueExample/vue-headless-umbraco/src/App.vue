@@ -14,14 +14,17 @@ export default {
     }
   },
   mounted() {
+    console.log('mount', this.isBackoffice)
+    console.log('seed', this.$seed)
     if (this.isBackoffice) {
-      window.reloadPreview = this.reloadPreview;
+      window.addEventListener(`event-${this.$seed}`, data => {
+        this.reloadPreview(JSON.parse(data.detail));
+      })
     }
   },
   methods: {
     reloadPreview(data) {
       this.previewData = data;
-      console.log(this.previewData);
     }
   },
   components: {

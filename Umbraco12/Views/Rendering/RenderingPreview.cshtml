@@ -2,12 +2,21 @@
 <script src="~/dist/vueExample/js/app.js"></script>
 
 @{
-    Random r = new Random();
-    string appName = "app" + r.Next(1000000);
+    string appName = "app" + ViewBag.seed;
 }
 <div id="@appName"></div>
 
 <script>
+    
     const el = document.querySelector('#@appName');
-    window.initPreview(el);
+    //window.initPreview(el, '@(ViewBag.seed)');
+    let event = new CustomEvent('init-preview-app', { detail: { element: el, seed: '@ViewBag.seed' }});
+    window.dispatchEvent(event);
+    setTimeout(() => {
+        console.log('running', 'init-preview-app' + '@ViewBag.seed')
+        if(el) {
+            
+            window['init-preview-app' + '@ViewBag.seed'](el);
+        }
+    },50);
 </script>

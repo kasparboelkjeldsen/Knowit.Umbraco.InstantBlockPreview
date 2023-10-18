@@ -3,16 +3,27 @@ angular.module("umbraco").controller("customBlockController", [
     '$attrs',
     'editorState',
     'eventsService',
-    function ($scope, $attrs, editorState, eventsService) {
+    function ($scope, $attrs) {
         const blockType = $attrs.blockType;
-        const renderType = 'app';
-        let appInitialized = false;
-
+        let renderType = 'razor';
+        let settings;
+        let seed = "";
         const apiEndpoints = {
             renderPartial: '/umbraco/api/CustomPreview/RenderPartial',
-            renderAppComponent: '/umbraco/api/CustomPreview/RenderAppComponent',
-            refreshAppComponent: '/umbraco/api/CustomPreview/RefreshAppComponent'
+            refreshAppComponent: '/umbraco/api/CustomPreview/RefreshAppComponent',
+            getSettings: '/umbraco/api/CustomPreview/Settings'
         };
+
+        fetch(apiEndpoints.getSettings).then(res => res.json()).then(data => {
+            settings = data;
+            renderType = settings.renderType;
+
+            $scope.$watch('block.data', (newValue) => handleBlockDataChange(newValue, $scope.block.settingsData), true);
+            $scope.$watch('block.settingsData', (newValue) => handleBlockDataChange($scope.block.data, newValue), true);
+        });
+
+        let appInitialized = false;
+
 
         function fetchData(endpoint, dataToFetch) {
             return fetch(endpoint, {
@@ -38,41 +49,49 @@ angular.module("umbraco").controller("customBlockController", [
 
         function initApp(dataToFetch) {
             if (!appInitialized) {
-                fetchData(apiEndpoints.renderAppComponent, dataToFetch)
+                fetchData(apiEndpoints.renderPartial, dataToFetch)
                     .then(json => {
                         updateHtml(json);
+                        seed = json.seed;
                         return fetchData(apiEndpoints.refreshAppComponent, dataToFetch);
                     })
                     .then(json => {
-                        setTimeout(() => window.reloadPreview(JSON.parse(json.json)), 100);
+
+                        setTimeout(() => {
+                            let event = new CustomEvent('event-' + seed, { detail: json.json });
+                            window.dispatchEvent(event);
+                        }, 500);
                         appInitialized = true;
                     })
                     .catch(error => console.log(error));
             }
             else {
+
                 fetchData(apiEndpoints.refreshAppComponent, dataToFetch)
-                    .then(json => window.reloadPreview(JSON.parse(json.json)))
+                    .then(json => {
+                        console.log('event-' + seed, json.json);
+                        let event = new CustomEvent('event-' + seed, { detail: json.json });
+                        window.dispatchEvent(event);
+                    })
                     .catch(error => console.log(error));
             }
         }
 
         function handleBlockDataChange(newValue, settingsData) {
-            console.log('new', newValue)
+
             if (newValue) {
                 const data = {
                     Content: JSON.stringify(newValue),
                     Settings: JSON.stringify(settingsData),
                     ControllerName: $scope.block.content.contentTypeAlias,
-                    BlockType: blockType
+                    BlockType: blockType,
+                    isApp: renderType === 'app',
                 };
 
                 renderType === 'app' ? initApp(data) : fetchData(apiEndpoints.renderPartial, data).then(updateHtml).catch(error => console.log(error));
             }
         }
 
-        $scope.$watch('block.data', (newValue) => handleBlockDataChange(newValue, $scope.block.settingsData), true);
-
-        $scope.$watch('block.settingsData', (newValue) => handleBlockDataChange($scope.block.data, newValue), true);
     }
 ]);
 
@@ -154,10 +173,8 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
 
                             const el = element[0];
                             // create getELementById since that's normally only supported on document
-                            el.getElementById = function (id) { return el.querySelector(`#${id}`) };
-
                             window[funcName](el, injections, document);
-                            console.log(document)
+
                         }
 
 
