@@ -60,7 +60,7 @@ angular.module("umbraco").controller("customBlockController", [
                         setTimeout(() => {
                             let event = new CustomEvent('event-' + seed, { detail: json.json });
                             window.dispatchEvent(event);
-                        }, 200);
+                        }, 500);
                         appInitialized = true;
                     })
                     .catch(error => console.log(error));
@@ -69,6 +69,7 @@ angular.module("umbraco").controller("customBlockController", [
 
                 fetchData(apiEndpoints.refreshAppComponent, dataToFetch)
                     .then(json => {
+                        console.log('event-' + seed, json.json);
                         let event = new CustomEvent('event-' + seed, { detail: json.json });
                         window.dispatchEvent(event);
                     })
@@ -181,6 +182,7 @@ function ${funcName}(doc, scriptUrls, realDoc) {
     }
 }   
 `;
+
                             oldScript.parentNode.replaceChild(scriptTag, oldScript);
 
                             const el = element[0];
