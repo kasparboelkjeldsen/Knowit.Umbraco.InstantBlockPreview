@@ -1,48 +1,55 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk.Razor">
   <PropertyGroup>
+	  <EnableDefaultContentItems>false</EnableDefaultContentItems>
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <Title>Instant Block Preview for Umbraco</Title>
-    <Authors>Kaspar Boel Kjeldsen</Authors>
-    <Company>Knowit Experience</Company>
+	<StaticWebAssetBasePath>App_Plugins</StaticWebAssetBasePath>
+	<ContentTargetFolders>.</ContentTargetFolders>
+	<Title>Instant Block Preview for Umbraco</Title>
+	<Authors>Kaspar Boel Kjeldsen</Authors>
+	<Company>Knowit Experience</Company>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageProjectUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</RepositoryUrl>
+    <Version>0.1.22</Version>
   </PropertyGroup>
-<PropertyGroup>
-    <NuspecFile>.nuspec</NuspecFile>
-</PropertyGroup>
+	<ItemGroup>
+		<None Update="wwwroot\App_Plugins\Knowit.Umbraco.InstantBlockPreview\customBlock.js"
+			  Pack="true"
+			  PackagePath="contentFiles\any\any;content">
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</None>
+		<None Update="wwwroot\App_Plugins\Knowit.Umbraco.InstantBlockPreview\gridView.html"
+			  Pack="true"
+			  PackagePath="contentFiles\any\any;content">
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</None>
+		<None Update="wwwroot\App_Plugins\Knowit.Umbraco.InstantBlockPreview\blockView.html"
+			  Pack="true"
+			  PackagePath="contentFiles\any\any;content">
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</None>
+		<None Update="wwwroot\App_Plugins\Knowit.Umbraco.InstantBlockPreview\package.manifest"
+			  Pack="true"
+			  PackagePath="contentFiles\any\any;content">
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		</None>
+	</ItemGroup>
+	
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="Umbraco.Cms.Core" Version="12.0.1" />
+    <PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="12.0.1" />
     <PackageReference Include="Umbraco.Cms.Web.Common" Version="12.0.1" />
   </ItemGroup>
-	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-	</ItemGroup>
-	<ItemGroup>
-		<None Update="wwwroot\**\*">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<Content Include="wwwroot\**\*">
-			<Pack>true</Pack>
-			<PackagePath>content\wwwroot</PackagePath>
-		</Content>
-	</ItemGroup>
-	<ItemGroup>
-	  <None Remove="Views\Rendering\RenderingPreview.cshtml" />
-	  <None Remove="wwwroot\App_Plugins\Knowit.Umbraco.InstantBlockPreview\listView.html" />
-	</ItemGroup>
-	<ItemGroup>
-	  <Content Include="Views\Rendering\RenderingPreview.cshtml">
-	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
-	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-	  </Content>
-	</ItemGroup>
-
 </Project>

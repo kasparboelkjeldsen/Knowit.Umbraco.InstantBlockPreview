@@ -1,0 +1,57 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ContentTargetFolders>.</ContentTargetFolders>
+    <Product>Knowit.Umbraco.InstantBlockPreview</Product>
+    <PackageId>Knowit.Umbraco.InstantBlockPreview</PackageId>
+    <Title>Knowit.Umbraco.InstantBlockPreview</Title>
+    <Description>...</Description>
+    <PackageTags>umbraco plugin package</PackageTags>
+    <Version>0.2.2</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Umbraco.Cms.Core" Version="12.0.1" />
+    <PackageReference Include="Umbraco.Cms.Web.Common" Version="12.0.1" />
+    <PackageReference Include="Umbraco.Cms.Web.Website" Version="12.0.1" />
+    <PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="12.0.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="App_Plugins\Knowit.Umbraco.InstantBlockPreview\**" ExcludeFromSingleFile="true" CopyToPublishDirectory="Always" />
+    <None Include="buildTransitive\**" Pack="true" PackagePath="buildTransitive" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+	  <None Update="App_Plugins\Knowit.Umbraco.InstantBlockPreview\customBlock.js">
+		  <PackagePath>contentFiles\any\any;content</PackagePath>
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		  <PackageCopyToOutput>true</PackageCopyToOutput>
+		  <Pack>true</Pack>
+	  </None>
+	  <None Update="App_Plugins\Knowit.Umbraco.InstantBlockPreview\gridView.html">
+		  <PackagePath>contentFiles\any\any;content</PackagePath>
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		  <PackageCopyToOutput>true</PackageCopyToOutput>
+		  <Pack>true</Pack>
+	  </None>
+	  <None Update="App_Plugins\Knowit.Umbraco.InstantBlockPreview\listView.html">
+		  <PackagePath>contentFiles\any\any;content</PackagePath>
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		  <PackageCopyToOutput>true</PackageCopyToOutput>
+		  <Pack>true</Pack>
+	  </None>
+    <None Update="App_Plugins\Knowit.Umbraco.InstantBlockPreview\package.manifest">
+      <PackagePath>contentFiles\any\any;content</PackagePath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+      <Pack>true</Pack>
+    </None>
+  </ItemGroup>
+</Project>

@@ -5,7 +5,9 @@ VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco12", "Umbraco12\Umbraco12.csproj", "{93646483-22FA-4A9C-A970-12CD56F2CB84}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Knowit.Umbraco.InstantBlockPreview.Core", "Knowit.Umbraco.InstantBlockPreview.Core\Knowit.Umbraco.InstantBlockPreview.Core.csproj", "{4F3684AA-8B48-4FB3-BBCF-0038361C040C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Knowit.Umbraco.InstantBlockPreview.Core", "Knowit.Umbraco.InstantBlockPreview.Core\Knowit.Umbraco.InstantBlockPreview.Core.csproj", "{4F3684AA-8B48-4FB3-BBCF-0038361C040C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Knowit.Umbraco.InstantBlockPreview", "Knowit.Umbraco.InstantBlockPreview\Knowit.Umbraco.InstantBlockPreview.csproj", "{2493282F-99FB-45CC-A981-DB05F4BE0B44}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{4F3684AA-8B48-4FB3-BBCF-0038361C040C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F3684AA-8B48-4FB3-BBCF-0038361C040C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F3684AA-8B48-4FB3-BBCF-0038361C040C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2493282F-99FB-45CC-A981-DB05F4BE0B44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2493282F-99FB-45CC-A981-DB05F4BE0B44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2493282F-99FB-45CC-A981-DB05F4BE0B44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2493282F-99FB-45CC-A981-DB05F4BE0B44}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
