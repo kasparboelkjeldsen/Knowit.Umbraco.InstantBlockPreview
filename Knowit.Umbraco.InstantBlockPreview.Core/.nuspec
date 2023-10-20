@@ -1,0 +1,3 @@
+﻿<files>
+	<file src="wwwroot\App_Plugins\**\*.*" target="contentFiles\any\any\wwwroot\App_Plugins" />
+</files>

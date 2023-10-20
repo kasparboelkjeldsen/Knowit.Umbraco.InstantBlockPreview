@@ -8,6 +8,9 @@
     <Title>Instant Block Preview for Umbraco</Title>
     <Authors>Kaspar Boel Kjeldsen</Authors>
     <Company>Knowit Experience</Company>
+    <PackageProjectUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,7 +33,14 @@
 		</Content>
 	</ItemGroup>
 	<ItemGroup>
+	  <None Remove="Views\Rendering\RenderingPreview.cshtml" />
 	  <None Remove="wwwroot\App_Plugins\Knowit.Umbraco.InstantBlockPreview\listView.html" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Include="Views\Rendering\RenderingPreview.cshtml">
+	    <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+	    <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+	  </Content>
 	</ItemGroup>
 
 </Project>
