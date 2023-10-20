@@ -7,7 +7,7 @@
     <Title>Knowit.Umbraco.InstantBlockPreview</Title>
     <Description>...</Description>
     <PackageTags>umbraco plugin package</PackageTags>
-    <Version>0.2.2</Version>
+    <Version>0.2.5</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -53,5 +53,10 @@
       <PackageCopyToOutput>true</PackageCopyToOutput>
       <Pack>true</Pack>
     </None>
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <Folder Include="Views\Rendering\" />
   </ItemGroup>
 </Project>
