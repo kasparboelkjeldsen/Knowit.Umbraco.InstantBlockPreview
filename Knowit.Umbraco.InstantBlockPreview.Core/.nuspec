@@ -1,3 +1,17 @@
-﻿<files>
-	<file src="wwwroot\App_Plugins\**\*.*" target="contentFiles\any\any\wwwroot\App_Plugins" />
-</files>
+﻿<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+	<metadata>
+		<id>Knowit.Umbraco.InstantBlockPreview</id>
+		<version>0.1.2</version>
+		<title>Instant Block Preview for Umbraco</title>
+		<authors>Kaspar Boel Kjeldsen</authors>
+		<owners>Knowit Experience</owners>
+		<requireLicenseAcceptance>false</requireLicenseAcceptance>
+		<description>A sample package description.</description>
+		<releaseNotes>Initial release</releaseNotes>
+	</metadata>
+	<files>
+		<file src="wwwroot\App_Plugins\**\*.*" target="content\wwwroot\App_Plugins" />
+		<file src="Views\**\*.*" target="content\Views" />
+	</files>
+</package>
