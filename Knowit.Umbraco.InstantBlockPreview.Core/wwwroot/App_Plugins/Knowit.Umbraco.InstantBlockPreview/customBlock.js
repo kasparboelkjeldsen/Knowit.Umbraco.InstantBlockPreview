@@ -150,24 +150,38 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                             // we are faking a document so most scripts will keep running.
                             // randomly generated function name to avoid collisions
                             scriptTag.textContent = `
-                            function ${funcName}(doc, scriptUrls, realDoc) {
-                                let document = doc.getRootNode();
-                                
-                                try {
-                                    scriptUrls.forEach(url => {
-                                        let script = realDoc.createElement('script');
-                                        script.src = url;
-                                        document.appendChild(script);
-                                    });
-                                setTimeout(() => {
-                                    ${script}
+function ${funcName}(doc, scriptUrls, realDoc) {
+    let document = doc.getRootNode();
+    let scriptsToLoad = scriptUrls.length;
 
-                                },100) 
-                                
+    try {
+        scriptUrls.forEach(function(url) {
+            let script = realDoc.createElement('script');
+            script.src = url;
+            
+            script.onload = function() {
+                scriptsToLoad--;
+                
+                if (scriptsToLoad === 0) {
+                    ${script}
+                }
+            };
+            
+            script.onerror = function() {
+                scriptsToLoad--;
+                
+                if (scriptsToLoad === 0) {
+                    ${script}
+                }
+            };
 
-                                } catch (e${r}) { console.log(e${r}) }
-                            }`;
-                            // todo, make this less stupid
+            document.appendChild(script);
+        });
+    } catch (e${r}) {
+        // Handle any exceptions if necessary
+    }
+}   
+`;
 
                             oldScript.parentNode.replaceChild(scriptTag, oldScript);
 

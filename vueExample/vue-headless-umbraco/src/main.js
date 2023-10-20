@@ -4,6 +4,7 @@ import router from './router';  // Ensure the path to router.js is correct
 
 
 if(process.env.VUE_APP_BACKOFFICE === 'true') {
+
     window.addEventListener('init-preview-app', data => {
       const i = data.detail;
       const app = createApp(App);

@@ -4,6 +4,10 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Title>Instant Block Preview for Umbraco</Title>
+    <Authors>Kaspar Boel Kjeldsen</Authors>
+    <Company>Knowit Experience</Company>
   </PropertyGroup>
 
   <ItemGroup>

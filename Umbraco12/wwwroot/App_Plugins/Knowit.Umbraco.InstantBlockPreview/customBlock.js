@@ -60,7 +60,7 @@ angular.module("umbraco").controller("customBlockController", [
                         setTimeout(() => {
                             let event = new CustomEvent('event-' + seed, { detail: json.json });
                             window.dispatchEvent(event);
-                        }, 500);
+                        }, 200);
                         appInitialized = true;
                     })
                     .catch(error => console.log(error));
@@ -69,7 +69,6 @@ angular.module("umbraco").controller("customBlockController", [
 
                 fetchData(apiEndpoints.refreshAppComponent, dataToFetch)
                     .then(json => {
-                        console.log('event-' + seed, json.json);
                         let event = new CustomEvent('event-' + seed, { detail: json.json });
                         window.dispatchEvent(event);
                     })
@@ -127,7 +126,7 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                 if (htmlContent && htmlContent != element[0].innerHTML) {
 
                     element.html(htmlContent);
-                    
+
                     const scripts = Array.from(element[0].getElementsByTagName("script"));
 
                     const injections = [];
@@ -145,36 +144,49 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                             const script = (oldScript.innerText || oldScript.textContent);
                             const r = (Math.floor(Math.random() * 100000) + 1).toString();
                             const funcName = `jsInjection_${r}`
-                            
+
                             // we wrap the inlined script in a function so it can be called with the element as a parameter
                             // we are faking a document so most scripts will keep running.
                             // randomly generated function name to avoid collisions
                             scriptTag.textContent = `
-                            function ${funcName}(doc, scriptUrls, realDoc) {
-                                let document = doc.getRootNode();
-                                
-                                try {
-                                    scriptUrls.forEach(url => {
-                                        let script = realDoc.createElement('script');
-                                        script.src = url;
-                                        document.appendChild(script);
-                                    });
-                                setTimeout(() => {
-                                    ${script}
+function ${funcName}(doc, scriptUrls, realDoc) {
+    let document = doc.getRootNode();
+    let scriptsToLoad = scriptUrls.length;
 
-                                },100) 
-                                
+    try {
+        scriptUrls.forEach(function(url) {
+            let script = realDoc.createElement('script');
+            script.src = url;
+            
+            script.onload = function() {
+                scriptsToLoad--;
+                
+                if (scriptsToLoad === 0) {
+                    ${script}
+                }
+            };
+            
+            script.onerror = function() {
+                scriptsToLoad--;
+                
+                if (scriptsToLoad === 0) {
+                    ${script}
+                }
+            };
 
-                                } catch (e${r}) { console.log(e${r}) }
-                            }`;
-                            // todo, make this less stupid
-
+            document.appendChild(script);
+        });
+    } catch (e${r}) {
+        // Handle any exceptions if necessary
+    }
+}   
+`;
                             oldScript.parentNode.replaceChild(scriptTag, oldScript);
 
                             const el = element[0];
                             // create getELementById since that's normally only supported on document
                             window[funcName](el, injections, document);
-                            
+
                         }
 
 

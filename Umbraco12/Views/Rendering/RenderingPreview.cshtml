@@ -12,11 +12,14 @@
     //window.initPreview(el, '@(ViewBag.seed)');
     let event = new CustomEvent('init-preview-app', { detail: { element: el, seed: '@ViewBag.seed' }});
     window.dispatchEvent(event);
-    setTimeout(() => {
-        console.log('running', 'init-preview-app' + '@ViewBag.seed')
-        if(el) {
-            
-            window['init-preview-app' + '@ViewBag.seed'](el);
+
+    function callWhenExists(funcName,el, timeout = 10) {
+        if (typeof window[funcName] === 'function') {
+            window[funcName](el);
+        } else {
+            setTimeout(() => callWhenExists(funcName,el, timeout), timeout);
         }
-    },50);
+    }
+    callWhenExists('init-preview-app' + '@ViewBag.seed', el);
+
 </script>
