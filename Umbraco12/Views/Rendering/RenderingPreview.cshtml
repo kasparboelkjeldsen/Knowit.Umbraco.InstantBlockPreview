@@ -1,4 +1,5 @@
-﻿<script src="~/dist/vueExample/js/chunk-vendors.js"></script>
+﻿@*Your app scripts go here*@
+<script src="~/dist/vueExample/js/chunk-vendors.js"></script>
 <script src="~/dist/vueExample/js/app.js"></script>
 
 @{
@@ -7,19 +8,16 @@
 <div id="@appName"></div>
 
 <script>
-    
     const el = document.querySelector('#@appName');
-    //window.initPreview(el, '@(ViewBag.seed)');
-    let event = new CustomEvent('init-preview-app', { detail: { element: el, seed: '@ViewBag.seed' }});
+    let event = new CustomEvent('init-preview-app', { detail: { element: el, seed: '@ViewBag.seed' } });
     window.dispatchEvent(event);
 
-    function callWhenExists(funcName,el, timeout = 10) {
+    function callWhenExists(funcName, el, timeout = 10) {
         if (typeof window[funcName] === 'function') {
             window[funcName](el);
         } else {
-            setTimeout(() => callWhenExists(funcName,el, timeout), timeout);
+            setTimeout(() => callWhenExists(funcName, el, timeout), timeout);
         }
     }
     callWhenExists('init-preview-app' + '@ViewBag.seed', el);
-
 </script>

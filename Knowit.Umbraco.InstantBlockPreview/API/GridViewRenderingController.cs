@@ -11,9 +11,14 @@ using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StackExchange.Profiling.Internal;
+using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.DeliveryApi;
 using Umbraco.Cms.Core.Models;
@@ -25,7 +30,7 @@ using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
 using Umbraco.Cms.Web.Common.Controllers;
 using static Umbraco.Cms.Core.Constants.HttpContext;
 
-namespace Knowit.Umbraco.InstantBlockPreview.Core.API
+namespace Knowit.Umbraco.InstantBlockPreview.API
 {
     public class GridViewRenderingController : UmbracoApiController
     {
