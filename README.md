@@ -1,4 +1,3 @@
-```markdown
 # Knowit.Umbraco.InstantBlockPreview
 
 A package for Umbraco that enables instant previews in the back office for Block Grid and Block List element types, without the need to save the document first. This package was heavily inspired by [Rick Butterfield's Block Preview package](https://github.com/rickbutterfield/Umbraco.Community.BlockPreview). It also introduces experimental support for generating previews using JavaScript frameworks like Vue or React.
