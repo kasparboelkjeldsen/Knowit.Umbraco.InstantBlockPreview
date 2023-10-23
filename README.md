@@ -1,6 +1,3 @@
-Based on the information you provided, here's a draft for your README.md file for your Umbraco package. This draft includes a brief introduction, credits, a description of the main features, configuration instructions, and code examples. You may need to adjust it to better fit your needs or to provide additional information if necessary:
-
-```markdown
 # Knowit.Umbraco.InstantBlockPreview
 
 A package for Umbraco that enables instant previews in the back office for Block Grid and Block List element types, without the need to save the document first. This package was heavily inspired by [Rick Butterfield's Block Preview package](https://github.com/rickbutterfield/Umbraco.Community.BlockPreview). It also introduces experimental support for generating previews using JavaScript frameworks like Vue or React.
@@ -16,7 +13,7 @@ Add the following section to your `appsettings.json`:
 
 ```json
 "Knowit.Umbraco.InstantBlockPreview": {
-  "renderType": "razor", // app or razor
+  "renderType": "razor",
   "gridViewPath": "~/Views/Partials/blockgrid/Components/",
   "blockViewPath": "~/Views/Partials/blocklist/Components/",
   "appViewPath": "~/Views/Rendering/RenderingPreview.cshtml"
@@ -38,7 +35,7 @@ Implement your views normally. Set `gridView.html` for Block Grid and `listview.
 ```
 
 ### App Preview (Experimental)
-For the experimental app preview, create your own `RenderingPreview.cshtml` and update the config accordingly. Here’s an example with a Vue app:
+For the experimental app preview, create your own `RenderingPreview.cshtml` and update the config accordingly. Hereâ€™s an example with a Vue app:
 
 ```html
 @*Your app scripts go here*@
