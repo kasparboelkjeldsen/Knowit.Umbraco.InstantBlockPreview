@@ -1,13 +1,21 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net7.0</TargetFramework>
     <ContentTargetFolders>.</ContentTargetFolders>
     <Product>Knowit.Umbraco.InstantBlockPreview</Product>
     <PackageId>Knowit.Umbraco.InstantBlockPreview</PackageId>
     <Title>Knowit.Umbraco.InstantBlockPreview</Title>
-    <Description>...</Description>
+    <Description>Instant block and grid previews in Umbraco without saving your documents</Description>
     <PackageTags>umbraco plugin package</PackageTags>
-    <Version>0.2.5</Version>
+    <Authors>KasparBoelKjeldsen</Authors>
+    <Company>Knowit Experience Copenhagen</Company>
+    <Copyright>Kaspar Boel Kjeldsen</Copyright>
+    <PackageProjectUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</PackageProjectUrl>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <SignAssembly>False</SignAssembly>
+    <Version>0.3.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -59,4 +67,13 @@
   <ItemGroup>
     <Folder Include="Views\Rendering\" />
   </ItemGroup>
+
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+
 </Project>

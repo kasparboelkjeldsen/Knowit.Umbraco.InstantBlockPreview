@@ -9,7 +9,6 @@
 
 <script>
     const el = document.querySelector('#@appName');
-    //window.initPreview(el, '@(ViewBag.seed)');
     let event = new CustomEvent('init-preview-app', { detail: { element: el, seed: '@ViewBag.seed' } });
     window.dispatchEvent(event);
 
