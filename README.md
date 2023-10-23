@@ -13,7 +13,7 @@ Add the following section to your `appsettings.json`:
 
 ```json
 "Knowit.Umbraco.InstantBlockPreview": {
-  "renderType": "razor", // app or razor
+  "renderType": "razor",
   "gridViewPath": "~/Views/Partials/blockgrid/Components/",
   "blockViewPath": "~/Views/Partials/blocklist/Components/",
   "appViewPath": "~/Views/Rendering/RenderingPreview.cshtml"
