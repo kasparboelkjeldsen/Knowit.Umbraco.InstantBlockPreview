@@ -58,6 +58,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
 
             [JsonProperty("isApp")]
             public bool IsApp { get; set; }
+
+            [JsonProperty("contentId")]
+            public int ContentId { get; set; }
         }
 
         public GridViewRenderingController(BlockEditorConverter blockEditorConverter, IRazorViewEngine razorViewEngine, ITempDataProvider tempDataProvider, IApiElementBuilder apiElementBuilder, IConfiguration configuration)
@@ -96,13 +99,14 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                 ViewEngineResult viewResult = _razorViewEngine.GetView("", viewPath, false);
 
                 var actionContext = new ActionContext(ControllerContext.HttpContext, new RouteData(), new ActionDescriptor());
-
-                // build Model and viewbag
-                ViewDataDictionary viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
+				BlockGridItem test = blockItemInstance as BlockGridItem;
+                
+				// build Model and viewbag
+				ViewDataDictionary viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
                 {
                     Model = blockItemInstance
                 };
-                
+                viewData["assignedContentId"] = scope.ContentId;
                 viewData["blockPreview"] = true;
                 viewData["seed"] = seed;
 

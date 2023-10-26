@@ -3,7 +3,7 @@ angular.module("umbraco").controller("customBlockController", [
     '$attrs',
     'editorState',
     'eventsService',
-    function ($scope, $attrs) {
+    function ($scope, $attrs, editorState) {
         const blockType = $attrs.blockType;
         let renderType = 'razor';
         let settings;
@@ -85,6 +85,7 @@ angular.module("umbraco").controller("customBlockController", [
                     ControllerName: $scope.block.content.contentTypeAlias,
                     BlockType: blockType,
                     isApp: renderType === 'app',
+                    contentId: editorState.getCurrent().id
                 };
 
                 renderType === 'app' ? initApp(data) : fetchData(apiEndpoints.renderPartial, data).then(updateHtml).catch(error => console.log(error));

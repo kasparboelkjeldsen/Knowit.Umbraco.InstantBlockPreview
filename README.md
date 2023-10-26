@@ -20,6 +20,15 @@ Add the following section to your `appsettings.json`:
 }
 ```
 
+### Umbraco Cloud
+Currently to deploy this package on a Umbraco Cloud solution, the following is required to be added to your web projects .csproj file:
+
+```xml
+<PropertyGroup>
+    <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
+</PropertyGroup>
+```
+
 ### Render Type
 - `razor`: Use regular razor views for rendering.
 - `app`: Render through a JavaScript app.
@@ -34,6 +43,13 @@ Implement your views normally. Set `gridView.html` for Block Grid and `listview.
 }
 ```
 
+Umbraco.AssignedContentItem.Id will not work in your previews as the content is temporary and not assigned to anything.
+
+A workaround if you must have a reference in your view to the content the element is assigned, something like this can be used.
+
+```csharp
+var id = ViewBag.blockPreview ? ViewBag.assignedContentId : Umbraco.AssignedContentItem.Id;
+```
 ### App Preview (Experimental)
 For the experimental app preview, create your own `RenderingPreview.cshtml` and update the config accordingly. Here’s an example with a Vue app:
 

@@ -2,7 +2,7 @@
 @using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
 
 <div style="background: #@Model.Settings?.Value("backgroundColor")">
-    <h2>@Model.Content.Text</h2>
+    <h2 class="h2">@Model.Content.Text</h2>
     @if (Model.Content.Image != null)
     {
         <img id="image" src="@Model.Content.Image.Url()" />
@@ -52,7 +52,7 @@
         max-width:500px;
         border-radius: 25px;
     }
-    h2 {
+    .h2 {
         background: grey;
     }
 </style>

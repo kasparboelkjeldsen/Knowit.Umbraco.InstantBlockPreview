@@ -1,9 +1,9 @@
 <template>
   <div :style="'background-color:#' + settings.backgroundColor">
     <h2>{{content.text}}</h2>
-    
-        <img v-if="content.image && content.image.length" id="image" :src="content.image[0].url" />
-        <br />
+
+    <img v-if="content.image && content.image.length" id="image" :src="content.image[0].url" />
+    <br />
     
     {{ content.date }}
 
