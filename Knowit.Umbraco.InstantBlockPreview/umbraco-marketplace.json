@@ -16,7 +16,7 @@
     "SyncContributorsFromRepository": "false"
   },
   "Category": "Editor Tools",
-  "Description": "A package for Umbraco that enables instant previews in the back office for Block Grid and Block List element types, without the need to save the document first.",
+  "Description": "Instant block and grid previews in Umbraco without saving your documents",
   "DiscussionForumUrl": "",
   "DocumentationUrl": "https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview",
   "LicenseTypes": [ "Free" ],
@@ -42,7 +42,12 @@
     "blocklist",
     "blockgrid",
     "preview",
-    "editorial experience"
+    "editorial experience",
+    "umbraco",
+    "plugin",
+    "package",
+    "umbraco-marketplace",
+    "knowit"
   ],
   "Title": "Knowit.Umbraco.InstantBlockPreview",
   "VersionSpecificPackageIds": [
