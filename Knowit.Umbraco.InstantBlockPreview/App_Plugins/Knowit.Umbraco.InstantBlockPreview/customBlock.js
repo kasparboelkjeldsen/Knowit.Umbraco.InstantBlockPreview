@@ -123,7 +123,7 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
         },
         link: function (scope, element) {
             scope.$watch('executeScripts', function (htmlContent) {
-
+                
                 if (htmlContent && htmlContent != element[0].innerHTML) {
 
                     element.html(htmlContent);
@@ -133,10 +133,10 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                     const injections = [];
                     scripts.forEach(function (oldScript) {
                         if (oldScript.src) {
-                            injections.push(oldScript.src);
+                            injections.push({ src: oldScript.src, type: oldScript.getAttribute('type'), nomodule: oldScript.getAttribute('nomodule') });
                         }
                     });
-
+                    console.log(injections)
                     scripts.forEach(function (oldScript) {
                         var scriptTag = document.createElement('script');
                         if (oldScript.src) {
@@ -155,9 +155,12 @@ function ${funcName}(doc, scriptUrls, realDoc) {
     let scriptsToLoad = scriptUrls.length;
 
     try {
-        scriptUrls.forEach(function(url) {
+        scriptUrls.forEach(function(s) {
             let script = realDoc.createElement('script');
-            script.src = url;
+            
+            script.src = s.src;
+            script.type = s.type;
+            script.nomodule = s.nomodule;
             
             script.onload = function() {
                 scriptsToLoad--;
@@ -178,13 +181,14 @@ function ${funcName}(doc, scriptUrls, realDoc) {
             document.appendChild(script);
         });
     } catch (e${r}) {
+        console.log(e${r})
         // Handle any exceptions if necessary
     }
 }   
 `;
 
                             oldScript.parentNode.replaceChild(scriptTag, oldScript);
-
+                            
                             const el = element[0];
                             // create getELementById since that's normally only supported on document
                             window[funcName](el, injections, document);
