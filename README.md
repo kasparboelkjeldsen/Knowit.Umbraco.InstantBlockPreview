@@ -109,5 +109,9 @@ mounted() {
 
 This repository contains a barebones Vue example using the Content Delivery API to build a headless version of the Vue app and a preview generating version of the same app.
 
+## Umbraco Login
+test@test.dk
+instantblock
+
 ## License
 [MIT](LICENSE)
