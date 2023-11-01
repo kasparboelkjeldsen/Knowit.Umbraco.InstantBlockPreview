@@ -3,7 +3,7 @@ angular.module("umbraco").controller("customBlockController", [
     '$attrs',
     'editorState',
     'eventsService',
-    function ($scope, $attrs, editorState) {
+    function ($scope, $attrs, editorState) {    
         const blockType = $attrs.blockType;
         let renderType = 'razor';
         let settings;
