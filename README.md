@@ -106,12 +106,20 @@ mounted() {
   },
 ```
 ## Demo
-
 This repository contains a barebones Vue example using the Content Delivery API to build a headless version of the Vue app and a preview generating version of the same app.
 
 ## Umbraco Login
 test@test.dk
 instantblock
+
+## FileWatcher
+Is used to move App_Plugins from package to Umbraco 12 project.
+Gulp 4 is required.
+To get started:
+npm install --global gulp-cli
+npm install
+npm i
+gulp
 
 ## License
 [MIT](LICENSE)
