@@ -4,9 +4,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+  <ItemGroup>
+    <Content Include="App_Plugins\Knowit.Umbraco.InstantBlockPreview\gridView.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="App_Plugins\Knowit.Umbraco.InstantBlockPreview\listView.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Knowit.Umbraco.InstantBlockPreview" Version="0.2.8" />
     <PackageReference Include="Umbraco.Cms" Version="12.0.1" />
   </ItemGroup>
 
@@ -21,9 +28,19 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="App_Plugins\Knowit.Umbraco.InstantBlockPreview\customBlock.js">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="App_Plugins\Knowit.Umbraco.InstantBlockPreview\package.manifest">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="wwwroot\dist\myVueApp\css\app.css" />
     <None Include="wwwroot\dist\myVueApp\js\app.js" />
     <None Include="wwwroot\dist\myVueApp\js\vendor.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Knowit.Umbraco.InstantBlockPreview\Knowit.Umbraco.InstantBlockPreview.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

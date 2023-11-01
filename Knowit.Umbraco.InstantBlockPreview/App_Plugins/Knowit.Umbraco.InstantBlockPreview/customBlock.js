@@ -3,11 +3,12 @@ angular.module("umbraco").controller("customBlockController", [
     '$attrs',
     'editorState',
     'eventsService',
-    function ($scope, $attrs, editorState) {
+    function ($scope, $attrs, editorState) {    
         const blockType = $attrs.blockType;
         let renderType = 'razor';
         let settings;
         let seed = "";
+        $scope.enableBlockEdit = false;
         const apiEndpoints = {
             renderPartial: '/umbraco/api/CustomPreview/RenderPartial',
             refreshAppComponent: '/umbraco/api/CustomPreview/RefreshAppComponent',
@@ -20,6 +21,7 @@ angular.module("umbraco").controller("customBlockController", [
 
             $scope.$watch('block.data', (newValue) => handleBlockDataChange(newValue, $scope.block.settingsData), true);
             $scope.$watch('block.settingsData', (newValue) => handleBlockDataChange($scope.block.data, newValue), true);
+            $scope.enableBlockEdit = settings.enableBlockEdit;
         });
 
         let appInitialized = false;

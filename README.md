@@ -16,7 +16,8 @@ Add the following section to your `appsettings.json`:
   "renderType": "razor",
   "gridViewPath": "~/Views/Partials/blockgrid/Components/",
   "blockViewPath": "~/Views/Partials/blocklist/Components/",
-  "appViewPath": "~/Views/Rendering/RenderingPreview.cshtml"
+  "appViewPath": "~/Views/Rendering/RenderingPreview.cshtml",
+  "enableBlockEdit": false
 }
 ```
 
@@ -32,6 +33,9 @@ Currently to deploy this package on a Umbraco Cloud solution, the following is r
 ### Render Type
 - `razor`: Use regular razor views for rendering.
 - `app`: Render through a JavaScript app.
+
+### Enable Block Edit
+If true, will trigger an edit overlay when clicking on a block item in backoffice.
 
 ### Razor View
 Implement your views normally. Set `gridView.html` for Block Grid and `listview.html` for Block List, which are installed by this package in `app_plugins/Knowit.Umbraco.InstantBlockPreview`. They render through a razor view engine in the frontend and show in the back office. You can include special code to run only in the back office like so:
@@ -106,8 +110,20 @@ mounted() {
   },
 ```
 ## Demo
-
 This repository contains a barebones Vue example using the Content Delivery API to build a headless version of the Vue app and a preview generating version of the same app.
+
+## Umbraco Login
+test@test.dk
+instantblock
+
+## FileWatcher
+Is used to move App_Plugins from package to Umbraco 12 project.
+Gulp 4 is required.
+To get started:
+npm install --global gulp-cli
+npm install
+npm i
+gulp
 
 ## License
 [MIT](LICENSE)
