@@ -27,5 +27,8 @@ namespace Knowit.Umbraco.InstantBlockPreview
 
         [JsonProperty("appViewPath")]
         public string AppViewPath { get; set; }
+
+        [JsonProperty("enableBlockEdit")]
+        public bool EnableBlockEdit { get; set; }
     }
 }
