@@ -3,12 +3,14 @@ angular.module("umbraco").controller("customBlockController", [
     '$attrs',
     'editorState',
     'eventsService',
-    function ($scope, $attrs, editorState) {    
+    function ($scope, $attrs, editorState) {
         const blockType = $attrs.blockType;
         let renderType = 'razor';
         let settings;
         let seed = "";
+
         $scope.enableBlockEdit = false;
+
         const apiEndpoints = {
             renderPartial: '/umbraco/api/CustomPreview/RenderPartial',
             refreshAppComponent: '/umbraco/api/CustomPreview/RefreshAppComponent',
@@ -25,7 +27,6 @@ angular.module("umbraco").controller("customBlockController", [
         });
 
         let appInitialized = false;
-
 
         function fetchData(endpoint, dataToFetch) {
             return fetch(endpoint, {
@@ -68,7 +69,6 @@ angular.module("umbraco").controller("customBlockController", [
                     .catch(error => console.log(error));
             }
             else {
-
                 fetchData(apiEndpoints.refreshAppComponent, dataToFetch)
                     .then(json => {
                         let event = new CustomEvent('event-' + seed, { detail: json.json });
@@ -81,9 +81,10 @@ angular.module("umbraco").controller("customBlockController", [
         function handleBlockDataChange(newValue, settingsData) {
 
             if (newValue) {
+                console.log(newValue)
                 const data = {
-                    Content: JSON.stringify(newValue),
-                    Settings: JSON.stringify(settingsData),
+                    Content: stringify(newValue),
+                    Settings: stringify(settingsData),
                     ControllerName: $scope.block.content.contentTypeAlias,
                     BlockType: blockType,
                     isApp: renderType === 'app',
@@ -125,7 +126,7 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
         },
         link: function (scope, element) {
             scope.$watch('executeScripts', function (htmlContent) {
-                
+
                 if (htmlContent && htmlContent != element[0].innerHTML) {
 
                     element.html(htmlContent);
@@ -133,17 +134,26 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                     const scripts = Array.from(element[0].getElementsByTagName("script"));
 
                     const injections = [];
+                    let needBootstrap = true;
                     scripts.forEach(function (oldScript) {
                         if (oldScript.src) {
                             injections.push({ src: oldScript.src, type: oldScript.getAttribute('type'), nomodule: oldScript.getAttribute('nomodule') });
                         }
+                        else {
+                            needBootstrap = false;
+                        }
                     });
-                    console.log(injections)
+
+                    if (needBootstrap) {
+                        const bootStrap = document.createElement('script');
+                        scripts.push(bootStrap);
+                    }
+
                     scripts.forEach(function (oldScript) {
                         var scriptTag = document.createElement('script');
-                        if (oldScript.src) {
 
-                        } else {
+                        if (!oldScript.src) {
+
                             const script = (oldScript.innerText || oldScript.textContent);
                             const r = (Math.floor(Math.random() * 100000) + 1).toString();
                             const funcName = `jsInjection_${r}`
@@ -153,6 +163,7 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                             // randomly generated function name to avoid collisions
                             scriptTag.textContent = `
 function ${funcName}(doc, scriptUrls, realDoc) {
+    
     let document = doc.getRootNode();
     let scriptsToLoad = scriptUrls.length;
 
@@ -161,9 +172,10 @@ function ${funcName}(doc, scriptUrls, realDoc) {
             let script = realDoc.createElement('script');
             
             script.src = s.src;
-            script.type = s.type;
-            script.nomodule = s.nomodule;
-            
+            if(s.type)
+                script.type = s.type;
+            if(s.nomodule)
+                script.nomodule = s.nomodule;
             script.onload = function() {
                 scriptsToLoad--;
                 
@@ -179,7 +191,6 @@ function ${funcName}(doc, scriptUrls, realDoc) {
                     ${script}
                 }
             };
-
             document.appendChild(script);
         });
     } catch (e${r}) {
@@ -190,14 +201,11 @@ function ${funcName}(doc, scriptUrls, realDoc) {
 `;
 
                             oldScript.parentNode.replaceChild(scriptTag, oldScript);
-                            
+
                             const el = element[0];
-                            // create getELementById since that's normally only supported on document
+
                             window[funcName](el, injections, document);
-
                         }
-
-
                     });
                 }
             });

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StackExchange.Profiling.Internal;
@@ -28,41 +29,42 @@ using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
 using Umbraco.Cms.Web.Common.Controllers;
+using static System.Net.Mime.MediaTypeNames;
 using static Umbraco.Cms.Core.Constants.HttpContext;
 
 namespace Knowit.Umbraco.InstantBlockPreview.API
 {
-    public class GridViewRenderingController : UmbracoApiController
+    public partial class GridViewRenderingController : UmbracoApiController
     {
         private readonly IRazorViewEngine _razorViewEngine;
         private readonly ITempDataProvider _tempDataProvider;
         private readonly BlockEditorConverter _blockEditorConverter;
         private readonly IApiElementBuilder _apiElementBuilder;
         private readonly IConfiguration _configuration;
-        
-        private PackageSettings? _settings { get; set; }
 
-        private static readonly Random random = new Random();
+        private readonly PackageSettings _settings;
+
+        static readonly Random random = new Random();
         static readonly ConcurrentDictionary<string, (Type, Type, Type)> controllerToTypes = new();
-        
-        public class SC
-        {
-            [JsonProperty("content")]
-            public string? Content { get; set; }
-            [JsonProperty("settings")]
-            public string? Settings { get; set; }
-            [JsonProperty("controllerName")]
-            public string? ControllerName { get; set; }
-            [JsonProperty("blockType")]
-            public string? BlockType { get; set; }
 
-            [JsonProperty("isApp")]
-            public bool IsApp { get; set; }
+        #region default appHtml
+        static readonly string defaultAppHtml = @"
+<div id=""app{0}""></div>
+<script>
+    const el = document.querySelector('#app{0}');
+    let event = new CustomEvent('init-preview-app', { detail: { element: el, seed: '{0}' } });
+    window.dispatchEvent(event);
 
-            [JsonProperty("contentId")]
-            public int ContentId { get; set; }
+    function callWhenExists(funcName, el, timeout = 10) {
+        if (typeof window[funcName] === 'function') {
+            window[funcName](el);
+        } else {
+            setTimeout(() => callWhenExists(funcName, el, timeout), timeout);
         }
-
+    }
+    callWhenExists('init-preview-app' + '{0}', el);
+</script>";
+        #endregion
         public GridViewRenderingController(BlockEditorConverter blockEditorConverter, IRazorViewEngine razorViewEngine, ITempDataProvider tempDataProvider, IApiElementBuilder apiElementBuilder, IConfiguration configuration)
         {
             _razorViewEngine = razorViewEngine;
@@ -71,6 +73,17 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
             _apiElementBuilder = apiElementBuilder;
             _configuration = configuration;
             _settings = _configuration.GetSection("Knowit.Umbraco.InstantBlockPreview")?.Get<PackageSettings>();
+
+            if(_settings == null)
+            {
+                _settings = new PackageSettings()
+                {
+                    BlockViewPath = "~/Views/Partials/blocklist/Components/",
+                    GridViewPath = "~/Views/Partials/blockgrid/Components/",
+                    EnableBlockEdit = false,
+                    RenderType = "razor"
+                };
+            }
         }
 
         [HttpPost("umbraco/api/CustomPreview/RenderPartial")]
@@ -86,50 +99,61 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
             var controllerName = scope.ControllerName![0].ToString().ToUpper() + scope.ControllerName.Substring(1);
             string htmlString = "";
             string seed = random.Next(int.MaxValue).ToString();
-            try
+
+            if (scope.IsApp && string.IsNullOrEmpty(_settings.AppViewPath))
             {
-                // hide the crazy
-                object blockItemInstance = InstantiateFromJson(content, settings, controllerName, scope.BlockType);
-                
-                var formattedViewPath = string.Format("{0}.cshtml", controllerName);
-
-                var viewPath = scope.IsApp ? _settings!.AppViewPath : (scope.BlockType == "grid" ? _settings!.GridViewPath : _settings!.BlockViewPath) + formattedViewPath;
-
-                // compile the view
-                ViewEngineResult viewResult = _razorViewEngine.GetView("", viewPath, false);
-
-                var actionContext = new ActionContext(ControllerContext.HttpContext, new RouteData(), new ActionDescriptor());
-				BlockGridItem test = blockItemInstance as BlockGridItem;
-                
-				// build Model and viewbag
-				ViewDataDictionary viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
-                {
-                    Model = blockItemInstance
-                };
-                viewData["assignedContentId"] = scope.ContentId;
-                viewData["blockPreview"] = true;
-                viewData["seed"] = seed;
-
-                await using var sw = new StringWriter();
-
-                // render the view and convert to string
-                var viewContext = new ViewContext(actionContext, viewResult.View!, viewData, new TempDataDictionary(actionContext.HttpContext, _tempDataProvider), sw, new HtmlHelperOptions());
-                
-                await viewResult.View!.RenderAsync(viewContext);
-
-                htmlString = sw.ToString();
+                htmlString = defaultAppHtml.Replace("{0}", seed);
             }
-            catch (Exception e)
+            else
             {
-                htmlString = e.Message;
-                return BadRequest(new { html = htmlString });
+                try
+                {
+                    // hide the crazy
+                    object blockItemInstance = InstantiateFromJson(content, settings, controllerName, scope.BlockType);
+
+                    var formattedViewPath = string.Format("{0}.cshtml", controllerName);
+
+                    var viewPath = scope.IsApp ? _settings!.AppViewPath : (scope.BlockType == "grid" ? _settings!.GridViewPath : _settings!.BlockViewPath) + formattedViewPath;
+
+                    // compile the view
+                    ViewEngineResult viewResult = _razorViewEngine.GetView("", viewPath, false);
+
+                    var actionContext = new ActionContext(ControllerContext.HttpContext, new RouteData(), new ActionDescriptor());
+                    BlockGridItem test = blockItemInstance as BlockGridItem;
+
+                    // build Model and viewbag
+                    ViewDataDictionary viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
+                    {
+                        Model = blockItemInstance
+                    };
+                    viewData["assignedContentId"] = scope.ContentId;
+                    viewData["blockPreview"] = true;
+                    viewData["seed"] = seed;
+
+                    await using var sw = new StringWriter();
+
+                    // render the view and convert to string
+                    var viewContext = new ViewContext(actionContext, viewResult.View!, viewData, new TempDataDictionary(actionContext.HttpContext, _tempDataProvider), sw, new HtmlHelperOptions());
+
+                    await viewResult.View!.RenderAsync(viewContext);
+
+                    htmlString = sw.ToString();
+                }
+                catch (Exception e)
+                {
+                    htmlString = e.Message;
+                    return BadRequest(new { html = htmlString });
+                }
             }
             // Clear href attributes
             htmlString = Regex.Replace(htmlString, @"href\s*=\s*[""'].*?[""']", "", RegexOptions.IgnoreCase);
 
             // Clear onclick attributes
             htmlString = Regex.Replace(htmlString, @"onclick\s*=\s*[""'].*?[""']", "", RegexOptions.IgnoreCase);
-
+            if(_settings.Injections != null)
+            {
+                htmlString = string.Join("\n", _settings.Injections) + htmlString;
+            }
             return Ok(new { html = htmlString, seed });
         }
 
@@ -147,11 +171,14 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
             // as we are (ab)using content delivery api, we need to bust the cache so it will refresh every time
             // changing the udi is only an issue if we were saving the data, but as we are just using it to generate previews
             // everything is fine
-            var cacheBusterUdi = Udi.Create("element", Guid.NewGuid());
 
-            JObject jsonObj = JObject.Parse(content);
-            jsonObj["udi"] = cacheBusterUdi.ToString();
-            content = jsonObj.ToString();
+            var matches = Regex.Matches(content, @"umb://element/[\w\d]+");
+
+            foreach (Match match in matches)
+            {
+                var cacheBusterUdi = Udi.Create("element", Guid.NewGuid());
+                content = content.Replace(match.Value, cacheBusterUdi.ToString());
+            }
 
             var controllerName = scope.ControllerName![0].ToString().ToUpper() + scope.ControllerName.Substring(1);
 

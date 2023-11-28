@@ -7,15 +7,16 @@
 
 <script>
 
-import GridTest from './contentTypes/GridTest.vue'
-import UmbBlockGridDemoHeadlineBlock from './contentTypes/UmbBlockGridDemoHeadlineBlock.vue';
-import UmbBlockGridDemoRichTextBlock from './contentTypes/UmbBlockGridDemoRichTextBlock.vue';
+import HeadlineBlock from './elements/HeadlineBlock.vue';
+import RTEBlock from './elements/RTEBlock.vue';
+import ImageBlock from './elements/ImageBlock.vue';
+import ThreeThingsElement from './elements/ThreeThingsElement.vue';
 export default {
   components: {
-    
-    UmbBlockGridDemoHeadlineBlock,
-    UmbBlockGridDemoRichTextBlock,
-    GridTest,
+    HeadlineBlock,
+    RTEBlock,
+    ImageBlock,
+    ThreeThingsElement
   },
   props: {
       data: Object
@@ -27,6 +28,7 @@ export default {
   },
   mounted() {
     this.pageData = this.data 
+    console.log(this.pageData)
   },
   methods: {
     getComponentName(propertyName) {

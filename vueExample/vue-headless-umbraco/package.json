@@ -7,7 +7,6 @@
     "serve-backoffice": "cross-env VUE_APP_BACKOFFICE=true vue-cli-service serve",
     "build": "cross-env VUE_APP_BACKOFFICE=false vue-cli-service build",
     "build-backoffice": "cross-env VUE_APP_BACKOFFICE=true vue-cli-service build && del-cli \"../../Umbraco12/wwwroot/dist/vueExample/**/*\" --force && copyfiles -u 1 dist/**/* ../../Umbraco12/wwwroot/dist/vueExample",
-    "build-backoffice-test": "del-cli ../../Umbraco12/wwwroot/dist/vueExample/ --force",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

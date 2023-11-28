@@ -8,20 +8,7 @@
     <title><%= htmlWebpackPlugin.options.title %></title>
   </head>
   <body>
-    <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <script>
-      const injectedData = {
-        test: 'hej'
-      }
-    </script>
-    <div id="vueapp" data-json='{
-      "content":"{\"contentTypeKey\":\"7af7238a-7e27-4e9d-bbe6-d4fccfef450c\",\"udi\":\"umb://element/b4a305a56723470c9dad72c763137795\",\"image\":[{\"key\":\"fba34d70-8f21-425f-b7a9-6c96e7b60564\",\"mediaKey\":\"2c281bb6-19d9-4609-935e-5e3cb6cd0b62\",\"crops\":[],\"focalPoint\":null}],\"date\":\"\",\"text\":\"YO!\"}",
-      "settings":"{\"contentTypeKey\":\"3ab169e3-30c1-4f40-9800-ec4942a5b6f6\",\"udi\":\"umb://element/5c07ad2b8f2446eaa47f572686752347\",\"backgroundColor\":{\"value\":\"6fa8dc\",\"label\":\"6fa8dc\",\"sortOrder\":2,\"id\":\"3\"}}",
-      "controllerName":"gridTest",
-      "blockType":"grid"
-   }'></div>
+    <div class="vueapp" id="vueapp"></div>
     <!-- built files will be auto injected -->
   </body>
 </html>

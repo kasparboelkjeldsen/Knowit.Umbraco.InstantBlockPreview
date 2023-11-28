@@ -1,18 +1,18 @@
 <template>
-  <div v-if="pageData && pageData.properties"> 
-    <div v-for="(propertyValue, propertyName) in pageData.properties" :key="propertyName">
-      
-      <component :is="getComponentName(propertyName)" :data="propertyValue"></component>
+  <main>
+    <div v-if="pageData && pageData.properties"> 
+      <component :is="getComponentName(pageData.contentType)" :data="pageData.properties"></component>
     </div>
-  </div>
+  </main>
 </template>
 
 <script>
-import Grid from './contentTypes/Grid.vue'
+import ContentPage from './pageTypes/ContentPage.vue';
 import { GetContent } from './../util/getContent'
 export default {
   components: {
-    Grid
+    ContentPage,
+    // all your other page types
   },
   props: {
       url: {

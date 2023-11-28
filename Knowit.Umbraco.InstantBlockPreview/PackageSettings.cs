@@ -30,5 +30,8 @@ namespace Knowit.Umbraco.InstantBlockPreview
 
         [JsonProperty("enableBlockEdit")]
         public bool EnableBlockEdit { get; set; }
+
+        [JsonProperty("injections")]
+        public IEnumerable<string> Injections { get; set; }
     }
 }

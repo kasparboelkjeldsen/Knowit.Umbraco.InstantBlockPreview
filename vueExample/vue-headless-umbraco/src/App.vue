@@ -14,8 +14,6 @@ export default {
     }
   },
   mounted() {
-    console.log('mount', this.isBackoffice)
-    console.log('seed', this.$seed)
     if (this.isBackoffice) {
       window.addEventListener(`event-${this.$seed}`, data => {
         this.reloadPreview(JSON.parse(data.detail));
@@ -33,6 +31,17 @@ export default {
 }
 </script>
 
-<style>
-/* Add your styles here */
+<style lang="postcss">
+  html, body, .vueapp {
+    height: 100%;
+  }
+  body {
+    background: #e6e2ff;
+  }
+  main {
+    margin: auto;
+    max-width: 1024px;
+    background: white;
+    height: 100%;
+  }
 </style>

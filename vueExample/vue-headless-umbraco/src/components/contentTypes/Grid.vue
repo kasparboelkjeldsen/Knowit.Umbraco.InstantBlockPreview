@@ -1,6 +1,7 @@
 <!-- eslint-disable vue/multi-word-component-names -->
 <template>
   <div v-if="data">
+  
   <section class="grid" v-for="item in data.items" :key="item">
     <div :class="'grid-col-'+item.columnSpan">
       <DynamicContent :data="item"></DynamicContent>
