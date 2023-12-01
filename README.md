@@ -8,8 +8,9 @@ A package for Umbraco that enables instant previews in the back office for Block
 - Experimental support for preview generation through a JavaScript app.
 
 ## Configuration
+Configuration is optional, if you are happy with the standard values, you don't need to add anything to your `appsettings.json`. 
 
-Add the following section to your `appsettings.json`:
+The following values are available for configuration:
 
 ```json
 "Knowit.Umbraco.InstantBlockPreview": {
@@ -17,9 +18,17 @@ Add the following section to your `appsettings.json`:
   "gridViewPath": "~/Views/Partials/blockgrid/Components/",
   "blockViewPath": "~/Views/Partials/blocklist/Components/",
   "appViewPath": "~/Views/Rendering/RenderingPreview.cshtml",
-  "enableBlockEdit": false
+  "enableBlockEdit": false,
+  "injections": []
 }
 ```
+### Configuration values
+renderType - The type of rendering to use. Can be either `razor` or `app`. Default is `razor`.
+gridviewPath - The path to the Block Grid views. Default is `~/Views/Partials/blockgrid/Components/`.
+blockViewPath - The path to the Block List views. Default is `~/Views/Partials/blocklist/Components/`.
+appViewPath - The path to the Rendering Preview view. Default is that the api just returns predefined HTML. See section about app-preview.
+injections - In short, a way to add lines of code to the start of the preview-HTML. Use it to inject your web-components JS or your app or something else!
+enableBlockEdit - If true, will trigger an edit overlay when clicking on a block item in backoffice. Default is `false`.
 
 ### Umbraco Cloud
 Currently to deploy this package on a Umbraco Cloud solution, the following is required to be added to your web projects .csproj file:
@@ -29,13 +38,6 @@ Currently to deploy this package on a Umbraco Cloud solution, the following is r
     <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
 </PropertyGroup>
 ```
-
-### Render Type
-- `razor`: Use regular razor views for rendering.
-- `app`: Render through a JavaScript app.
-
-### Enable Block Edit
-If true, will trigger an edit overlay when clicking on a block item in backoffice.
 
 ### Razor View
 Implement your views normally. Set `gridView.html` for Block Grid and `listview.html` for Block List, which are installed by this package in `app_plugins/Knowit.Umbraco.InstantBlockPreview`. They render through a razor view engine in the frontend and show in the back office. You can include special code to run only in the back office like so:
@@ -55,21 +57,14 @@ A workaround if you must have a reference in your view to the content the elemen
 var id = ViewBag.blockPreview ? ViewBag.assignedContentId : Umbraco.AssignedContentItem.Id;
 ```
 ### App Preview (Experimental)
-For the experimental app preview, create your own `RenderingPreview.cshtml` and update the config accordingly. Here’s an example with a Vue app:
+For the experimental app preview, make sure to use the injections parameter to insert the required JS of your app. 
 
+If nothing else is defined in the configuration, the API will output the following HTML to boostrap your app
 ```html
-@*Your app scripts go here*@
-<script src="~/dist/vueExample/js/chunk-vendors.js"></script>
-<script src="~/dist/vueExample/js/app.js"></script>
-
-@{
-    string appName = "app" + ViewBag.seed;
-}
-<div id="@appName"></div>
-
+<div id=""app{0}""></div>
 <script>
-    const el = document.querySelector('#@appName');
-    let event = new CustomEvent('init-preview-app', { detail: { element: el, seed: '@ViewBag.seed' } });
+    const el = document.querySelector('#app{0}');
+    let event = new CustomEvent('init-preview-app', { detail: { element: el, seed: '{0}' } });
     window.dispatchEvent(event);
 
     function callWhenExists(funcName, el, timeout = 10) {
@@ -79,7 +74,7 @@ For the experimental app preview, create your own `RenderingPreview.cshtml` and 
             setTimeout(() => callWhenExists(funcName, el, timeout), timeout);
         }
     }
-    callWhenExists('init-preview-app' + '@ViewBag.seed', el);
+    callWhenExists('init-preview-app' + '{0}', el);
 </script>
 ```
 
