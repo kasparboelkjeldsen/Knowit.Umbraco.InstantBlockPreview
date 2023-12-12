@@ -21,10 +21,9 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Umbraco.Cms.Core;
-using Umbraco.Cms.Core.DeliveryApi;
 using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Blocks;
-using Umbraco.Cms.Core.Models.DeliveryApi;
+
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
@@ -32,14 +31,88 @@ using Umbraco.Cms.Web.Common.Controllers;
 using static System.Net.Mime.MediaTypeNames;
 using static Umbraco.Cms.Core.Constants.HttpContext;
 
+//.net 7 specifics
+#if NET7_0_OR_GREATER
+using Umbraco.Cms.Core.DeliveryApi;
+using Umbraco.Cms.Core.Models.DeliveryApi;
+#endif
 namespace Knowit.Umbraco.InstantBlockPreview.API
 {
+    //.net 7 specifics
+#if NET7_0_OR_GREATER
+    public partial class GridViewRenderingController : UmbracoApiController
+    {
+        private readonly IApiElementBuilder _apiElementBuilder;
+
+
+        [HttpPost("umbraco/api/CustomPreview/RefreshAppComponent")]
+        public IActionResult RefreshAppComponent(SC scope)
+        {
+            if (scope == null || scope.ControllerName == null || scope.Content == null || scope.BlockType == null)
+            {
+                return BadRequest(new { html = "Missing parameters" });
+            }
+
+            var content = scope.Content;
+            var settings = scope.Settings;
+
+            // as we are (ab)using content delivery api, we need to bust the cache so it will refresh every time
+            // changing the udi is only an issue if we were saving the data, but as we are just using it to generate previews
+            // everything is fine
+
+            var matches = Regex.Matches(content, @"umb://element/[\w\d]+");
+
+            foreach (Match match in matches)
+            {
+                var cacheBusterUdi = Udi.Create("element", Guid.NewGuid());
+                content = content.Replace(match.Value, cacheBusterUdi.ToString());
+            }
+
+            var controllerName = scope.ControllerName![0].ToString().ToUpper() + scope.ControllerName.Substring(1);
+
+            var blockItemInstance = InstantiateAsContentDeliveryApiResponse(content, settings, controllerName, scope.BlockType);
+
+            return Ok(new { json = JsonConvert.SerializeObject(blockItemInstance) });
+        }
+        private object? InstantiateAsContentDeliveryApiResponse(string? content, string? settings, string? controllerName, string? blockType)
+        {
+            var model = InstantiateFromJson(content, settings, controllerName, blockType);
+
+            if (model is BlockGridItem blockGridModel)
+            {
+                // borrowed from umbracos source code
+                ApiBlockGridItem CreateApiBlockGridItem(BlockGridItem item)
+                => new ApiBlockGridItem(
+                    _apiElementBuilder.Build(item.Content),
+                    item.Settings != null
+                        ? _apiElementBuilder.Build(item.Settings)
+                        : null,
+                    item.RowSpan,
+                    item.ColumnSpan,
+                    item.AreaGridColumns ?? blockGridModel.GridColumns ?? 12,
+                    item.Areas.Select(CreateApiBlockGridArea).ToArray());
+
+                ApiBlockGridArea CreateApiBlockGridArea(BlockGridArea area)
+                => new ApiBlockGridArea(
+                    area.Alias,
+                    area.RowSpan,
+                    area.ColumnSpan,
+                    area.Select(CreateApiBlockGridItem).ToArray());
+
+                return new ApiBlockGridModel(blockGridModel.GridColumns ?? 12, new List<ApiBlockGridItem>() { CreateApiBlockGridItem(blockGridModel) });
+            }
+            // todo: add support for other models like BlockListItem
+            return model;
+        }
+
+    }
+#endif
     public partial class GridViewRenderingController : UmbracoApiController
     {
         private readonly IRazorViewEngine _razorViewEngine;
         private readonly ITempDataProvider _tempDataProvider;
         private readonly BlockEditorConverter _blockEditorConverter;
-        private readonly IApiElementBuilder _apiElementBuilder;
+        
         private readonly IConfiguration _configuration;
 
         private readonly PackageSettings _settings;
@@ -47,7 +120,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
         static readonly Random random = new Random();
         static readonly ConcurrentDictionary<string, (Type, Type, Type)> controllerToTypes = new();
 
-        #region default appHtml
+#region default appHtml
         static readonly string defaultAppHtml = @"
 <div id=""app{0}""></div>
 <script>
@@ -64,16 +137,27 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
     }
     callWhenExists('init-preview-app' + '{0}', el);
 </script>";
-        #endregion
-        public GridViewRenderingController(BlockEditorConverter blockEditorConverter, IRazorViewEngine razorViewEngine, ITempDataProvider tempDataProvider, IApiElementBuilder apiElementBuilder, IConfiguration configuration)
+#endregion
+
+
+        public GridViewRenderingController(
+            BlockEditorConverter blockEditorConverter, 
+            IRazorViewEngine razorViewEngine, 
+            ITempDataProvider tempDataProvider,
+            #if NET7_0_OR_GREATER
+            IApiElementBuilder apiElementBuilder, 
+            #endif
+            IConfiguration configuration)
         {
             _razorViewEngine = razorViewEngine;
             _blockEditorConverter = blockEditorConverter;
             _tempDataProvider = tempDataProvider;
+#if NET7_0_OR_GREATER
             _apiElementBuilder = apiElementBuilder;
+#endif
             _configuration = configuration;
             _settings = _configuration.GetSection("Knowit.Umbraco.InstantBlockPreview")?.Get<PackageSettings>();
-
+            
             if(_settings == null)
             {
                 _settings = new PackageSettings()
@@ -84,6 +168,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                     RenderType = "razor"
                 };
             }
+
         }
 
         [HttpPost("umbraco/api/CustomPreview/RenderPartial")]
@@ -155,66 +240,6 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                 htmlString = string.Join("\n", _settings.Injections) + htmlString;
             }
             return Ok(new { html = htmlString, seed });
-        }
-
-        [HttpPost("umbraco/api/CustomPreview/RefreshAppComponent")]
-        public IActionResult RefreshAppComponent(SC scope)
-        {
-            if (scope == null || scope.ControllerName == null || scope.Content == null || scope.BlockType == null)
-            {
-                return BadRequest(new { html = "Missing parameters" });
-            }
-
-            var content = scope.Content;
-            var settings = scope.Settings;
-
-            // as we are (ab)using content delivery api, we need to bust the cache so it will refresh every time
-            // changing the udi is only an issue if we were saving the data, but as we are just using it to generate previews
-            // everything is fine
-
-            var matches = Regex.Matches(content, @"umb://element/[\w\d]+");
-
-            foreach (Match match in matches)
-            {
-                var cacheBusterUdi = Udi.Create("element", Guid.NewGuid());
-                content = content.Replace(match.Value, cacheBusterUdi.ToString());
-            }
-
-            var controllerName = scope.ControllerName![0].ToString().ToUpper() + scope.ControllerName.Substring(1);
-
-            var blockItemInstance = InstantiateAsContentDeliveryApiResponse(content, settings, controllerName, scope.BlockType);
-
-            return Ok(new { json = JsonConvert.SerializeObject(blockItemInstance) });
-        }
-        private object? InstantiateAsContentDeliveryApiResponse(string? content, string? settings, string? controllerName, string? blockType)
-        {
-            var model = InstantiateFromJson(content, settings, controllerName, blockType);
-
-            if(model is BlockGridItem blockGridModel)
-            {
-                // borrowed from umbracos source code
-                ApiBlockGridItem CreateApiBlockGridItem(BlockGridItem item)
-                => new ApiBlockGridItem(
-                    _apiElementBuilder.Build(item.Content),
-                    item.Settings != null
-                        ? _apiElementBuilder.Build(item.Settings)
-                        : null,
-                    item.RowSpan,
-                    item.ColumnSpan,
-                    item.AreaGridColumns ?? blockGridModel.GridColumns ?? 12,
-                    item.Areas.Select(CreateApiBlockGridArea).ToArray());
-                
-                ApiBlockGridArea CreateApiBlockGridArea(BlockGridArea area)
-                => new ApiBlockGridArea(
-                    area.Alias,
-                    area.RowSpan,
-                    area.ColumnSpan,
-                    area.Select(CreateApiBlockGridItem).ToArray());
-
-                return new ApiBlockGridModel(blockGridModel.GridColumns ?? 12, new List<ApiBlockGridItem>() { CreateApiBlockGridItem(blockGridModel) });
-            }
-            // todo: add support for other models like BlockListItem
-            return model;
         }
 
         private object InstantiateFromJson(string? content, string? settings, string? controllerName, string? blockType)
