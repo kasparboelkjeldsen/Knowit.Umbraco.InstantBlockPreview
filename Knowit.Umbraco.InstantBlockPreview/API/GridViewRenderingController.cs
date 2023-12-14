@@ -152,9 +152,6 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
             _razorViewEngine = razorViewEngine;
             _blockEditorConverter = blockEditorConverter;
             _tempDataProvider = tempDataProvider;
-#if NET7_0_OR_GREATER
-            _apiElementBuilder = apiElementBuilder;
-#endif
             _configuration = configuration;
             _settings = _configuration.GetSection("Knowit.Umbraco.InstantBlockPreview")?.Get<PackageSettings>();
             
@@ -169,6 +166,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                 };
             }
 
+#if NET7_0_OR_GREATER
+            _apiElementBuilder = apiElementBuilder;
+#endif
         }
 
         [HttpPost("umbraco/api/CustomPreview/RenderPartial")]

@@ -2,6 +2,11 @@
 
 A package for Umbraco that enables instant previews in the back office for Block Grid and Block List element types, without the need to save the document first. This package was heavily inspired by [Rick Butterfield's Block Preview package](https://github.com/rickbutterfield/Umbraco.Community.BlockPreview). It also introduces experimental support for generating previews using JavaScript frameworks like Vue or React.
 
+The package supports Umbraco 10 (without headless capabilities as those rely on Content Delivery API)
+Umbraco 12 and Umbraco 13
+
+Umbraco 11 isn't possible as I differentiate the features on .net version and since both Umbraco 11 and 12 share .Net 7, I can't support Umbraco 11 as it doesn't include Content Delivery Api.
+
 ## Features
 - Instant preview for Block Grid and Block List element types.
 - No document save required to perform a preview.
