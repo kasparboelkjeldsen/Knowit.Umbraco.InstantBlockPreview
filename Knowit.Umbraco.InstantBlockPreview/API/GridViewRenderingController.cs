@@ -144,9 +144,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
             BlockEditorConverter blockEditorConverter, 
             IRazorViewEngine razorViewEngine, 
             ITempDataProvider tempDataProvider,
-            #if NET7_0_OR_GREATER
+#if NET7_0_OR_GREATER
             IApiElementBuilder apiElementBuilder, 
-            #endif
+#endif
             IConfiguration configuration)
         {
             _razorViewEngine = razorViewEngine;
