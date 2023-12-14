@@ -28,12 +28,19 @@ The following values are available for configuration:
 }
 ```
 ### Configuration values
+
 renderType - The type of rendering to use. Can be either `razor` or `app`. Default is `razor`.
+
 gridviewPath - The path to the Block Grid views. Default is `~/Views/Partials/blockgrid/Components/`.
+
 blockViewPath - The path to the Block List views. Default is `~/Views/Partials/blocklist/Components/`.
+
 appViewPath - The path to the Rendering Preview view. Default is that the api just returns predefined HTML. See section about app-preview.
+
 injections - In short, a way to add lines of code to the start of the preview-HTML. Use it to inject your web-components JS or your app or something else!
+
 enableBlockEdit - If true, will trigger an edit overlay when clicking on a block item in backoffice. Default is `false`.
+
 
 ### Umbraco Cloud
 Currently to deploy this package on a Umbraco Cloud solution, the following is required to be added to your web projects .csproj file:
