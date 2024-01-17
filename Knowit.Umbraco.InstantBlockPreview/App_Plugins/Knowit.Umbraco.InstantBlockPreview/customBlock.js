@@ -81,10 +81,10 @@ angular.module("umbraco").controller("customBlockController", [
         function handleBlockDataChange(newValue, settingsData) {
 
             if (newValue) {
-                console.log(newValue)
                 const data = {
                     Content: stringify(newValue),
                     Settings: stringify(settingsData),
+                    Layout: stringify($scope.block.layout),
                     ControllerName: $scope.block.content.contentTypeAlias,
                     BlockType: blockType,
                     isApp: renderType === 'app',

@@ -10,6 +10,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
             public string? Content { get; set; }
             [JsonProperty("settings")]
             public string? Settings { get; set; }
+            
+            [JsonProperty("layout")]
+            public string? Layout { get; set; }
             [JsonProperty("controllerName")]
             public string? ControllerName { get; set; }
             [JsonProperty("blockType")]

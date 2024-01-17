@@ -76,7 +76,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
         }
         private object? InstantiateAsContentDeliveryApiResponse(string? content, string? settings, string? controllerName, string? blockType)
         {
-            var model = InstantiateFromJson(content, settings, controllerName, blockType);
+            var model = InstantiateFromJson(content, settings, controllerName, blockType, null);
 
             if (model is BlockGridItem blockGridModel)
             {
@@ -194,7 +194,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                 try
                 {
                     // hide the crazy
-                    object blockItemInstance = InstantiateFromJson(content, settings, controllerName, scope.BlockType);
+                    object blockItemInstance = InstantiateFromJson(content, settings, controllerName, scope.BlockType, scope.Layout);
 
                     var formattedViewPath = string.Format("{0}.cshtml", controllerName);
 
@@ -223,6 +223,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                     await viewResult.View!.RenderAsync(viewContext);
 
                     htmlString = sw.ToString();
+                    if (!htmlString.ToLower().Contains("<script>")) htmlString += "<script></script>"; // for bootstraping purposes
                 }
                 catch (Exception e)
                 {
@@ -242,7 +243,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
             return Ok(new { html = htmlString, seed });
         }
 
-        private object InstantiateFromJson(string? content, string? settings, string? controllerName, string? blockType)
+        private object InstantiateFromJson(string? content, string? settings, string? controllerName, string? blockType, string? layout)
         {
             // try to deserialize to BlockItemData, while ignoring all errors
             BlockItemData? bid = JsonConvert.DeserializeObject<BlockItemData>(content!);
@@ -287,7 +288,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                 typeof(Udi),
                 settingsModel != null ? settingsModel.GetType() : typeof(IPublishedElement)
             });
-
+            
             // use reflection to instantiate our BlockGridItem<T> with the typed model
             object blockGridItemInstance = ctor!.Invoke(new object[]
             {
@@ -296,6 +297,31 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                 Udi.Create("element",Guid.NewGuid()),
                 settingsModel! //todo something something block settings
             });
+
+            if(layout != null)
+            {
+                try
+                {
+                    JObject jsonObject = JObject.Parse(layout);
+
+                    // Retrieve the columnSpan and rowSpan values
+                    int columnSpan = jsonObject["columnSpan"].Value<int>();
+                    int rowSpan = jsonObject["rowSpan"].Value<int>();
+                    PropertyInfo? columnSpanProperty = blockGridItemInstance.GetType().GetProperty("ColumnSpan");
+                    if (columnSpanProperty != null && columnSpanProperty.CanWrite)
+                    {
+                        columnSpanProperty.SetValue(blockGridItemInstance, columnSpan);
+                    }
+                    PropertyInfo? rowSpanProperty = blockGridItemInstance.GetType().GetProperty("RowSpan");
+                    if (rowSpanProperty != null && rowSpanProperty.CanWrite)
+                    {
+                        rowSpanProperty.SetValue(blockGridItemInstance, rowSpan);
+                    }
+                }
+                catch { }
+            }
+            
+
             return blockGridItemInstance;
         }
 

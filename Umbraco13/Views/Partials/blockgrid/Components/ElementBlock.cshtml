@@ -2,7 +2,8 @@
 @using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
 
 <div>
-    Something something
+    Row span: @Model.RowSpan
+    Column span: @Model.ColumnSpan
     @if(Model.Content.Image != null)
     {
         <img src="@Model.Content.Image.Url()" alt="@Model.Content.Image.Name" />
