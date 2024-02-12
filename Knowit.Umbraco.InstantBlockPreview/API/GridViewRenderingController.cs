@@ -1,14 +1,11 @@
-﻿using Microsoft.AspNetCore.Html;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Razor;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.FileSystemGlobbing.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using StackExchange.Profiling.Internal;
@@ -21,15 +18,25 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Umbraco.Cms.Core;
-using Umbraco.Cms.Core.Models;
 using Umbraco.Cms.Core.Models.Blocks;
 
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
 using Umbraco.Cms.Web.Common.Controllers;
-using static System.Net.Mime.MediaTypeNames;
-using static Umbraco.Cms.Core.Constants.HttpContext;
+using Microsoft.AspNetCore.Mvc.ViewComponents;
+using Microsoft.AspNetCore.Http.Features;
+using System.Text;
+using static Lucene.Net.Util.Packed.PackedInt32s;
+using System.Text.Encodings.Web;
+
+
+
+
+
+
+
+
 
 //.net 7 specifics
 #if NET7_0_OR_GREATER
@@ -43,7 +50,6 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
     public partial class GridViewRenderingController : UmbracoApiController
     {
         private readonly IApiElementBuilder _apiElementBuilder;
-
 
         [HttpPost("umbraco/api/CustomPreview/RefreshAppComponent")]
         public IActionResult RefreshAppComponent(SC scope)
@@ -112,9 +118,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
         private readonly IRazorViewEngine _razorViewEngine;
         private readonly ITempDataProvider _tempDataProvider;
         private readonly BlockEditorConverter _blockEditorConverter;
-        
+        private readonly IViewComponentSelector _viewComponentSelector;
         private readonly IConfiguration _configuration;
-
+        private readonly IViewComponentHelper _viewComponentHelper;
         private readonly PackageSettings _settings;
 
         static readonly Random random = new Random();
@@ -144,8 +150,10 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
             BlockEditorConverter blockEditorConverter, 
             IRazorViewEngine razorViewEngine, 
             ITempDataProvider tempDataProvider,
+            IViewComponentSelector viewComponentSelector,
+            IViewComponentHelper viewComponentHelper,
 #if NET7_0_OR_GREATER
-            IApiElementBuilder apiElementBuilder, 
+            IApiElementBuilder apiElementBuilder,
 #endif
             IConfiguration configuration)
         {
@@ -154,8 +162,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
             _tempDataProvider = tempDataProvider;
             _configuration = configuration;
             _settings = _configuration.GetSection("Knowit.Umbraco.InstantBlockPreview")?.Get<PackageSettings>();
-            
-            if(_settings == null)
+            _viewComponentSelector = viewComponentSelector;
+            _viewComponentHelper = viewComponentHelper;
+            if (_settings == null)
             {
                 _settings = new PackageSettings()
                 {
@@ -200,10 +209,11 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
 
                     var viewPath = scope.IsApp ? _settings!.AppViewPath : (scope.BlockType == "grid" ? _settings!.GridViewPath : _settings!.BlockViewPath) + formattedViewPath;
 
+                                        
                     // compile the view
                     ViewEngineResult viewResult = _razorViewEngine.GetView("", viewPath, false);
 
-                    var actionContext = new ActionContext(ControllerContext.HttpContext, new RouteData(), new ActionDescriptor());
+                    var actionContext = new ActionContext(ControllerContext.HttpContext, new Microsoft.AspNetCore.Routing.RouteData(), new ActionDescriptor());
                     BlockGridItem test = blockItemInstance as BlockGridItem;
 
                     // build Model and viewbag
@@ -217,12 +227,45 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
 
                     await using var sw = new StringWriter();
 
-                    // render the view and convert to string
-                    var viewContext = new ViewContext(actionContext, viewResult.View!, viewData, new TempDataDictionary(actionContext.HttpContext, _tempDataProvider), sw, new HtmlHelperOptions());
+                    // see if there is a component
+                    var viewComponent = _viewComponentSelector.SelectComponent(controllerName);
+                    // deal with view component
+                    if (viewComponent != null)
+                    {
+                        var viewContext = new ViewContext(
+                            actionContext,
+                            new FakeView(),
+                            new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
+                            {
+                                Model = blockItemInstance
+                            },
+                            new TempDataDictionary(actionContext.HttpContext, _tempDataProvider),
+                            new StringWriter(),
+                            new HtmlHelperOptions()
+                        );
 
-                    await viewResult.View!.RenderAsync(viewContext);
+                        var viewComponentHelper = _viewComponentHelper as IViewContextAware;
+                        viewComponentHelper?.Contextualize(viewContext);
 
-                    htmlString = sw.ToString();
+                        var result = await _viewComponentHelper.InvokeAsync(controllerName, blockItemInstance);
+                        using(var writer = new StringWriter())
+                        {
+                            // Invoke the ViewComponent and write its output directly to the StringWriter
+                            result.WriteTo(writer, HtmlEncoder.Default);
+
+                            // The StringWriter now contains the rendered HTML
+                            htmlString = writer.ToString();
+                        }
+                    }
+                    else
+                    {
+                        // render the view and convert to string
+                        var viewContext = new ViewContext(actionContext, viewResult.View!, viewData, new TempDataDictionary(actionContext.HttpContext, _tempDataProvider), sw, new HtmlHelperOptions());
+
+                        await viewResult.View!.RenderAsync(viewContext);
+                        htmlString = sw.ToString();
+                    }
+                    
                     if (!htmlString.ToLower().Contains("<script>")) htmlString += "<script></script>"; // for bootstraping purposes
                 }
                 catch (Exception e)
@@ -329,6 +372,16 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
         public IActionResult GetSettings()
         {
             return Ok(_settings);
+        }
+
+        private class FakeView : IView
+        {
+            public string Path => string.Empty;
+
+            public async Task RenderAsync(ViewContext context)
+            {
+                await Task.CompletedTask;
+            }
         }
     }
 }
