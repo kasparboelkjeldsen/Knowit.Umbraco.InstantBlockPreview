@@ -235,10 +235,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                         var viewContext = new ViewContext(
                             actionContext,
                             new FakeView(),
-                            new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
-                            {
-                                Model = blockItemInstance
-                            },
+                            viewData,
                             new TempDataDictionary(actionContext.HttpContext, _tempDataProvider),
                             new StringWriter(),
                             new HtmlHelperOptions()
