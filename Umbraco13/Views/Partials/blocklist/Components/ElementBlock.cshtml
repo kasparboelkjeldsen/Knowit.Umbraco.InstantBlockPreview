@@ -1,9 +1,9 @@
-﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockGridItem<ContentModels.ElementBlock>>;
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockListItem<ContentModels.ElementBlock>>;
 @using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
 
 <div>
-    Row span: @Model.RowSpan
-    Column span: @Model.ColumnSpan
+    
+    
     @if(Model.Content.Image != null)
     {
         <img src="@Model.Content.Image.Url()" alt="@Model.Content.Image.Name" />

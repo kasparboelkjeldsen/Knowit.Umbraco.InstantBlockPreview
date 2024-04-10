@@ -6,11 +6,21 @@ namespace Umbraco13.Controllers
 {
     public class ElementBlockViewComponent : ViewComponent
     {
-        public IViewComponentResult Invoke(BlockGridItem<ElementBlock> model)
+        public IViewComponentResult Invoke(object model)
         {
-            model.Content.PartialValue = "PARTIAL";
+            if (model is BlockGridItem<ElementBlock> grid)
+            {
+                grid.Content.PartialValue = "PARTIAL";
 
-            return View("~/Views/Partials/blockgrid/Components/ElementBlock.cshtml",model);
+                return View("~/Views/Partials/blockgrid/Components/ElementBlock.cshtml", grid);
+            }
+            else if (model is BlockListItem<ElementBlock> block)
+            {
+                block.Content.PartialValue = "PARTIAL";
+
+                return View("~/Views/Partials/blockgrid/Components/ElementBlock.cshtml", block);
+            }
+            else return View("~/Views/Partials/blocklist/Components/ElementBlock.cshtml");
         }
 
     }
