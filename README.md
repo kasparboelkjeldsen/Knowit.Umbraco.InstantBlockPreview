@@ -10,7 +10,7 @@ Umbraco 11 isn't possible as I differentiate the features on .net version and si
 ## Features
 - Instant preview for Block Grid and Block List element types.
 - No document save required to perform a preview.
-- Supports rendering through ViewComponents
+- Supports rendering through ViewComponents (Block Grid Only)
 - Experimental support for preview generation through a JavaScript app.
 
 

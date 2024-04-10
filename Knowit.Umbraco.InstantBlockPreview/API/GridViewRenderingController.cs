@@ -214,7 +214,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                     ViewEngineResult viewResult = _razorViewEngine.GetView("", viewPath, false);
 
                     var actionContext = new ActionContext(ControllerContext.HttpContext, new Microsoft.AspNetCore.Routing.RouteData(), new ActionDescriptor());
-                    BlockGridItem test = blockItemInstance as BlockGridItem;
+                    //BlockGridItem test = blockItemInstance as BlockGridItem;
 
                     // build Model and viewbag
                     ViewDataDictionary viewData = new ViewDataDictionary(new EmptyModelMetadataProvider(), new ModelStateDictionary())
@@ -230,7 +230,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                     // see if there is a component
                     var viewComponent = _viewComponentSelector.SelectComponent(controllerName);
                     // deal with view component
-                    if (viewComponent != null)
+                    if (viewComponent != null && scope.BlockType == "grid")
                     {
                         var viewContext = new ViewContext(
                             actionContext,
