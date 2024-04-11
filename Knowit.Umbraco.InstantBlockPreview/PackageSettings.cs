@@ -33,5 +33,16 @@ namespace Knowit.Umbraco.InstantBlockPreview
 
         [JsonProperty("injections")]
         public IEnumerable<string> Injections { get; set; }
+
+        [JsonProperty("ssrUrl")]
+        public string SSRUrl { get; set; }
+
+        [JsonProperty("ssrApiUrl")]
+        public string SSRApiUrl { get; set; }
+        [JsonProperty("ssrSecret")]
+        public string SSRSecret { get; set;}
+
+        [JsonProperty("ssrSelector")]
+        public string SSRSelector { get; set; }
     }
 }

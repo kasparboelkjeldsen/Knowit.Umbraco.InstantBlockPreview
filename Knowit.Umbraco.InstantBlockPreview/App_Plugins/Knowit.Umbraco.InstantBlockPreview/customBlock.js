@@ -6,6 +6,7 @@ angular.module("umbraco").controller("customBlockController", [
     function ($scope, $attrs, editorState) {
         const blockType = $attrs.blockType;
         let renderType = 'razor';
+        let ssr = false;
         let settings;
         let seed = "";
 
@@ -13,6 +14,7 @@ angular.module("umbraco").controller("customBlockController", [
 
         const apiEndpoints = {
             renderPartial: '/umbraco/api/CustomPreview/RenderPartial',
+            renderSSRComponent: '/umbraco/api/CustomPreview/RenderSSRComponent',
             refreshAppComponent: '/umbraco/api/CustomPreview/RefreshAppComponent',
             getSettings: '/umbraco/api/CustomPreview/Settings'
         };
@@ -20,7 +22,7 @@ angular.module("umbraco").controller("customBlockController", [
         fetch(apiEndpoints.getSettings).then(res => res.json()).then(data => {
             settings = data;
             renderType = settings.renderType;
-
+            ssr = renderType == 'ssr'
             $scope.$watch('block.data', (newValue) => handleBlockDataChange(newValue, $scope.block.settingsData), true);
             $scope.$watch('block.settingsData', (newValue) => handleBlockDataChange($scope.block.data, newValue), true);
             $scope.enableBlockEdit = settings.enableBlockEdit;
@@ -52,7 +54,8 @@ angular.module("umbraco").controller("customBlockController", [
 
         function initApp(dataToFetch) {
             if (!appInitialized) {
-                fetchData(apiEndpoints.renderPartial, dataToFetch)
+                fetchData(
+                    ssr ? apiEndpoints.renderSSRComponent : apiEndpoints.renderPartial, dataToFetch)
                     .then(json => {
                         updateHtml(json);
                         seed = json.seed;
@@ -81,17 +84,17 @@ angular.module("umbraco").controller("customBlockController", [
         function handleBlockDataChange(newValue, settingsData) {
 
             if (newValue) {
+                console.log(newValue)
                 const data = {
                     Content: stringify(newValue),
                     Settings: stringify(settingsData),
-                    Layout: stringify($scope.block.layout),
                     ControllerName: $scope.block.content.contentTypeAlias,
                     BlockType: blockType,
                     isApp: renderType === 'app',
                     contentId: editorState.getCurrent().id
                 };
 
-                renderType === 'app' ? initApp(data) : fetchData(apiEndpoints.renderPartial, data).then(updateHtml).catch(error => console.log(error));
+                renderType === 'app' ? initApp(data) : fetchData(ssr ? apiEndpoints.renderSSRComponent : apiEndpoints.renderPartial, data).then(updateHtml).catch(error => console.log(error));
             }
         }
 

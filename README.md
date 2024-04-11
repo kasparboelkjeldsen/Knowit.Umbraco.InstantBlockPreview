@@ -11,6 +11,7 @@ Umbraco 11 isn't possible as I differentiate the features on .net version and si
 - Instant preview for Block Grid and Block List element types.
 - No document save required to perform a preview.
 - Supports rendering through ViewComponents (Block Grid Only)
+- Supports rendering with HTML fetched from an SSR app
 - Experimental support for preview generation through a JavaScript app.
 
 
@@ -26,6 +27,10 @@ The following values are available for configuration:
   "blockViewPath": "~/Views/Partials/blocklist/Components/",
   "appViewPath": "~/Views/Rendering/RenderingPreview.cshtml",
   "enableBlockEdit": false,
+  "ssrApiUrl": "https://localhost:3000/api/blockPreview",
+  "ssrUrl": "https://localhost:3000/blockPreview",
+  "ssrSecret": "my-ssr-secret",
+  "ssrSelector": "#__nuxt",
   "injections": []
 }
 ```
@@ -43,6 +48,7 @@ injections - In short, a way to add lines of code to the start of the preview-HT
 
 enableBlockEdit - If true, will trigger an edit overlay when clicking on a block item in backoffice. Default is `false`.
 
+ssr* - see SSR section for description
 
 ### Umbraco Cloud
 Currently to deploy this package on a Umbraco Cloud solution, the following is required to be added to your web projects .csproj file:
@@ -70,6 +76,44 @@ A workaround if you must have a reference in your view to the content the elemen
 ```csharp
 var id = ViewBag.blockPreview ? ViewBag.assignedContentId : Umbraco.AssignedContentItem.Id;
 ```
+
+### SSR Preview
+
+To allow an SSR app (Next/Nuxt etc) to provide a preview for the plugin, you will need to wire up some stuff yourself.
+
+When renderType is set to "ssr" the behavior of the preview api changes and will attempt to do the following
+
+It will send a POST to the "ssrApiUrl" with whatever you've put in "ssrSecret" as an | Authorization: Bearer <your secret> | header. The POST BODY will include standard Content Delivery API Json in the form of a Grid or Blocklist entry depending on what you're doing.
+
+It will expect to receive a string back which will act as a key for the next call. It will then perform a GET call to "ssrUrl" with ?key=returnedKeyFromApi appended and again with the authorization header.
+
+Your application needs to return server-side rendered HTML back from that request.
+
+So on your end.
+
+- Api needs to recieve JSON from POST and save/cache it somehow with a key, and return the key as response
+- Preview Url needs to return preview-HTML when given the key through a GET request
+
+"ssrSelector" is an optional option to narrow the amount of HTML returned to Umbraco. You can put in #__next/#__nuxt or any other valid css selector and the API will only return the INNERHTML of that selector to Umbraco for a cleaner HTML output.
+
+#### Example
+
+You've set up a grid element with a rich text editor to use Instant Block Preview and have just now entered some text and hit save.
+
+1) The Javascript sends your changes to Instant Block Preview API 
+2) Instant Block Preview API sends a POST request to https://localhost:3000/api/blockPreview with following BODY:
+```json
+{"gridColumns":12,"items":[{"rowSpan":0,"columnSpan":0,"areaGridColumns":12,"areas":[],"content":{"id":"554991cb-dfa4-43fd-85ba-9c9b0213438e","contentType":"text","properties":{"richText":{"markup":"<p>Test 123</p>","blocks":[]}}},"settings":null}]}
+```
+as well as an Authorization header with your secret key
+3) Your app, whatever it may be, recieves the call, verifies the secret key and caches the json in a way where your app will be able to retrieve it with just a string key you've just generated. Could just be current time in microseconds or a guid or something else
+4) Your app returns the string key as response (example key "lutvdx1hghiz4w9suye")
+5) Instant Block Preview now makes a GET request to https://localhost:3000/blockPreview?key=lutvdx1hghiz4w9suye with the same authorization headers set
+6) Your app retrieves the JSON from it's cache with the key, and renders the HTML just like you would with a normal response from the Content Delivery API
+7) Instant Block Preview recieves the Html and (optionally) filters it down to the css selector you've sendt in "ssrSelector" and returns that Html to be previewed in Umbraco
+
+
+
 ### App Preview (Experimental)
 For the experimental app preview, make sure to use the injections parameter to insert the required JS of your app. 
 

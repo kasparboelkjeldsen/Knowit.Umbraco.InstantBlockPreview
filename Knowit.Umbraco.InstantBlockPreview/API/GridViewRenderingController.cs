@@ -25,23 +25,18 @@ using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
 using Umbraco.Cms.Web.Common.Controllers;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
-using Microsoft.AspNetCore.Http.Features;
-using System.Text;
-using static Lucene.Net.Util.Packed.PackedInt32s;
 using System.Text.Encodings.Web;
-
-
-
-
-
-
-
+using System.Net.Http.Headers;
+using System.Net.Http;
+using Newtonsoft.Json.Serialization;
 
 
 //.net 7 specifics
 #if NET7_0_OR_GREATER
 using Umbraco.Cms.Core.DeliveryApi;
 using Umbraco.Cms.Core.Models.DeliveryApi;
+using HtmlAgilityPack;
+using Fizzler.Systems.HtmlAgilityPack;
 #endif
 namespace Knowit.Umbraco.InstantBlockPreview.API
 {
@@ -79,6 +74,94 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
             var blockItemInstance = InstantiateAsContentDeliveryApiResponse(content, settings, controllerName, scope.BlockType);
 
             return Ok(new { json = JsonConvert.SerializeObject(blockItemInstance) });
+        }
+
+        [HttpPost("umbraco/api/CustomPreview/RenderSSRComponent")]
+        public async Task<IActionResult> RenderSSRComponent(SC scope)
+        {
+            if (scope == null || scope.ControllerName == null || scope.Content == null || scope.BlockType == null)
+            {
+                return BadRequest(new { html = "Missing parameters" });
+            }
+
+            var content = scope.Content;
+            var settings = scope.Settings;
+
+            // as we are (ab)using content delivery api, we need to bust the cache so it will refresh every time
+            // changing the udi is only an issue if we were saving the data, but as we are just using it to generate previews
+            // everything is fine
+
+            var matches = Regex.Matches(content, @"umb://element/[\w\d]+");
+
+            foreach (Match match in matches)
+            {
+                var cacheBusterUdi = Udi.Create("element", Guid.NewGuid());
+                content = content.Replace(match.Value, cacheBusterUdi.ToString());
+            }
+
+            var controllerName = scope.ControllerName![0].ToString().ToUpper() + scope.ControllerName.Substring(1);
+            try
+            {
+                var blockItemInstance = InstantiateAsContentDeliveryApiResponse(content, settings, controllerName, scope.BlockType);
+
+                var ssrUrl = _settings.SSRUrl;
+                var ssrSecret = _settings.SSRSecret;
+                var ssrApi = _settings.SSRApiUrl;
+                // Create an instance of JsonSerializerSettings
+                var jsSettings = new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                };
+
+                // Serialize the object using the settings
+                var json = JsonConvert.SerializeObject(blockItemInstance, jsSettings);
+
+                var handler = new HttpClientHandler
+                {
+                    ServerCertificateCustomValidationCallback = (sender, cert, chain, sslPolicyErrors) => true
+                };
+
+                using (var client = new HttpClient(handler))
+                {
+                    // Set the Authorization header with the bearer token
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", ssrSecret);
+
+                    // Set up the request content with the JSON payload
+                    var ssrcontent = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+
+                    // Perform the POST request to the specified URL
+                    var response = await client.PostAsync(ssrApi, ssrcontent);
+
+                    // Ensure the request was successful
+                    response.EnsureSuccessStatusCode();
+
+                    // Read the response content as a string (HTML in this case)
+                    var key = await response.Content.ReadAsStringAsync();
+
+                    var htmlContent = await client.GetStringAsync(ssrUrl + "?key=" + key);
+
+                    if (string.IsNullOrEmpty(_settings.SSRSelector)) return Ok(new { html = htmlContent });
+                    else return Ok(new { html = ExtractValueFromHtml(htmlContent, _settings.SSRSelector) });
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return Ok(ex.Message);
+            }
+        }
+        private string ExtractValueFromHtml(string htmlContent, string cssSelector)
+        {
+            // Load the HTML content into an HtmlDocument
+            var htmlDocument = new HtmlDocument();
+            htmlDocument.LoadHtml(htmlContent);
+
+            // Use the QuerySelector method to find the element
+            var node = htmlDocument.DocumentNode.QuerySelector(cssSelector);
+
+            // If the node is found, return its inner content; otherwise, return null or an appropriate message
+            return node != null ? node.InnerHtml : null;
         }
         private object? InstantiateAsContentDeliveryApiResponse(string? content, string? settings, string? controllerName, string? blockType)
         {
@@ -171,9 +254,13 @@ namespace Knowit.Umbraco.InstantBlockPreview.API
                     BlockViewPath = "~/Views/Partials/blocklist/Components/",
                     GridViewPath = "~/Views/Partials/blockgrid/Components/",
                     EnableBlockEdit = false,
-                    RenderType = "razor"
+                    RenderType = "razor",
                 };
             }
+            if (_settings.BlockViewPath == null)
+                _settings.BlockViewPath = "~/Views/Partials/blocklist/Components/";
+            if (_settings.GridViewPath == null)
+                _settings.GridViewPath = "~/Views/Partials/blockgrid/Components/";
 
 #if NET7_0_OR_GREATER
             _apiElementBuilder = apiElementBuilder;
