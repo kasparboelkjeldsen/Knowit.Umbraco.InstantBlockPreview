@@ -18,6 +18,7 @@
     <Version>0.7.0</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Configurations>Debug;Release;</Configurations>
+	  <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
@@ -90,6 +91,7 @@
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
+	  <None Include="images\icon.png" Pack="true" PackagePath=""/>
   </ItemGroup>
 
 
