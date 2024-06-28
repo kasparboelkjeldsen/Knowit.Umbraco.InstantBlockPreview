@@ -6,27 +6,17 @@ angular.module("umbraco").controller("customBlockController", [
     function ($scope, $attrs, editorState) {
         const blockType = $attrs.blockType;
         let renderType = 'razor';
-        let settings;
-        let seed = "";
 
-        $scope.enableBlockEdit = false;
+        $scope.enableBlockEdit = true;
 
         const apiEndpoints = {
-            renderPartial: '/umbraco/api/CustomPreview/RenderPartial',
-            refreshAppComponent: '/umbraco/api/CustomPreview/RefreshAppComponent',
-            getSettings: '/umbraco/api/CustomPreview/Settings'
+            renderPartial: '/umbraco/api/PreviewRendering/RenderComponent',
         };
 
-        fetch(apiEndpoints.getSettings).then(res => res.json()).then(data => {
-            settings = data;
-            renderType = settings.renderType;
+        $scope.$watch('block.data', (newValue) => handleBlockDataChange(newValue, $scope.block.settingsData), true);
+        $scope.$watch('block.settingsData', (newValue) => handleBlockDataChange($scope.block.data, newValue), true);
 
-            $scope.$watch('block.data', (newValue) => handleBlockDataChange(newValue, $scope.block.settingsData), true);
-            $scope.$watch('block.settingsData', (newValue) => handleBlockDataChange($scope.block.data, newValue), true);
-            $scope.enableBlockEdit = settings.enableBlockEdit;
-        });
 
-        let appInitialized = false;
 
         function fetchData(endpoint, dataToFetch) {
             return fetch(endpoint, {
@@ -50,48 +40,19 @@ angular.module("umbraco").controller("customBlockController", [
             });
         }
 
-        function initApp(dataToFetch) {
-            if (!appInitialized) {
-                fetchData(apiEndpoints.renderPartial, dataToFetch)
-                    .then(json => {
-                        updateHtml(json);
-                        seed = json.seed;
-                        return fetchData(apiEndpoints.refreshAppComponent, dataToFetch);
-                    })
-                    .then(json => {
-
-                        setTimeout(() => {
-                            let event = new CustomEvent('event-' + seed, { detail: json.json });
-                            window.dispatchEvent(event);
-                        }, 200);
-                        appInitialized = true;
-                    })
-                    .catch(error => console.log(error));
-            }
-            else {
-                fetchData(apiEndpoints.refreshAppComponent, dataToFetch)
-                    .then(json => {
-                        let event = new CustomEvent('event-' + seed, { detail: json.json });
-                        window.dispatchEvent(event);
-                    })
-                    .catch(error => console.log(error));
-            }
-        }
-
         function handleBlockDataChange(newValue, settingsData) {
 
             if (newValue) {
+                
                 const data = {
                     Content: stringify(newValue),
                     Settings: stringify(settingsData),
-                    Layout: stringify($scope.block.layout),
                     ControllerName: $scope.block.content.contentTypeAlias,
                     BlockType: blockType,
-                    isApp: renderType === 'app',
                     contentId: editorState.getCurrent().id
                 };
 
-                renderType === 'app' ? initApp(data) : fetchData(apiEndpoints.renderPartial, data).then(updateHtml).catch(error => console.log(error));
+                fetchData(apiEndpoints.renderPartial, data).then(updateHtml).catch(error => console.log(error));
             }
         }
 
@@ -132,7 +93,7 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                     element.html(htmlContent);
 
                     const scripts = Array.from(element[0].getElementsByTagName("script"));
-
+                    
                     const injections = [];
                     let needBootstrap = true;
                     scripts.forEach(function (oldScript) {
@@ -141,6 +102,7 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                         }
                         else {
                             needBootstrap = false;
+                           
                         }
                     });
 
@@ -163,14 +125,12 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                             // randomly generated function name to avoid collisions
                             scriptTag.textContent = `
 function ${funcName}(doc, scriptUrls, realDoc) {
-    
     let document = doc.getRootNode();
     let scriptsToLoad = scriptUrls.length;
 
     try {
         scriptUrls.forEach(function(s) {
             let script = realDoc.createElement('script');
-            
             script.src = s.src;
             if(s.type)
                 script.type = s.type;
@@ -184,15 +144,12 @@ function ${funcName}(doc, scriptUrls, realDoc) {
                 }
             };
             
-            script.onerror = function() {
-                scriptsToLoad--;
-                
-                if (scriptsToLoad === 0) {
-                    ${script}
-                }
-            };
             document.appendChild(script);
         });
+
+        if(scriptUrls.length == 0) {
+            ${script}
+        }
     } catch (e${r}) {
         console.log(e${r})
         // Handle any exceptions if necessary

@@ -11,6 +11,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco10", "Umbraco10\Umbr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco13", "Umbraco13\Umbraco13.csproj", "{598058FB-3F30-4804-A4DB-702F7C45C5C1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Knowit.Umbraco.InstantBlockPreview.Headless", "Knowit.Umbraco.InstantBlockPreview.Headless\Knowit.Umbraco.InstantBlockPreview.Headless.csproj", "{D4CFB139-40B0-424E-8F18-A5D591BBEA8B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Knowit.Umbraco.InstantBlockPreview.Shared", "Knowit.Umbraco.InstantBlockPreview.Shared\Knowit.Umbraco.InstantBlockPreview.Shared.csproj", "{F7A14936-0A1D-4C5E-B36B-E74C9553B2DE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco13Headless", "Umbraco13Headless\Umbraco13Headless.csproj", "{22EAA8E2-574D-4C6B-9E8B-E73795F39883}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +39,18 @@ Global
 		{598058FB-3F30-4804-A4DB-702F7C45C5C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{598058FB-3F30-4804-A4DB-702F7C45C5C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{598058FB-3F30-4804-A4DB-702F7C45C5C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D4CFB139-40B0-424E-8F18-A5D591BBEA8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D4CFB139-40B0-424E-8F18-A5D591BBEA8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D4CFB139-40B0-424E-8F18-A5D591BBEA8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D4CFB139-40B0-424E-8F18-A5D591BBEA8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F7A14936-0A1D-4C5E-B36B-E74C9553B2DE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F7A14936-0A1D-4C5E-B36B-E74C9553B2DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F7A14936-0A1D-4C5E-B36B-E74C9553B2DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F7A14936-0A1D-4C5E-B36B-E74C9553B2DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{22EAA8E2-574D-4C6B-9E8B-E73795F39883}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{22EAA8E2-574D-4C6B-9E8B-E73795F39883}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{22EAA8E2-574D-4C6B-9E8B-E73795F39883}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{22EAA8E2-574D-4C6B-9E8B-E73795F39883}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

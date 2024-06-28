@@ -1,0 +1,5 @@
+﻿{
+  "javascript": [
+    "~/App_Plugins/Knowit.Umbraco.InstantBlockPreview.Headless/customBlock.js"
+  ]
+}
