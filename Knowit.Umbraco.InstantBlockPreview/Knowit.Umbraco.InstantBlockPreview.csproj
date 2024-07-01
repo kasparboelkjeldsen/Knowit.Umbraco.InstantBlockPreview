@@ -15,7 +15,7 @@
     <RepositoryUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <SignAssembly>False</SignAssembly>
-    <Version>0.7.0</Version>
+    <Version>1.0.2</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Configurations>Debug;Release;</Configurations>
 	  <PackageIcon>icon.png</PackageIcon>
@@ -104,7 +104,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\Knowit.Umbraco.InstantBlockPreview.Shared\Knowit.Umbraco.InstantBlockPreview.Shared.csproj" />
+    <ProjectReference Include="..\Knowit.Umbraco.InstantBlockPreview.Shared\Knowit.Umbraco.InstantBlockPreview.Shared.csproj"  />
   </ItemGroup>
 
 </Project>
