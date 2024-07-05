@@ -8,6 +8,11 @@
         if (block?.ContentUdi == null) { continue; }
         var data = block.Content;
 
-        @await Html.PartialAsync("blocklist/Components/" + data.ContentType.Alias, block)
+        var firstLetter = block.Content.ContentType.Alias.Substring(0, 1).ToUpper();
+        var rest = block.Content.ContentType.Alias.Substring(1);
+        var componentName =  firstLetter+rest;
+
+        @await Component.InvokeAsync(componentName, block)
+        
     }
 </div>

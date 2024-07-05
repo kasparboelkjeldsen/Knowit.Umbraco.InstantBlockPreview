@@ -12,7 +12,7 @@ With version 1.0 I've chosen to simplify things by splitting the functionality u
 ## Features
 - Instant preview for Block Grid and Block List element types.
 - No document save required to perform a preview.
-- MVC: Supports rendering through ViewComponents (Block Grid Only)
+- MVC: Supports rendering through ViewComponents
 - Headless: Supports rendering with HTML fetched from an SSR app (if you're using Knowit.Umbraco.InstantBlockPreview.Headless)
 
 ## Configuration

@@ -90,37 +90,21 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
                 // see if there is a component
                 var viewComponent = _viewComponentSelector.SelectComponent(controllerName);
                 // deal with view component
-                if (viewComponent != null && scope.BlockType == "grid")
+                if (viewComponent != null)
                 {
-                    var viewContext = new ViewContext(
-                        actionContext,
-                        new FakeView(),
-                        viewData,
-                        new TempDataDictionary(actionContext.HttpContext, _tempDataProvider),
-                        new StringWriter(),
-                        new HtmlHelperOptions()
-                    );
-
-                    var viewComponentHelper = _viewComponentHelper as IViewContextAware;
-                    viewComponentHelper?.Contextualize(viewContext);
-
-                    var result = await _viewComponentHelper.InvokeAsync(controllerName, blockItemInstance);
-                    using (var writer = new StringWriter())
+                    try
                     {
-                        // Invoke the ViewComponent and write its output directly to the StringWriter
-                        result.WriteTo(writer, HtmlEncoder.Default);
-
-                        // The StringWriter now contains the rendered HTML
-                        htmlString = writer.ToString();
+                        htmlString = await ExecuteViewComponent(controllerName, htmlString, blockItemInstance, actionContext, viewData);
+                    }
+                    catch (Exception e)
+                    {
+                        htmlString = await ExecuteViewContext(htmlString, viewResult, actionContext, viewData, sw);
                     }
                 }
                 else
                 {
                     // render the view and convert to string
-                    var viewContext = new ViewContext(actionContext, viewResult.View!, viewData, new TempDataDictionary(actionContext.HttpContext, _tempDataProvider), sw, new HtmlHelperOptions());
-
-                    await viewResult.View!.RenderAsync(viewContext);
-                    htmlString = sw.ToString();
+                    htmlString = await ExecuteViewContext(htmlString, viewResult, actionContext, viewData, sw);
                 }
 
                 if (!htmlString.ToLower().Contains("<script>")) htmlString += "<script></script>"; // for bootstraping purposes
@@ -143,6 +127,41 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
             return Ok(new { html = htmlString });
         }
 
+        private async Task<string> ExecuteViewContext(string htmlString, ViewEngineResult viewResult, ActionContext actionContext, ViewDataDictionary viewData, StringWriter sw)
+        {
+            var viewContext = new ViewContext(actionContext, viewResult.View!, viewData, new TempDataDictionary(actionContext.HttpContext, _tempDataProvider), sw, new HtmlHelperOptions());
+
+            await viewResult.View!.RenderAsync(viewContext);
+            htmlString = sw.ToString();
+            return htmlString;
+        }
+
+        private async Task<string> ExecuteViewComponent(string controllerName, string htmlString, object blockItemInstance, ActionContext actionContext, ViewDataDictionary viewData)
+        {
+            var viewContext = new ViewContext(
+                                    actionContext,
+                                    new FakeView(),
+                                    viewData,
+                                    new TempDataDictionary(actionContext.HttpContext, _tempDataProvider),
+                                    new StringWriter(),
+                                    new HtmlHelperOptions()
+                                );
+
+            var viewComponentHelper = _viewComponentHelper as IViewContextAware;
+            viewComponentHelper?.Contextualize(viewContext);
+
+            var result = await _viewComponentHelper.InvokeAsync(controllerName, blockItemInstance);
+            using (var writer = new StringWriter())
+            {
+                // Invoke the ViewComponent and write its output directly to the StringWriter
+                result.WriteTo(writer, HtmlEncoder.Default);
+
+                // The StringWriter now contains the rendered HTML
+                htmlString = writer.ToString();
+            }
+
+            return htmlString;
+        }
 
         private class FakeView : IView
         {
