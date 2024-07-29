@@ -11,11 +11,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco10", "Umbraco10\Umbr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco13", "Umbraco13\Umbraco13.csproj", "{598058FB-3F30-4804-A4DB-702F7C45C5C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Knowit.Umbraco.InstantBlockPreview.Headless", "Knowit.Umbraco.InstantBlockPreview.Headless\Knowit.Umbraco.InstantBlockPreview.Headless.csproj", "{D4CFB139-40B0-424E-8F18-A5D591BBEA8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Knowit.Umbraco.InstantBlockPreview.Headless", "Knowit.Umbraco.InstantBlockPreview.Headless\Knowit.Umbraco.InstantBlockPreview.Headless.csproj", "{D4CFB139-40B0-424E-8F18-A5D591BBEA8B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Knowit.Umbraco.InstantBlockPreview.Shared", "Knowit.Umbraco.InstantBlockPreview.Shared\Knowit.Umbraco.InstantBlockPreview.Shared.csproj", "{F7A14936-0A1D-4C5E-B36B-E74C9553B2DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Knowit.Umbraco.InstantBlockPreview.Shared", "Knowit.Umbraco.InstantBlockPreview.Shared\Knowit.Umbraco.InstantBlockPreview.Shared.csproj", "{F7A14936-0A1D-4C5E-B36B-E74C9553B2DE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco13Headless", "Umbraco13Headless\Umbraco13Headless.csproj", "{22EAA8E2-574D-4C6B-9E8B-E73795F39883}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco13Headless", "Umbraco13Headless\Umbraco13Headless.csproj", "{22EAA8E2-574D-4C6B-9E8B-E73795F39883}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco14", "Umbraco14\Umbraco14.csproj", "{9D947AD3-2CD9-4B48-BB35-5A3CF8A9AFD9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Knowit.Umbraco.Bellissima.InstantBlockPreview", "Knowit.Umbraco.Bellissima.InstantBlockPreview\Knowit.Umbraco.Bellissima.InstantBlockPreview.csproj", "{3996030D-1110-4204-841D-A818B197596A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -51,6 +55,14 @@ Global
 		{22EAA8E2-574D-4C6B-9E8B-E73795F39883}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{22EAA8E2-574D-4C6B-9E8B-E73795F39883}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{22EAA8E2-574D-4C6B-9E8B-E73795F39883}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9D947AD3-2CD9-4B48-BB35-5A3CF8A9AFD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9D947AD3-2CD9-4B48-BB35-5A3CF8A9AFD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9D947AD3-2CD9-4B48-BB35-5A3CF8A9AFD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9D947AD3-2CD9-4B48-BB35-5A3CF8A9AFD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3996030D-1110-4204-841D-A818B197596A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3996030D-1110-4204-841D-A818B197596A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3996030D-1110-4204-841D-A818B197596A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3996030D-1110-4204-841D-A818B197596A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,13 +1,20 @@
-# Knowit.Umbraco.InstantBlockPreview (and Knowit.Umbraco.InstantBlockPreview.Headless)
 
-A package-set for Umbraco that enables instant previews in the Umbraco Backoffice for Block Grid and Block List element types, without the need to save the document first. This package was heavily inspired by [Rick Butterfield's Block Preview package](https://github.com/rickbutterfield/Umbraco.Community.BlockPreview).
+# Knowit.Umbraco.InstantBlockPreview (and *.Headless)
 
-Knowit.Umbraco.InstantBlockPreview currently supports Umbraco 10 to 13 - 14 is in the works
-Knowit.Umbraco.InstantBlockPreview.Headless currently supports Umbraco 12 and 13 - 14 is in the works
+A package-set for Umbraco that enables instant previews in the Umbraco Backoffice for Block Grid and Block List element types, 
+without the need to save the document first. This package was heavily inspired by [Rick Butterfield's Block Preview package](https://github.com/rickbutterfield/Umbraco.Community.BlockPreview).
 
-The two packages are sharing this readme file, as they share a lot of code and functionality. 
+**Knowit.Umbraco.InstantBlockPreview currently supports Umbraco 10 to 14**
 
-With version 1.0 I've chosen to simplify things by splitting the functionality up in Knowit.Umbraco.InstantBlockPreview which is for tradition MVC and Knowit.Umbraco.InstantBlockPreview.Headless which is, you guessed it, headless.
+**Knowit.Umbraco.InstantBlockPreview.Headless currently supports Umbraco 12 to 13**
+
+If you use Umbraco 13 or old, use version 1.x.x
+
+If you use Umbraco 14 use version 2.x.x (due to the rewrite of the backoffice)
+
+The two packages "Knowit.Umbraco.InstantBlockPreview" and "Knowit.Umbraco.InstantBlockPreview.Headless" share this repo and readme. 
+
+Choose your section accordingly. - Version 14 support of headless is in the works.
 
 ## Features
 - Instant preview for Block Grid and Block List element types.
@@ -15,24 +22,64 @@ With version 1.0 I've chosen to simplify things by splitting the functionality u
 - MVC: Supports rendering through ViewComponents
 - Headless: Supports rendering with HTML fetched from an SSR app (if you're using Knowit.Umbraco.InstantBlockPreview.Headless)
 
-## Configuration
 
-MVC: Configuration is optional, if you are happy with the standard values, you don't need to add anything to your `appsettings.json`. 
+## MVC
+### Configuration
 
-Headless: Configuration is mandatory as the package has no way of knowing where to fetch the preview HTML from.
+Configuration is optional, if you are happy with the standard values, you don't need to add anything to your `appsettings.json`. 
 
-
-MVC: The following values are available for configuration:
+The following values are available for configuration:
 
 ```json
 "Knowit.Umbraco.InstantBlockPreview": {
   "gridViewPath": "~/Views/Partials/blockgrid/Components/",
   "blockViewPath": "~/Views/Partials/blocklist/Components/",
   "injections": []
+  "enableFor": [], // only v14 and newer, see below
+  "disableFor": [], // only v14 and newer, see below
 }
 ```
 
-Headless: The following values are available for configuration:
+- `gridviewPath` - The path to the Block Grid views. Default is `~/Views/Partials/blockgrid/Components/`.
+- `blockViewPath` - The path to the Block List views. Default is `~/Views/Partials/blocklist/Components/`.
+- `injections` - In short, a way to add lines of code to the start of the preview-HTML. Use it to inject your web-components JS or your app or something else!
+
+#### Version 14 specific behavior
+As version 14.1 of Umbraco currently doesn't use the "advanced" tab info from the block setups, and instead lets you override "all" block renderings, I've introduced `enabledFor`and `disableFor` as a way to give that control back. 
+
+Default behaviour with no configuration is to take control of all block-renderings. If something goes wrong, it will output html like Umbraco normally would without the plugin installed.
+
+- If `enabledFor` is in use, it will only render blocks whose alias match the list.
+- If `disableFor` is in use, it will render all blocks except aliases matching the list.
+
+### Razor View
+Implement your views normally. 
+
+You can include special code to run only in the back office like so:
+```csharp
+@if (ViewBag.blockPreview != null)
+{
+    <p style="color:red">I am only visible in backoffice and this is my id @ViewBag.assignedContentId</p>
+}
+```
+
+Umbraco.AssignedContentItem.Id will not work in your previews as the content is temporary and not assigned to anything.
+
+A workaround if you must have a reference in your view to the content the element is assigned, something like this can be used.
+
+```csharp
+var id = ViewBag.blockPreview ? ViewBag.assignedContentId : Umbraco.AssignedContentItem.Id;
+```
+
+### Version 13 and earlier specific behavior
+Set `gridView.html` for Block Grid and `listview.html` for Block List, which are installed by this package in `app_plugins/Knowit.Umbraco.InstantBlockPreview`. 
+
+
+
+## Headless
+### Configuration
+
+The following values are available for configuration:
 
 ```json
 "Knowit.Umbraco.InstantBlockPreview": {
@@ -44,24 +91,10 @@ Headless: The following values are available for configuration:
 }
 ```
 
-### MVC Configuration values
-
-gridviewPath - The path to the Block Grid views. Default is `~/Views/Partials/blockgrid/Components/`.
-
-blockViewPath - The path to the Block List views. Default is `~/Views/Partials/blocklist/Components/`.
-
-injections - In short, a way to add lines of code to the start of the preview-HTML. Use it to inject your web-components JS or your app or something else!
-
-
-### Headless Configuration values
-
-ssrApiUrl - The URL to the API that will recieve the JSON from Umbraco.
-
-ssrUrl - The URL to the API that will return the HTML to Umbraco.
-
-ssrSecret - A secret key that will be sent to the API to verify that the request is coming from Umbraco.
-
-injections - In short, a way to add lines of code to the start of the preview-HTML. Use it to inject your web-components JS or your app or something else!
+- `ssrApiUrl` - The URL to the API that will recieve the JSON from Umbraco.
+- `ssrUrl` - The URL to the API that will return the HTML to Umbraco.
+- `ssrSecret` - A secret key that will be sent to the API to verify that the request is coming from Umbraco.
+- `injections` - In short, a way to add lines of code to the start of the preview-HTML. Use it to inject your web-components JS or your app or something else!
 
 Read more under "Headless Preview"
 
@@ -74,23 +107,6 @@ Currently to deploy this package on a Umbraco Cloud solution, the following is r
 </PropertyGroup>
 ```
 
-### Razor View
-Implement your views normally. Set `gridView.html` for Block Grid and `listview.html` for Block List, which are installed by this package in `app_plugins/Knowit.Umbraco.InstantBlockPreview`. They render through a razor view engine in the frontend and show in the back office. You can include special code to run only in the back office like so:
-
-```csharp
-@if (ViewBag.blockPreview != null)
-{
-    <p style="color:red">I am only visible in backoffice</p>
-}
-```
-
-Umbraco.AssignedContentItem.Id will not work in your previews as the content is temporary and not assigned to anything.
-
-A workaround if you must have a reference in your view to the content the element is assigned, something like this can be used.
-
-```csharp
-var id = ViewBag.blockPreview ? ViewBag.assignedContentId : Umbraco.AssignedContentItem.Id;
-```
 
 ### Headless Preview
 
@@ -114,29 +130,17 @@ So on your end.
 You've set up a grid element with a rich text editor to use Instant Block Preview and have just now entered some text and hit save.
 
 1) The Javascript sends your changes to Instant Block Preview API 
-2) Instant Block Preview API sends a POST request to https://localhost:3000/api/blockPreview with following BODY:
+2) Instant Block Preview API sends a POST request to https://localhost:3000/api/blockPreview with following BODY: 
 ```json
 {"gridColumns":12,"items":[{"rowSpan":0,"columnSpan":0,"areaGridColumns":12,"areas":[],"content":{"id":"554991cb-dfa4-43fd-85ba-9c9b0213438e","contentType":"text","properties":{"richText":{"markup":"<p>Test 123</p>","blocks":[]}}},"settings":null}]}
 ```
 as well as an header with your secret key
+
 3) Your app, whatever it may be, recieves the call, verifies the secret key and caches the json in a way where your app will be able to retrieve it with just a string key you've just generated. Could just be current time in microseconds or a guid or something else
 4) Your app returns the string key as response (example key "lutvdx1hghiz4w9suye")
 5) Instant Block Preview now makes a GET request to https://localhost:3000/blockPreview?key=lutvdx1hghiz4w9suye with the same authorization headers set
 6) Your app retrieves the JSON from it's cache with the key, and renders the HTML just like you would with a normal response from the Content Delivery API
 7) Instant Block Preview recieves the Html and (optionally) filters it down to the css selector you've sendt in "ssrSelector" and returns that Html to be previewed in Umbraco
-
-## Umbraco Login
-test@test.dk
-instantblock
-
-## FileWatcher
-Is used to move App_Plugins from package to Umbraco 12 project.
-Gulp 4 is required.
-To get started:
-npm install --global gulp-cli
-npm install
-npm i
-gulp
 
 ## License
 [MIT](LICENSE)

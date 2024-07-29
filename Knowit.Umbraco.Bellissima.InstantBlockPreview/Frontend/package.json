@@ -1,0 +1,21 @@
+{
+    "name": "my-package.client",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "build": "tsc && vite build",
+        "watch": "vite build --watch",
+        "watch-v14": "cross-env OUT_DIR=./../../Umbraco14/App_Plugins/knowit-instantblockpreview vite build --watch"
+    },
+    "dependencies": {
+        "lit": "^3.1.4"
+    },
+    "devDependencies": {
+        "@umbraco-cms/backoffice": "^14.0.0",
+        "cross-env": "^7.0.3",
+        "dotenv": "^16.4.5",
+        "typescript": "^5.2.2",
+        "vite": "^5.3.1"
+    }
+}
