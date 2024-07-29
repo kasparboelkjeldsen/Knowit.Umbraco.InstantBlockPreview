@@ -15,7 +15,7 @@
     <RepositoryUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <SignAssembly>False</SignAssembly>
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Configurations>Debug;Release;</Configurations>
 	  <PackageIcon>icon.png</PackageIcon>
@@ -61,6 +61,10 @@
     <None Remove="Views\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="App_Plugins\Knowit.Umbraco.InstantBlockPreview\rteView.html" />
+  </ItemGroup>
+
 
   <ItemGroup>
 	  <None Update="App_Plugins\Knowit.Umbraco.InstantBlockPreview\customBlock.js">
@@ -78,6 +82,13 @@
 		  <Pack>true</Pack>
 	  </None>
 	  <None Update="App_Plugins\Knowit.Umbraco.InstantBlockPreview\listView.html">
+		  <PackagePath>contentFiles\any\any;content</PackagePath>
+		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+		  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+		  <PackageCopyToOutput>true</PackageCopyToOutput>
+		  <Pack>true</Pack>
+	  </None>
+	  <None Update="App_Plugins\Knowit.Umbraco.InstantBlockPreview\rteView.html">
 		  <PackagePath>contentFiles\any\any;content</PackagePath>
 		  <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 		  <CopyToPublishDirectory>Always</CopyToPublishDirectory>
@@ -111,7 +122,7 @@
 
 
   <ItemGroup>
-    <ProjectReference Include="..\Knowit.Umbraco.InstantBlockPreview.Shared\Knowit.Umbraco.InstantBlockPreview.Shared.csproj"  />
+    <ProjectReference Include="..\Knowit.Umbraco.InstantBlockPreview.Shared\Knowit.Umbraco.InstantBlockPreview.Shared.csproj" />
   </ItemGroup>
 
 </Project>

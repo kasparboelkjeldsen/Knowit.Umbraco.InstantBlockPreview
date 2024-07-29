@@ -58,7 +58,11 @@ namespace Knowit.Umbraco.InstantBlockPreview.Shared
                 // get the typed model of the controller/view
                 controllerType = model!.GetType();
                 // create generic type BlockGridItem<T> where T is the typed model
-                blockItemType = blockType == "grid" ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
+                blockItemType =
+#if NET8_0_OR_GREATER
+                    blockType == "rte" ? typeof(RichTextBlockItem<>) :
+#endif
+                    blockType == "grid" ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
                 blockElementType = blockItemType.MakeGenericType(controllerType);
 
                 controllerToTypes.TryAdd(controllerKey, (controllerType, blockItemType, blockElementType));

@@ -67,7 +67,11 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
 
                 var formattedViewPath = string.Format("{0}.cshtml", controllerName);
 
-                var viewPath = (scope.BlockType == "grid" ? _settings.PackageSettings.GridViewPath : _settings.PackageSettings.BlockViewPath) + formattedViewPath;
+                var viewPath = string.Empty;
+                if (scope.BlockType == "grid") viewPath = _settings.PackageSettings.GridViewPath + formattedViewPath;
+                else if (scope.BlockType == "list") viewPath = _settings.PackageSettings.BlockViewPath + formattedViewPath;
+                else if (scope.BlockType == "rte") viewPath = _settings.PackageSettings.RteViewPath + formattedViewPath;
+                //var viewPath = (scope.BlockType == "grid" ? _settings.PackageSettings.GridViewPath : _settings.PackageSettings.BlockViewPath) + formattedViewPath;
 
 
                 // compile the view

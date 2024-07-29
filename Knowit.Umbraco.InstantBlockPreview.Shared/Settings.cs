@@ -20,6 +20,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Shared
                 {
                     BlockViewPath = "~/Views/Partials/blocklist/Components/",
                     GridViewPath = "~/Views/Partials/blockgrid/Components/",
+                    RteViewPath = "~/Views/Partials/richtext/Components/",
                     RenderType = "razor",
                 };
               

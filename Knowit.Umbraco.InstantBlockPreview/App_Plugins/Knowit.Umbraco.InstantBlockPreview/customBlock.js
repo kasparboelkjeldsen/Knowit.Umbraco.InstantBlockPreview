@@ -6,7 +6,6 @@ angular.module("umbraco").controller("customBlockController", [
     function ($scope, $attrs, editorState) {
         const blockType = $attrs.blockType;
         let renderType = 'razor';
-
         $scope.enableBlockEdit = true;
 
         const apiEndpoints = {

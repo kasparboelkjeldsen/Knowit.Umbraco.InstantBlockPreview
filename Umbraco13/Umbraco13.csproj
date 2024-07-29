@@ -13,7 +13,11 @@
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Content>
-    <Content Include="App_Plugins\Knowit.Umbraco.InstantBlockPreview\listView.html">
+    <Content Include="App_Plugins\Knowit.Umbraco.InstantBlockPreview\listView - Copy.html">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+    <Content Include="App_Plugins\Knowit.Umbraco.InstantBlockPreview\rteView.html">
       <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
       <CopyToPublishDirectory>Always</CopyToPublishDirectory>
     </Content>
@@ -24,7 +28,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Umbraco.Cms" Version="13.0.0" />
+    <PackageReference Include="Umbraco.Cms" Version="13.4.1" />
   </ItemGroup>
 
   <ItemGroup>

@@ -4,6 +4,8 @@
 A package-set for Umbraco that enables instant previews in the Umbraco Backoffice for Block Grid and Block List element types, 
 without the need to save the document first. This package was heavily inspired by [Rick Butterfield's Block Preview package](https://github.com/rickbutterfield/Umbraco.Community.BlockPreview).
 
+For Umbraco 13 it also allows for preview of blocks in the Rich Text Editor. (Version 14 support of this is in the works)
+
 **Knowit.Umbraco.InstantBlockPreview currently supports Umbraco 10 to 14**
 
 **Knowit.Umbraco.InstantBlockPreview.Headless currently supports Umbraco 12 to 13**

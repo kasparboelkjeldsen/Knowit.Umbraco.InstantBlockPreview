@@ -25,6 +25,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.Shared
         [JsonProperty("blockViewPath")]
         public string? BlockViewPath { get; set; }
 
+        [JsonProperty("rteViewPath")]
+        public string? RteViewPath { get; set; }
+
         [JsonProperty("injections")]
         public IEnumerable<string> Injections { get; set; }
 
