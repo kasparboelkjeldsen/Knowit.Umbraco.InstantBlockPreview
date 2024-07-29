@@ -21,20 +21,25 @@
 	  <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
 
-    <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-        <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-        <PackageReference Include="Umbraco.Cms.Core" Version="10.8.2" />
-        <PackageReference Include="Umbraco.Cms.Web.Common" Version="10.8.2" />
-        <PackageReference Include="Umbraco.Cms.Web.Website" Version="10.8.2" />
-        <PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.8.2" />
-    </ItemGroup>
-    <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+	<!-- Default dependencies for net6.0 -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="Umbraco.Cms.Core" Version="10.8.2" />
+		<PackageReference Include="Umbraco.Cms.Web.Common" Version="10.8.2" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="10.8.2" />
+		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="10.8.2" />
+	</ItemGroup>
+
+	<!-- Dependencies for net7.0 -->
+	<ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Umbraco.Cms.Core" Version="[12.0.1,13.0.0)" />
 		<PackageReference Include="Umbraco.Cms.Web.Common" Version="[12.0.1,13.0.0)" />
 		<PackageReference Include="Umbraco.Cms.Web.Website" Version="[12.0.1,13.0.0)" />
 		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="[12.0.1,13.0.0)" />
-   </ItemGroup>
+	</ItemGroup>
+
+	<!-- Dependencies for net8.0 and Umbraco 13 -->
 	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 		<PackageReference Include="Umbraco.Cms.Core" Version="[13.0.0,14.0.0)" />
@@ -42,6 +47,8 @@
 		<PackageReference Include="Umbraco.Cms.Web.Website" Version="[13.0.0,14.0.0)" />
 		<PackageReference Include="Umbraco.Cms.Web.BackOffice" Version="[13.0.0,14.0.0)" />
 	</ItemGroup>
+
+
 
   <ItemGroup>
     <Content Include="App_Plugins\Knowit.Umbraco.InstantBlockPreview\**" ExcludeFromSingleFile="true" CopyToPublishDirectory="Always" />
