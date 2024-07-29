@@ -16,7 +16,7 @@
 	  <RepositoryUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
 	  <SignAssembly>False</SignAssembly>
-	  <Version>2.0.4</Version>
+	  <Version>2.0.8</Version>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <Configurations>Debug;Release;</Configurations>
 	  <PackageIcon>icon.png</PackageIcon>
@@ -30,7 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="App_Plugins\Knowit.Umbraco.InstantBlockPreview\**" ExcludeFromSingleFile="true" CopyToPublishDirectory="Always" />
+		<Content Include="App_Plugins\knowit-instantblockpreview\**" ExcludeFromSingleFile="true" CopyToPublishDirectory="Always" />
 		<None Include="buildTransitive\**" Pack="true" PackagePath="buildTransitive" />
 	</ItemGroup>
 
@@ -43,21 +43,21 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Update="App_Plugins\Knowit.Umbraco.InstantBlockPreview\knowit-instantblockpreview.js">
+		<None Update="App_Plugins\knowit-instantblockpreview\knowit-instantblockpreview.js">
 			<PackagePath>contentFiles\any\any;content</PackagePath>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
 			<PackageCopyToOutput>true</PackageCopyToOutput>
 			<Pack>true</Pack>
 		</None>
-		<None Update="App_Plugins\Knowit.Umbraco.InstantBlockPreview\knowit-instantblockpreview.js.map">
+		<None Update="App_Plugins\knowit-instantblockpreview\knowit-instantblockpreview.js.map">
 			<PackagePath>contentFiles\any\any;content</PackagePath>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
 			<PackageCopyToOutput>true</PackageCopyToOutput>
 			<Pack>true</Pack>
 		</None>
-		<None Update="App_Plugins\Knowit.Umbraco.InstantBlockPreview\umbraco-package.json">
+		<None Update="App_Plugins\knowit-instantblockpreview\umbraco-package.json">
 			<PackagePath>contentFiles\any\any;content</PackagePath>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 			<CopyToPublishDirectory>Always</CopyToPublishDirectory>

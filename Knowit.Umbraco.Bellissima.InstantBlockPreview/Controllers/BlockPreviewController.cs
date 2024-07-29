@@ -28,8 +28,6 @@ using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
 using Umbraco.Cms.Core.Serialization;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Web;
-using Umbraco.Extensions;
-using static Umbraco.Cms.Core.Constants.Conventions;
 using Udi = Umbraco.Cms.Core.Udi;
 
 namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
@@ -103,8 +101,27 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 					var propType = iptype.GetPropertyType(propAlias);
 					controllerName = ptype.Alias;
 
+					// check if we need to filter on Alias
+					if(_settings.PackageSettings.EnableFor != null && _settings.PackageSettings.EnableFor.Any())
+					{
+						if (!_settings.PackageSettings.EnableFor.Contains(controllerName))
+						{
+							return Ok(new { html = "blockbeam" });
+						}
+					}
+
+					if(_settings.PackageSettings.DisableFor != null && _settings.PackageSettings.DisableFor.Any())
+					{
+						if (_settings.PackageSettings.DisableFor.Contains(controllerName))
+						{
+							return Ok(new { html = "blockbeam" });
+						}
+					}
+
 					BlockGridModel bgm = null;
 					BlockListModel blm = null;
+
+
 
 					if (propType.DataType.EditorAlias == Constants.PropertyEditors.Aliases.BlockGrid)
 					{
@@ -117,7 +134,7 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 						blm = (BlockListModel)_blockListPropertyValueConverter.ConvertIntermediateToObject(null, propType, PropertyCacheLevel.None, content, true);
 					}
 
-					if (bgm == null && blm == null) return BadRequest("No block data found");
+					if (bgm == null && blm == null) return Ok(new { html = "blockbeam" });
 
 					object blockInstanceItem = BlockInstance(controllerName, blockType, bgm != null ? bgm.FirstOrDefault() : blm.FirstOrDefault());
 
@@ -172,9 +189,9 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 					return Ok(new { html = htmlString });
 				}
 			}
-			catch (Exception e)
+			catch
 			{
-				return BadRequest(e.Message);
+				return Ok(new { html = "blockbeam" });
 			}
         }
 
@@ -216,7 +233,7 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 					Udi.Create("element",Guid.NewGuid()),
 					model!,
 					Udi.Create("element",Guid.NewGuid()),
-					settings //todo something something block settings
+					settings
 			});
 			return blockGridItemInstance;
 		}

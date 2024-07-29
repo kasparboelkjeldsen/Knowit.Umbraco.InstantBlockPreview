@@ -22,9 +22,21 @@ namespace Knowit.Umbraco.InstantBlockPreview.Shared
                     GridViewPath = "~/Views/Partials/blockgrid/Components/",
                     RenderType = "razor",
                 };
-              
             }
             else PackageSettings = settings;
+
+            if(PackageSettings.BlockViewPath == null)
+            {
+				PackageSettings.BlockViewPath = "~/Views/Partials/blocklist/Components/";
+			}
+            if(PackageSettings.GridViewPath == null)
+            { 
+                PackageSettings.GridViewPath = "~/Views/Partials/blockgrid/Components/";
+			}
+            if(PackageSettings.RenderType == null)
+            {
+				PackageSettings.RenderType = "razor";
+			}
         }
     }
 }

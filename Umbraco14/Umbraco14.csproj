@@ -6,13 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Knowit.Umbraco.InstantBlockPreview" Version="2.0.7" />
     <PackageReference Include="Umbraco.Cms" Version="14.1.1" />
   </ItemGroup>
 
   <ItemGroup>
     <!-- Opt-in to app-local ICU to ensure consistent globalization APIs across different platforms -->
     <PackageReference Include="Microsoft.ICU.ICU4C.Runtime" Version="72.1.0.3" />
-    <ProjectReference Include="..\Knowit.Umbraco.Bellissima.InstantBlockPreview\Knowit.Umbraco.Bellissima.InstantBlockPreview.csproj" />
     <RuntimeHostConfigurationOption Include="System.Globalization.AppLocalIcu" Value="72.1.0.3" Condition="$(RuntimeIdentifier.StartsWith('linux')) or $(RuntimeIdentifier.StartsWith('win')) or ('$(RuntimeIdentifier)' == '' and !$([MSBuild]::IsOSPlatform('osx')))" />
   </ItemGroup>
 

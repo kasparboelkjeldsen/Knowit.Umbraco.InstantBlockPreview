@@ -38,5 +38,11 @@ namespace Knowit.Umbraco.InstantBlockPreview.Shared
 
         [JsonProperty("ssrSelector")]
         public string? SSRSelector { get; set; }
-    }
+
+        [JsonProperty("enableFor")]
+		public IEnumerable<string> EnableFor { get; set; }
+
+        [JsonProperty("disableFor")]
+		public IEnumerable<string> DisableFor { get; set; }
+	}
 }

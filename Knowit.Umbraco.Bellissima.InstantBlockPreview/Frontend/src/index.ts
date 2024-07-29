@@ -89,7 +89,9 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
     })
     .then(response => response.json()).then(data => {
       this.#showLoader = false;
-      this.#htmlOutput = data.html;
+      if(data.html === "blockbeam")
+        this.#htmlOutput = this.blockBeam();  
+      else this.#htmlOutput = data.html;
       this.requestUpdate();
     });
 
