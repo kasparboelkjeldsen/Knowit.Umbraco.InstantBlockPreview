@@ -36,6 +36,7 @@ The following values are available for configuration:
 "Knowit.Umbraco.InstantBlockPreview": {
   "gridViewPath": "~/Views/Partials/blockgrid/Components/",
   "blockViewPath": "~/Views/Partials/blocklist/Components/",
+  "rteViewPath": "~/Views/Partials/richtext/Components/",
   "injections": []
   "enableFor": [], // only v14 and newer, see below
   "disableFor": [], // only v14 and newer, see below
@@ -44,6 +45,7 @@ The following values are available for configuration:
 
 - `gridviewPath` - The path to the Block Grid views. Default is `~/Views/Partials/blockgrid/Components/`.
 - `blockViewPath` - The path to the Block List views. Default is `~/Views/Partials/blocklist/Components/`.
+- `rteViewPath` - The path to the richtext Block views. Default is `~/Views/Partials/blocklist/Components/`.
 - `injections` - In short, a way to add lines of code to the start of the preview-HTML. Use it to inject your web-components JS or your app or something else!
 
 #### Version 14 specific behavior
@@ -51,7 +53,7 @@ As version 14.1 of Umbraco currently doesn't use the "advanced" tab info from th
 
 Default behaviour with no configuration is to take control of all block-renderings. If something goes wrong, it will output html like Umbraco normally would without the plugin installed.
 
-- If `enabledFor` is in use, it will only render blocks whose alias match the list.
+- If `enableFor` is in use, it will only render blocks whose alias match the list.
 - If `disableFor` is in use, it will render all blocks except aliases matching the list.
 
 ### Razor View

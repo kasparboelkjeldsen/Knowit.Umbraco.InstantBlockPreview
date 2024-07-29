@@ -42,7 +42,7 @@ angular.module("umbraco").controller("customBlockController", [
         function handleBlockDataChange(newValue, settingsData) {
 
             if (newValue) {
-                
+
                 const data = {
                     Content: stringify(newValue),
                     Settings: stringify(settingsData),
@@ -92,7 +92,7 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                     element.html(htmlContent);
 
                     const scripts = Array.from(element[0].getElementsByTagName("script"));
-                    
+
                     const injections = [];
                     let needBootstrap = true;
                     scripts.forEach(function (oldScript) {
@@ -101,7 +101,7 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
                         }
                         else {
                             needBootstrap = false;
-                           
+
                         }
                     });
 
