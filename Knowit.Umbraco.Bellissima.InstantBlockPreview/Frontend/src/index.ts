@@ -91,7 +91,7 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
       this.#showLoader = false;
       if(data.html === "blockbeam")
         this.#htmlOutput = this.blockBeam();  
-      else this.#htmlOutput = data.html;
+      else this.#htmlOutput = '<div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px;">' + data.html + '</div>';
       this.requestUpdate();
     });
 
