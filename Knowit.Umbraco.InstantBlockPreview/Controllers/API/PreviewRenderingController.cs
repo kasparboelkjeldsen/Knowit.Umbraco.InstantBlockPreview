@@ -15,6 +15,8 @@ using Umbraco.Cms.Web.Common.Controllers;
 using Microsoft.AspNetCore.Mvc.ViewComponents;
 using System.Text.Encodings.Web;
 using Knowit.Umbraco.InstantBlockPreview.Shared;
+using Serilog;
+
 
 namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
 {
@@ -28,13 +30,15 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
         private readonly IViewComponentHelper _viewComponentHelper;
         private readonly Settings _settings;
         private readonly BlockHelper _blockHelper;
+        private readonly ILogger _logger;
         public PreviewRenderingController(
             BlockEditorConverter blockEditorConverter,
             IRazorViewEngine razorViewEngine,
             ITempDataProvider tempDataProvider,
             IViewComponentSelector viewComponentSelector,
             IViewComponentHelper viewComponentHelper,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ILogger logger)
         {
             _razorViewEngine = razorViewEngine;
             _blockEditorConverter = blockEditorConverter;
@@ -43,6 +47,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
             _viewComponentHelper = viewComponentHelper;
             _blockHelper = new BlockHelper(_blockEditorConverter);
             _settings = new Settings(configuration);
+            _logger = logger;
         }
 
         [HttpPost("umbraco/api/PreviewRendering/RenderComponent")]
@@ -50,6 +55,10 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
         {
             if (scope == null || scope.ControllerName == null || scope.Content == null || scope.BlockType == null)
             {
+                if(_settings.PackageSettings.Debug.HasValue && _settings.PackageSettings.Debug.Value)
+                {
+                    _logger.Error("Missing parameters");
+                }
                 return Ok(new { html = "Missing parameters" });
             }
 
@@ -63,7 +72,10 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
             try
             {
                 // hide the crazy
-                object blockItemInstance = _blockHelper.InstantiateFromJson(content, settings, controllerName, scope.BlockType, scope.Layout);
+                object blockItemInstance = _blockHelper.InstantiateFromJson(content, settings, controllerName, scope.BlockType, scope.Layout, false);
+                object blockItemInstance2 = _blockHelper.InstantiateFromJson(content, settings, controllerName, scope.BlockType, scope.Layout, true);
+
+                if (blockItemInstance == null) blockItemInstance = blockItemInstance2;
 
                 var formattedViewPath = string.Format("{0}.cshtml", controllerName);
 
@@ -88,7 +100,10 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
 
                 viewData["assignedContentId"] = scope.ContentId;
                 viewData["blockPreview"] = true;
-
+                if(scope.BlockType == "grid" && _settings.PackageSettings.AreaReplace.HasValue && _settings.PackageSettings.AreaReplace.Value)
+                {
+                    viewData["renderGridAreaSlots"] = "###renderGridAreaSlots";
+                }
                 await using var sw = new StringWriter();
 
                 // see if there is a component
@@ -116,6 +131,11 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
             catch (Exception e)
             {
                 htmlString = e.Message;
+
+                if (_settings.PackageSettings.Debug.HasValue && _settings.PackageSettings.Debug.Value)
+                {
+                    _logger.Error(e, "Error rendering component");
+                }
                 return BadRequest(new { html = htmlString });
             }
 
@@ -124,6 +144,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
 
             // Clear onclick attributes
             htmlString = Regex.Replace(htmlString, @"onclick\s*=\s*[""'].*?[""']", "", RegexOptions.IgnoreCase);
+
             if (_settings.PackageSettings.Injections is not null)
             {
                 htmlString = string.Join("\n", _settings.PackageSettings.Injections) + "\n" + htmlString;

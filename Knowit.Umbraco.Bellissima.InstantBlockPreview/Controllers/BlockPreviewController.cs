@@ -9,9 +9,10 @@ using Microsoft.AspNetCore.Mvc.ViewComponents;
 using Microsoft.AspNetCore.Mvc.ViewEngines;
 using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.Extensions.Configuration;
-
+using Serilog;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -49,6 +50,7 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 		private readonly IUmbracoContextFactory _umbracoContextFactory;
         private readonly IContentTypeService _contentTypeService;
         private readonly IPublishedContentTypeFactory _publishedContentTypeFactory;
+		private readonly ILogger _logger;
 		public BlockPreviewController(
             IRazorViewEngine razorViewEngine,
             ITempDataProvider tempDataProvider,
@@ -59,7 +61,8 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 			IContentTypeService contentTypeService,
 			IPublishedContentTypeFactory publishedContentTypeFactory,
 			BlockGridPropertyValueConverter blockGridPropertyValueConverter,
-            BlockListPropertyValueConverter blockListPropertyValueConverter)
+            BlockListPropertyValueConverter blockListPropertyValueConverter,
+			ILogger logger)
         {
             _razorViewEngine = razorViewEngine;
             _tempDataProvider = tempDataProvider;
@@ -74,6 +77,8 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 
             _contentTypeService = contentTypeService;
 			_publishedContentTypeFactory = publishedContentTypeFactory;
+
+			_logger = logger;
 		}
 
 
@@ -136,9 +141,13 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 
 					if (bgm == null && blm == null) return Ok(new { html = "blockbeam" });
 
-					object blockInstanceItem = BlockInstance(controllerName, blockType, bgm != null ? bgm.FirstOrDefault() : blm.FirstOrDefault());
+					object blockInstanceItem = BlockInstance(controllerName, blockType, bgm != null ? bgm.FirstOrDefault() : blm.FirstOrDefault(), false);
+                    object blockInstanceItem2 = BlockInstance(controllerName, blockType, bgm != null ? bgm.FirstOrDefault() : blm.FirstOrDefault(), true);
 
-					var formattedViewPath = string.Format("{0}.cshtml", controllerName);
+					if(blockInstanceItem == null) blockInstanceItem = blockInstanceItem2;
+
+
+                    var formattedViewPath = string.Format("{0}.cshtml", controllerName);
 
 					var viewPath = (blockType == "grid" ? _settings.PackageSettings.GridViewPath : _settings.PackageSettings.BlockViewPath) + formattedViewPath;
 
@@ -153,8 +162,12 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 
 					viewData["assignedContentId"] = scope.ContentId;
 					viewData["blockPreview"] = true;
+                    if (blockType == "grid" && _settings.PackageSettings.AreaReplace.HasValue && _settings.PackageSettings.AreaReplace.Value)
+                    {
+                        viewData["renderGridAreaSlots"] = "###renderGridAreaSlots";
+                    }
 
-					await using var sw = new StringWriter();
+                    await using var sw = new StringWriter();
 
 					var viewComponent = _viewComponentSelector.SelectComponent(controllerName);
 
@@ -189,53 +202,72 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 					return Ok(new { html = htmlString });
 				}
 			}
-			catch
+			catch (Exception e)
 			{
-				return Ok(new { html = "blockbeam" });
+				if(_settings.PackageSettings.Debug.HasValue && _settings.PackageSettings.Debug.Value)
+                {
+                    _logger.Error(e, "Error rendering block preview");
+                }
+                return Ok(new { html = "blockbeam" });
 			}
         }
 
-		private static object BlockInstance(string controller, string blockType, object blockGridItem)
+		private static object BlockInstance(string controller, string blockType, object blockGridItem, bool comma)
 		{
-
-			IPublishedElement model = blockGridItem is BlockGridItem ? ((BlockGridItem)blockGridItem).Content : ((BlockListItem)blockGridItem).Content;
-			object settings = blockGridItem is BlockGridItem ? ((BlockGridItem)blockGridItem).Settings : ((BlockListItem)blockGridItem).Settings;
-
-			Type? controllerType, blockItemType, blockElementType;
-			var controllerKey = blockType + controller;
-
-			if (!controllerToTypes.ContainsKey(controllerKey))
+            var controllerKey = blockType + controller + comma;
+            try
 			{
-				// get the typed model of the controller/view
-				controllerType = model!.GetType();
-				// create generic type BlockGridItem<T> where T is the typed model
-				blockItemType = blockType == "grid" ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
-				blockElementType = blockItemType.MakeGenericType(controllerType);
+				IPublishedElement model = blockGridItem is BlockGridItem ? ((BlockGridItem)blockGridItem).Content : ((BlockListItem)blockGridItem).Content;
+				object settings = blockGridItem is BlockGridItem ? ((BlockGridItem)blockGridItem).Settings : ((BlockListItem)blockGridItem).Settings;
 
-				controllerToTypes.TryAdd(controllerKey, (controllerType, blockItemType, blockElementType));
-			}
-			else
-			{
-				// or just load everything from the static dictionary since we've done this all before
-				(controllerType, blockItemType, blockElementType) = controllerToTypes[controllerKey];
-			}
+				Type? controllerType, blockItemType, blockElementType;
+				
 
-			ConstructorInfo? ctor = blockElementType.GetConstructor(new[]
-			{
+				if (!controllerToTypes.ContainsKey(controllerKey))
+				{
+					// get the typed model of the controller/view
+					controllerType = model!.GetType();
+					var settingsType = settings?.GetType();
+					// create generic type BlockGridItem<T> where T is the typed model
+					if (!comma)
+						blockItemType = blockType == "grid" ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
+					else
+						blockItemType = blockType == "grid" ? typeof(BlockGridItem<,>) : typeof(BlockListItem<,>);
+
+					Type[] typeArray = settingsType != null ? [controllerType, settingsType] : [controllerType]; 
+					blockElementType = blockItemType.MakeGenericType(typeArray);
+
+					controllerToTypes.TryAdd(controllerKey, (controllerType, blockItemType, blockElementType));
+				}
+				else
+				{
+					// or just load everything from the static dictionary since we've done this all before
+					(controllerType, blockItemType, blockElementType) = controllerToTypes[controllerKey];
+				}
+
+				ConstructorInfo? ctor = blockElementType.GetConstructor(new[]
+				{
 					typeof(Udi),
 					controllerType,
 					typeof(Udi),
 					settings != null ? settings.GetType() : typeof(IPublishedElement)
 				});
 
-			object blockGridItemInstance = ctor!.Invoke(new object[]
-			{
+				object blockGridItemInstance = ctor!.Invoke(new object[]
+				{
 					Udi.Create("element",Guid.NewGuid()),
 					model!,
 					Udi.Create("element",Guid.NewGuid()),
 					settings
-			});
-			return blockGridItemInstance;
+				});
+				return blockGridItemInstance;
+			}
+			catch
+			{
+				controllerToTypes.Remove(controllerKey, out _);
+
+                return null;
+			}
 		}
 
 		public static object CreateBlockGridPropertyValueCreator(

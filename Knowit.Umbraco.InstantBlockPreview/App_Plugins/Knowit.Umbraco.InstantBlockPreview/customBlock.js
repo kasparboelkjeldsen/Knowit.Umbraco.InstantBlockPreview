@@ -89,7 +89,16 @@ angular.module('umbraco').directive('executeScripts', function ($sce, $parse) {
 
                 if (htmlContent && htmlContent != element[0].innerHTML) {
 
+                    htmlContent = htmlContent.replace('###renderGridAreaSlots', '<div class="renderGridAreaSlots">renderGridAreaSlots</div>');
+                    console.log(scope);
                     element.html(htmlContent);
+
+                    const renderGridAreaSlots = element[0].querySelector('.renderGridAreaSlots');
+                    if (renderGridAreaSlots) {
+                        const areaDiv = element[0].parentElement.querySelector('#areaDiv').firstElementChild;
+                        renderGridAreaSlots.innerHTML = '';
+                        renderGridAreaSlots.appendChild(areaDiv);
+                    }
 
                     const scripts = Array.from(element[0].getElementsByTagName("script"));
 
