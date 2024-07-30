@@ -1,8 +1,9 @@
-﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockGridItem<ContentModels.Paragraph>>;
+﻿@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockGridItem<ContentModels.Paragraph, Settings>>;
 @using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
 
 <div>
     @Model.Content.Rte
+    @Model.Settings.Color
 </div>
 <script>
     console.log("we got js execution too")

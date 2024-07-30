@@ -38,6 +38,7 @@ The following values are available for configuration:
   "blockViewPath": "~/Views/Partials/blocklist/Components/",
   "rteViewPath": "~/Views/Partials/richtext/Components/",
   "injections": []
+  "areaReplace": true/false, 
   "enableFor": [], // only v14 and newer, see below
   "disableFor": [], // only v14 and newer, see below
 }
@@ -47,6 +48,20 @@ The following values are available for configuration:
 - `blockViewPath` - The path to the Block List views. Default is `~/Views/Partials/blocklist/Components/`.
 - `rteViewPath` - The path to the richtext Block views. Default is `~/Views/Partials/blocklist/Components/`.
 - `injections` - In short, a way to add lines of code to the start of the preview-HTML. Use it to inject your web-components JS or your app or something else!
+- `areaReplace` - If set to true, will try to render grid areas wherever it finds the magic viewbag item "@ViewBag.renderGridAreaSlots"
+
+AreaReplace example: 
+
+```razor
+@using Umbraco.Extensions
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<Umbraco.Cms.Core.Models.Blocks.BlockGridItem>
+
+<div>
+    This is my 2-col<hr />
+    @await Html.GetBlockGridItemAreasHtmlAsync(Model)
+    @ViewBag.renderGridAreaSlots
+</div>
+```
 
 #### Version 14 specific behavior
 As version 14.1 of Umbraco currently doesn't use the "advanced" tab info from the block setups, and instead lets you override "all" block renderings, I've introduced `enabledFor`and `disableFor` as a way to give that control back. 

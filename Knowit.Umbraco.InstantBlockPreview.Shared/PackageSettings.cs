@@ -41,5 +41,11 @@ namespace Knowit.Umbraco.InstantBlockPreview.Shared
 
         [JsonProperty("ssrSelector")]
         public string? SSRSelector { get; set; }
+
+        [JsonProperty("areaReplace")]
+        public bool? AreaReplace { get; set; }
+
+        [JsonProperty("debug")]
+        public bool? Debug { get; set; }
     }
 }

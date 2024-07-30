@@ -10,6 +10,7 @@ using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
 using Umbraco.Cms.Core;
 using HtmlAgilityPack;
 using Fizzler.Systems.HtmlAgilityPack;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Knowit.Umbraco.InstantBlockPreview.Shared
 {
@@ -34,90 +35,124 @@ namespace Knowit.Umbraco.InstantBlockPreview.Shared
             // If the node is found, return its inner content; otherwise, return null or an appropriate message
             return node != null ? node.InnerHtml : null;
         }
-        public object InstantiateFromJson(string? content, string? settings, string? controllerName, string? blockType, string? layout)
+        public object InstantiateFromJson(string? content, string? settings, string? controllerName, string? blockType, string? layout, bool comma)
         {
-            // try to deserialize to BlockItemData, while ignoring all errors
-            BlockItemData? bid = JsonConvert.DeserializeObject<BlockItemData>(content!);
-
-            IPublishedElement? settingsModel = null;
-
-            if (settings.HasValue())
+            var controllerKey = blockType + controllerName + comma;
+            try
             {
-                BlockItemData? set = JsonConvert.DeserializeObject<BlockItemData>(settings!);
-                settingsModel = _blockEditorConverter.ConvertToElement(set!, PropertyCacheLevel.Element, true);
-            }
+                // try to deserialize to BlockItemData, while ignoring all errors
+                BlockItemData? bid = JsonConvert.DeserializeObject<BlockItemData>(content!);
 
-            var controllerKey = blockType + controllerName;
-            // convert to IPublishedElement
-            var model = _blockEditorConverter.ConvertToElement(bid!, PropertyCacheLevel.Element, true);
+                IPublishedElement? settingsModel = null;
 
-            // we cannot avoid using some reflection to make this dynamic
-            Type? controllerType, blockItemType, blockElementType;
-            if (!controllerToTypes.ContainsKey(controllerKey))
-            {
-                // get the typed model of the controller/view
-                controllerType = model!.GetType();
-                // create generic type BlockGridItem<T> where T is the typed model
-                blockItemType =
+                if (settings.HasValue())
+                {
+                    BlockItemData? set = JsonConvert.DeserializeObject<BlockItemData>(settings!);
+                    settingsModel = _blockEditorConverter.ConvertToElement(set!, PropertyCacheLevel.Element, true);
+                }
+
+
+                // convert to IPublishedElement
+                var model = _blockEditorConverter.ConvertToElement(bid!, PropertyCacheLevel.Element, true);
+
+                // we cannot avoid using some reflection to make this dynamic
+                Type? controllerType, blockItemType, blockElementType;
+                if (!controllerToTypes.ContainsKey(controllerKey))
+                {
+                    // get the typed model of the controller/view
+                    controllerType = model!.GetType();
+                    var settingsType = settingsModel?.GetType();
+                    // create generic type BlockGridItem<T> where T is the typed model
+
+                    if (!comma)
+                    {
+                        blockItemType =
 #if NET8_0_OR_GREATER
                     blockType == "rte" ? typeof(RichTextBlockItem<>) :
 #endif
-                    blockType == "grid" ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
-                blockElementType = blockItemType.MakeGenericType(controllerType);
+                        blockType == "grid" ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
+                    }
+                    else
+                    {
+                        blockItemType =
+#if NET8_0_OR_GREATER
+                    blockType == "rte" ? typeof(RichTextBlockItem<,>) :
+#endif
+                        blockType == "grid" ? typeof(BlockGridItem<,>) : typeof(BlockListItem<,>);
+                    }
 
-                controllerToTypes.TryAdd(controllerKey, (controllerType, blockItemType, blockElementType));
-            }
-            else
-            {
-                // or just load everything from the static dictionary since we've done this all before
-                (controllerType, blockItemType, blockElementType) = controllerToTypes[controllerKey];
-            }
+                    Type[] typeArray = new Type[0];
+                    if (settingsType != null)
+                    {
+                        typeArray = new Type[] { controllerType, settingsType };
+                    }
+                    else
+                    {
+                        typeArray = new Type[] { controllerType };
+                    }
 
-            // create our constructor from this signature
-            // public BlockGridItem(Udi contentUdi, T content, Udi settingsUdi, IPublishedElement settings)
-            // public BlockListItem(Udi contentUdi, T content, Udi settingsUdi, IPublishedElement settings)
-            ConstructorInfo? ctor = blockElementType.GetConstructor(new[]
-            {
+                    blockElementType = blockItemType.MakeGenericType(typeArray);
+
+                    controllerToTypes.TryAdd(controllerKey, (controllerType, blockItemType, blockElementType));
+                }
+                else
+                {
+                    // or just load everything from the static dictionary since we've done this all before
+                    (controllerType, blockItemType, blockElementType) = controllerToTypes[controllerKey];
+                }
+
+                // create our constructor from this signature
+                // public BlockGridItem(Udi contentUdi, T content, Udi settingsUdi, IPublishedElement settings)
+                // public BlockListItem(Udi contentUdi, T content, Udi settingsUdi, IPublishedElement settings)
+                ConstructorInfo? ctor = blockElementType.GetConstructor(new[]
+                {
                 typeof(Udi),
                 controllerType,
                 typeof(Udi),
                 settingsModel != null ? settingsModel.GetType() : typeof(IPublishedElement)
             });
 
-            // use reflection to instantiate our BlockGridItem<T> with the typed model
-            object blockGridItemInstance = ctor!.Invoke(new object[]
-            {
+                // use reflection to instantiate our BlockGridItem<T> with the typed model
+                object blockGridItemInstance = ctor!.Invoke(new object[]
+                {
                 Udi.Create("element",Guid.NewGuid()),
                 model!,
                 Udi.Create("element",Guid.NewGuid()),
                 settingsModel! //todo something something block settings
-            });
+                });
 
-            if (layout != null)
-            {
-                try
+                if (layout != null)
                 {
-                    JObject jsonObject = JObject.Parse(layout);
+                    try
+                    {
+                        JObject jsonObject = JObject.Parse(layout);
 
-                    // Retrieve the columnSpan and rowSpan values
-                    int columnSpan = jsonObject["columnSpan"].Value<int>();
-                    int rowSpan = jsonObject["rowSpan"].Value<int>();
-                    PropertyInfo? columnSpanProperty = blockGridItemInstance.GetType().GetProperty("ColumnSpan");
-                    if (columnSpanProperty != null && columnSpanProperty.CanWrite)
-                    {
-                        columnSpanProperty.SetValue(blockGridItemInstance, columnSpan);
+                        // Retrieve the columnSpan and rowSpan values
+                        int columnSpan = jsonObject["columnSpan"].Value<int>();
+                        int rowSpan = jsonObject["rowSpan"].Value<int>();
+                        PropertyInfo? columnSpanProperty = blockGridItemInstance.GetType().GetProperty("ColumnSpan");
+                        if (columnSpanProperty != null && columnSpanProperty.CanWrite)
+                        {
+                            columnSpanProperty.SetValue(blockGridItemInstance, columnSpan);
+                        }
+                        PropertyInfo? rowSpanProperty = blockGridItemInstance.GetType().GetProperty("RowSpan");
+                        if (rowSpanProperty != null && rowSpanProperty.CanWrite)
+                        {
+                            rowSpanProperty.SetValue(blockGridItemInstance, rowSpan);
+                        }
                     }
-                    PropertyInfo? rowSpanProperty = blockGridItemInstance.GetType().GetProperty("RowSpan");
-                    if (rowSpanProperty != null && rowSpanProperty.CanWrite)
-                    {
-                        rowSpanProperty.SetValue(blockGridItemInstance, rowSpan);
-                    }
+                    catch { }
                 }
-                catch { }
+
+
+                return blockGridItemInstance;
             }
+            catch
+            {
+                controllerToTypes.Remove(controllerKey, out _);
 
-
-            return blockGridItemInstance;
+                return null;
+            }
         }
     }
 }

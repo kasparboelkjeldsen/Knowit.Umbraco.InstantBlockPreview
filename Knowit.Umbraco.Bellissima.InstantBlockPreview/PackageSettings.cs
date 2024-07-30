@@ -44,5 +44,11 @@ namespace Knowit.Umbraco.InstantBlockPreview.Shared
 
         [JsonProperty("disableFor")]
 		public IEnumerable<string> DisableFor { get; set; }
-	}
+
+        [JsonProperty("areaReplace")]
+        public bool? AreaReplace { get; set; }
+
+        [JsonProperty("debug")]
+        public bool? Debug { get; set; }
+    }
 }

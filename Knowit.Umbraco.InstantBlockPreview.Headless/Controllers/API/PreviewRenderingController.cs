@@ -121,7 +121,8 @@ namespace Knowit.Umbraco.InstantBlockPreview.Headless.Controllers.API
 
         private object? InstantiateAsContentDeliveryApiResponse(string? content, string? settings, string? controllerName, string? blockType)
         {
-            var model = _blockHelper.InstantiateFromJson(content, settings, controllerName, blockType, null);
+            var model = _blockHelper.InstantiateFromJson(content, settings, controllerName, blockType, null, false);
+            if(model == null) model = _blockHelper.InstantiateFromJson(content, settings, controllerName, blockType, null, true);
 
             if (model is BlockGridItem blockGridModel)
             {
