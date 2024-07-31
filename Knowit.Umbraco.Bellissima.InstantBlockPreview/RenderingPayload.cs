@@ -47,6 +47,9 @@ namespace Knowit.Umbraco.InstantBlockPreview.Shared
     {
 		[JsonPropertyName("contentData")]
 		public IEnumerable<PayloadContentExtractorContent> ContentData { get; set; }
+
+        [JsonPropertyName("target")]
+        public string? Target { get; set; }
     }
     public class PayloadContentExtractorContent
     {

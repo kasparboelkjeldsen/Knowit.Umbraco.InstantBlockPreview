@@ -1,9 +1,9 @@
 ﻿@using Umbraco.Cms.Core.Models.Blocks
 @using Umbraco.Cms.Web.Common.PublishedModels;
-@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<BlockGridItem<Paragraph,Settings>>
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<BlockGridItem<Paragraph>>
 
 <div>
-    type: @Model.GetType() <br />
+
 
     @Model.Content.Text
 </div>
