@@ -1,0 +1,9 @@
+﻿@using Umbraco.Cms.Core.Models.Blocks
+@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<BlockGridItem<Settings>>
+
+<div>
+    type: @Model.GetType() <br />
+
+    @Model.Content.Color
+</div>

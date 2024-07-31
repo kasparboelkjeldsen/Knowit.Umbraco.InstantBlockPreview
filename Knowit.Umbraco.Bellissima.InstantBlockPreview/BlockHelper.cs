@@ -11,6 +11,7 @@ using Umbraco.Cms.Core;
 using HtmlAgilityPack;
 using Fizzler.Systems.HtmlAgilityPack;
 using System;
+using System.Linq;
 
 namespace Knowit.Umbraco.InstantBlockPreview.Shared
 {
@@ -116,5 +117,7 @@ namespace Knowit.Umbraco.InstantBlockPreview.Shared
 
             return blockGridItemInstance;
         }
+
+        
     }
 }

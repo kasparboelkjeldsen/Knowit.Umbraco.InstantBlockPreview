@@ -1,4 +1,4 @@
-﻿using Knowit.Umbraco.InstantBlockPreview.Shared;
+using Knowit.Umbraco.InstantBlockPreview.Shared;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
@@ -125,13 +125,19 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 
 					BlockGridModel bgm = null;
 					BlockListModel blm = null;
+					BlockGridItem bgi = null;
 
 
-
-					if (propType.DataType.EditorAlias == Constants.PropertyEditors.Aliases.BlockGrid)
+                    if (propType.DataType.EditorAlias == Constants.PropertyEditors.Aliases.BlockGrid)
 					{
 						bgm = (BlockGridModel)_blockGridPropertyValueConverter.ConvertIntermediateToObject(null, propType, PropertyCacheLevel.None, content, true);
-						blockType = "grid";
+						foreach (var item in bgm)
+						{
+							bgi = DigForBlockGridItem(item, payloadContentExtractor.Target);
+							if (bgi != null) break;
+						}
+						controllerName = bgi.Content.ContentType.Alias;
+                        blockType = "grid";
 					}
 					else if (propType.DataType.EditorAlias == Constants.PropertyEditors.Aliases.BlockList)
 					{
@@ -141,8 +147,11 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 
 					if (bgm == null && blm == null) return Ok(new { html = "blockbeam" });
 
-					object blockInstanceItem = BlockInstance(controllerName, blockType, bgm != null ? bgm.FirstOrDefault() : blm.FirstOrDefault(), false);
-                    object blockInstanceItem2 = BlockInstance(controllerName, blockType, bgm != null ? bgm.FirstOrDefault() : blm.FirstOrDefault(), true);
+					
+
+
+                    object blockInstanceItem = BlockInstance(controllerName, blockType, bgm != null ? bgi : blm.FirstOrDefault(), false);
+                    object blockInstanceItem2 = BlockInstance(controllerName, blockType, bgm != null ? bgi: blm.FirstOrDefault(), true);
 
 					if(blockInstanceItem == null) blockInstanceItem = blockInstanceItem2;
 
@@ -212,7 +221,23 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 			}
         }
 
-		private static object BlockInstance(string controller, string blockType, object blockGridItem, bool comma)
+        private BlockGridItem DigForBlockGridItem(BlockGridItem model, string target)
+        {
+			if (model.ContentUdi.UriValue.ToString() == target) return model;
+
+			foreach(var area in model.Areas)
+			{
+				foreach(var content in area)
+				{
+					var dig = DigForBlockGridItem(content, target);
+					if (dig != null) return dig;
+                }
+            }
+
+			return null;
+        }
+
+        private static object BlockInstance(string controller, string blockType, object blockGridItem, bool comma)
 		{
             var controllerKey = blockType + controller + comma;
             try
