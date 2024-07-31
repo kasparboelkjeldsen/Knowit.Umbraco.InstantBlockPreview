@@ -58,7 +58,7 @@ let g = class extends N(C) {
     };
     fetch("/api/blockpreview", {
       method: "POST",
-      body: JSON.stringify(r),
+      body: JSON.stringify(i),
       headers: {
         "Content-Type": "application/json"
       }

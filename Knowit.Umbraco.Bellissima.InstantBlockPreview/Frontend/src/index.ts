@@ -1,4 +1,4 @@
-﻿import { LitElement, html, customElement, unsafeHTML} from "@umbraco-cms/backoffice/external/lit";
+import { LitElement, html, customElement, unsafeHTML} from "@umbraco-cms/backoffice/external/lit";
 import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api";
 import { UMB_PROPERTY_CONTEXT } from '@umbraco-cms/backoffice/property';
 import { UMB_DOCUMENT_WORKSPACE_CONTEXT } from "@umbraco-cms/backoffice/document";

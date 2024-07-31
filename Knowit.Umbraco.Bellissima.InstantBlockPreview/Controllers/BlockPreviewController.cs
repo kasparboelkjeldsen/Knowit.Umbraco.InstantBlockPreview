@@ -1,4 +1,4 @@
-﻿using Knowit.Umbraco.InstantBlockPreview.Shared;
+using Knowit.Umbraco.InstantBlockPreview.Shared;
 using Microsoft.AspNetCore.Html;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
