@@ -1,0 +1,8 @@
+﻿@using Umbraco.Cms.Core.Models.Blocks
+@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<BlockListItem<NestedList>>
+
+<div>
+    This is a nested block list <hr />
+    @await Html.GetBlockListHtmlAsync(Model.Content.List)
+</div>

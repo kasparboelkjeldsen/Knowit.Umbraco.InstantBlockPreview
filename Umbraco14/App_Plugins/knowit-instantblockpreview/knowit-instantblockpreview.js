@@ -1,60 +1,62 @@
-import { LitElement as C, html as M, unsafeHTML as S, customElement as E } from "@umbraco-cms/backoffice/external/lit";
-import { UmbElementMixin as N } from "@umbraco-cms/backoffice/element-api";
-import { UMB_PROPERTY_CONTEXT as U } from "@umbraco-cms/backoffice/property";
-import { UMB_DOCUMENT_WORKSPACE_CONTEXT as W } from "@umbraco-cms/backoffice/document";
-import { UmbContextToken as w } from "@umbraco-cms/backoffice/context-api";
-import { observeMultiple as y } from "@umbraco-cms/backoffice/observable-api";
-var x = Object.defineProperty, P = Object.getOwnPropertyDescriptor, O = (e) => {
+import { LitElement as B, html as M, unsafeHTML as N, customElement as A } from "@umbraco-cms/backoffice/external/lit";
+import { UmbElementMixin as x } from "@umbraco-cms/backoffice/element-api";
+import { UMB_PROPERTY_CONTEXT as S } from "@umbraco-cms/backoffice/property";
+import { UMB_DOCUMENT_WORKSPACE_CONTEXT as I } from "@umbraco-cms/backoffice/document";
+import { UmbContextToken as O } from "@umbraco-cms/backoffice/context-api";
+import { observeMultiple as T } from "@umbraco-cms/backoffice/observable-api";
+import { debounce as U } from "@umbraco-cms/backoffice/utils";
+var P = Object.defineProperty, W = Object.getOwnPropertyDescriptor, C = (e) => {
   throw TypeError(e);
-}, I = (e, s, t, a) => {
-  for (var r = a > 1 ? void 0 : a ? P(s, t) : s, i = e.length - 1, p; i >= 0; i--)
-    (p = e[i]) && (r = (a ? p(s, t, r) : p(r)) || r);
-  return a && r && x(s, t, r), r;
-}, T = (e, s, t) => s.has(e) || O("Cannot " + t), n = (e, s, t) => (T(e, s, "read from private field"), t ? t.call(e) : s.get(e)), h = (e, s, t) => s.has(e) ? O("Cannot add the same private member more than once") : s instanceof WeakSet ? s.add(e) : s.set(e, t), o = (e, s, t, a) => (T(e, s, "write to private field"), s.set(e, t), t), d, f, _, k, b, c, v, u, l, m;
-let g = class extends N(C) {
+}, R = (e, r, t, a) => {
+  for (var i = a > 1 ? void 0 : a ? W(r, t) : r, s = e.length - 1, m; s >= 0; s--)
+    (m = e[s]) && (i = (a ? m(r, t, i) : m(i)) || i);
+  return a && i && P(r, t, i), i;
+}, E = (e, r, t) => r.has(e) || C("Cannot " + t), n = (e, r, t) => (E(e, r, "read from private field"), t ? t.call(e) : r.get(e)), l = (e, r, t) => r.has(e) ? C("Cannot add the same private member more than once") : r instanceof WeakSet ? r.add(e) : r.set(e, t), o = (e, r, t, a) => (E(e, r, "write to private field"), r.set(e, t), t), p, b, _, v, y, u, g, c, d, f;
+let w = class extends x(B) {
   constructor() {
-    super(), h(this, d), h(this, f), h(this, _), h(this, k), h(this, b), h(this, c), h(this, v, '<uui-loader style="margin-right: 20px"></uui-loader> Loading preview...'), h(this, u, !1), h(this, l, ""), h(this, m), o(this, d, {}), o(this, l, this.blockBeam());
-    const e = new w("UmbBlockEntryContext"), s = new w("UmbBlockEntryContext");
-    this.consumeContext(W, (t) => {
-      o(this, _, t.getUnique()), o(this, b, t.getContentTypeId());
-    }), this.consumeContext(U, (t) => {
-      o(this, k, t.getAlias()), this.consumeContext(e, (a) => {
-        this.observe(a.label, (r) => {
-          o(this, c, r), o(this, l, this.blockBeam()), this.requestUpdate();
-        }), this.observe(y(a.content, t.value, a.areas), ([r, i]) => {
-          this.handleBlock(r, i);
-        }), a.areas && this.observe(a.areas, (r) => {
-          o(this, m, r);
+    super(), l(this, p), l(this, b), l(this, _), l(this, v), l(this, y), l(this, u), l(this, g, '<uui-loader style="margin-right: 20px"></uui-loader> Loading preview...'), l(this, c, !1), l(this, d, ""), l(this, f), o(this, p, {}), o(this, d, this.blockBeam());
+    const e = new O("UmbBlockEntryContext"), r = new O("UmbBlockEntryContext");
+    this.consumeContext(I, (t) => {
+      o(this, _, t.getUnique()), o(this, y, t.getContentTypeId());
+    }), this.consumeContext(S, (t) => {
+      o(this, v, t.getAlias()), this.consumeContext(e, (a) => {
+        this.observe(a.label, (i) => {
+          o(this, u, i), o(this, d, this.blockBeam()), this.requestUpdate();
+        }), this.observe(T(a.content, t.value), ([i, s]) => {
+          this.handleBlock(i, s);
+        }), a.areas && this.observe(a.areas, (i) => {
+          o(this, f, i);
         });
-      }), this.consumeContext(s, (a) => {
-        this.observe(a.label, (r) => {
-          o(this, c, r), o(this, l, this.blockBeam()), this.requestUpdate();
-        }), this.observe(y(a.content, t.value), ([r, i]) => {
-          this.handleBlock(r, i);
+      }), this.consumeContext(r, (a) => {
+        this.observe(a.label, (i) => {
+          o(this, u, i), o(this, d, this.blockBeam()), this.requestUpdate();
+        }), this.observe(T(a.content, t.value), ([i, s]) => {
+          this.handleBlock(i, s);
         });
       });
     });
   }
-  handleBlock(e, s) {
-    o(this, u, !0);
-    const t = JSON.parse(JSON.stringify(s));
-    if (e = JSON.parse(JSON.stringify(e)), n(this, d)[e.udi] && JSON.stringify(n(this, d)[e.udi]) === JSON.stringify(e))
+  handleBlock(e, r) {
+    if (o(this, c, !0), !r) return;
+    const t = JSON.parse(JSON.stringify(r));
+    if (e = JSON.parse(JSON.stringify(e)), n(this, p)[e.udi] && JSON.stringify(n(this, p)[e.udi]) === JSON.stringify(e))
       return;
-    n(this, d)[e.udi] = e;
-    const a = t.contentData.findIndex((i) => i.udi == e.udi);
-    if (e.picker) {
-      for (let i = 0; i < e.picker.length; i++) {
-        const p = `umb://${e.picker[i].type}/${e.picker[i].unique}`;
-        e.picker[i] = p;
+    n(this, p)[e.udi] = e;
+    const a = t.contentData.findIndex((s) => s.udi == e.udi);
+    for (const s in e)
+      if (Array.isArray(e[s]) && e[s].every((h) => h && typeof h.type == "string" && typeof h.unique == "string")) {
+        for (let h = 0; h < e[s].length; h++) {
+          const k = `umb://${e[s][h].type}/${e[s][h].unique}`;
+          e[s][h] = k;
+        }
+        e[s] = e[s].join(",");
       }
-      e.picker = e.picker.join(",");
-    }
-    console.log("content", e), t.contentData[a] = e, t.target = e.udi, o(this, f, t);
-    const r = {
-      content: JSON.stringify(n(this, f)),
+    t.contentData[a] = e, t.target = e.udi, o(this, b, t);
+    const i = {
+      content: JSON.stringify(n(this, b)),
       contentId: n(this, _),
-      propertyTypeAlias: n(this, k),
-      contentTypeId: n(this, b)
+      propertyTypeAlias: n(this, v),
+      contentTypeId: n(this, y)
     };
     fetch("/api/blockpreview", {
       method: "POST",
@@ -62,53 +64,66 @@ let g = class extends N(C) {
       headers: {
         "Content-Type": "application/json"
       }
-    }).then((i) => i.json()).then((i) => {
-      if (o(this, u, !1), i.html === "blockbeam")
-        o(this, l, this.blockBeam());
+    }).then((s) => s.json()).then((s) => {
+      if (o(this, c, !1), s.html === "blockbeam")
+        o(this, d, this.blockBeam());
       else {
-        if (i.html.includes("###renderGridAreaSlots")) {
-          const B = this.areas();
-          i.html = i.html.replace("###renderGridAreaSlots", B);
+        if (s.html.includes("###renderGridAreaSlots")) {
+          const k = this.areas();
+          s.html = s.html.replace("###renderGridAreaSlots", k);
         }
-        o(this, l, '<div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">' + i.html + "</div>");
+        o(this, d, '<div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">' + s.html + "</div>");
       }
-      this.requestUpdate();
+      this.requestUpdate(), U(() => {
+        this.manageScripts();
+      }, 100)();
+    });
+  }
+  manageScripts() {
+    var r;
+    const e = (r = this.shadowRoot) == null ? void 0 : r.querySelectorAll("script");
+    e == null || e.forEach((t) => {
+      var i;
+      const a = document.createElement("script");
+      Array.from(t.attributes).forEach((s) => {
+        a.setAttribute(s.name, s.value);
+      }), t.src ? a.src = t.src : a.textContent = t.textContent, (i = t == null ? void 0 : t.parentNode) == null || i.replaceChild(a, t);
     });
   }
   areas() {
-    return n(this, m) && n(this, m).length > 0 ? `
+    return n(this, f) && n(this, f).length > 0 ? `
       <umb-ref-grid-block standalone href="">
-        <span style="margin-right: 20px">${n(this, c)}</span> ${n(this, u) ? n(this, v) : ""}
+        <span style="margin-right: 20px">${n(this, u)}</span> ${n(this, c) ? n(this, g) : ""}
         <umb-block-grid-areas-container slot="areas"></umb-block-grid-areas-container>
       </umb-ref-grid-block>
-` : "";
+      ` : "";
   }
   blockBeam() {
     return `
     <umb-ref-grid-block standalone href="">
-      <span style="margin-right: 20px">${n(this, c)}</span> ${n(this, u) ? n(this, v) : ""}
+      <span style="margin-right: 20px">${n(this, u)}</span> ${n(this, c) ? n(this, g) : ""}
 		</umb-ref-grid-block>`;
   }
   render() {
-    return M`${S(n(this, l))}`;
+    return M`${N(n(this, d))}`;
   }
 };
+p = /* @__PURE__ */ new WeakMap();
+b = /* @__PURE__ */ new WeakMap();
+_ = /* @__PURE__ */ new WeakMap();
+v = /* @__PURE__ */ new WeakMap();
+y = /* @__PURE__ */ new WeakMap();
+u = /* @__PURE__ */ new WeakMap();
+g = /* @__PURE__ */ new WeakMap();
+c = /* @__PURE__ */ new WeakMap();
 d = /* @__PURE__ */ new WeakMap();
 f = /* @__PURE__ */ new WeakMap();
-_ = /* @__PURE__ */ new WeakMap();
-k = /* @__PURE__ */ new WeakMap();
-b = /* @__PURE__ */ new WeakMap();
-c = /* @__PURE__ */ new WeakMap();
-v = /* @__PURE__ */ new WeakMap();
-u = /* @__PURE__ */ new WeakMap();
-l = /* @__PURE__ */ new WeakMap();
-m = /* @__PURE__ */ new WeakMap();
-g = I([
-  E("knowit-instant-block-preview")
-], g);
-const G = g;
+w = R([
+  A("knowit-instant-block-preview")
+], w);
+const K = w;
 export {
-  g as InstantBlockPreview,
-  G as default
+  w as InstantBlockPreview,
+  K as default
 };
 //# sourceMappingURL=knowit-instantblockpreview.js.map

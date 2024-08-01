@@ -1,16 +1,18 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Knowit.Umbraco.Bellissima.InstantBlockPreview.Models;
+using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Knowit.Umbraco.InstantBlockPreview.Shared
+namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
 {
-    public class Settings
+    public class PreviewSettings : IPreviewSettings
     {
         public PackageSettings PackageSettings { get; set; }
-        public Settings(IConfiguration configuration)
+
+        public PreviewSettings(IConfiguration configuration)
         {
             var settings = configuration.GetSection("Knowit.Umbraco.InstantBlockPreview")?.Get<PackageSettings>();
 
@@ -25,18 +27,18 @@ namespace Knowit.Umbraco.InstantBlockPreview.Shared
             }
             else PackageSettings = settings;
 
-            if(PackageSettings.BlockViewPath == null)
+            if (PackageSettings.BlockViewPath == null)
             {
-				PackageSettings.BlockViewPath = "~/Views/Partials/blocklist/Components/";
-			}
-            if(PackageSettings.GridViewPath == null)
-            { 
+                PackageSettings.BlockViewPath = "~/Views/Partials/blocklist/Components/";
+            }
+            if (PackageSettings.GridViewPath == null)
+            {
                 PackageSettings.GridViewPath = "~/Views/Partials/blockgrid/Components/";
-			}
-            if(PackageSettings.RenderType == null)
+            }
+            if (PackageSettings.RenderType == null)
             {
-				PackageSettings.RenderType = "razor";
-			}
+                PackageSettings.RenderType = "razor";
+            }
         }
     }
 }
