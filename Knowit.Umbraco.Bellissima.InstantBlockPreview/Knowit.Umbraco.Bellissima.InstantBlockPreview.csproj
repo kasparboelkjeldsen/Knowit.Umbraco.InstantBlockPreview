@@ -16,7 +16,7 @@
 	  <RepositoryUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
 	  <SignAssembly>False</SignAssembly>
-	  <Version>2.1.0</Version>
+	  <Version>2.1.1</Version>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <Configurations>Debug;Release;</Configurations>
 	  <PackageIcon>icon.png</PackageIcon>
@@ -35,14 +35,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<None Include="..\README.md">
-			<Pack>True</Pack>
-			<PackagePath>\</PackagePath>
-		</None>
-		<None Include="images\icon.png" Pack="true" PackagePath="" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<None Update="App_Plugins\knowit-instantblockpreview\knowit-instantblockpreview.js">
 			<PackagePath>contentFiles\any\any;content</PackagePath>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -58,6 +50,13 @@
 			<Pack>true</Pack>
 		</None>
 		<None Update="App_Plugins\knowit-instantblockpreview\umbraco-package.json">
+			<PackagePath>contentFiles\any\any;content</PackagePath>
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
+			<PackageCopyToOutput>true</PackageCopyToOutput>
+			<Pack>true</Pack>
+		</None>
+		<None Update="App_Plugins\knowit-instantblockpreview\appsettings-schema.Knowit.Umbraco.InstantBlockPreview.json">
 			<PackagePath>contentFiles\any\any;content</PackagePath>
 			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
 			<CopyToPublishDirectory>Always</CopyToPublishDirectory>

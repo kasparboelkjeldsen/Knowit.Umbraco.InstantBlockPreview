@@ -1,21 +1,25 @@
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <KnowitUmbracoInstantBlockPreviewContentFilesPath>$(MSBuildThisFileDirectory)..\App_Plugins\knowit-instantblockpreview\**\*.*</KnowitUmbracoInstantBlockPreviewContentFilesPath>
-  </PropertyGroup>
+	<PropertyGroup>
+		<KnowitUmbracoInstantBlockPreviewContentFilesPath>$(MSBuildThisFileDirectory)..\App_Plugins\knowit-instantblockpreview\**\*.*</KnowitUmbracoInstantBlockPreviewContentFilesPath>
+		<AppSettingsSchemaPath>$(MSBuildProjectDirectory)\appsettings-schema.json</AppSettingsSchemaPath>
+		<KnowitSchemaReference>{ "$ref": "App_Plugins\\knowit-instantblockpreview\\appsettings-schema.Knowit.Umbraco.InstantBlockPreview.json#" }</KnowitSchemaReference>
+	</PropertyGroup>
 
-  <Target Name="CopyKnowitUmbracoInstantBlockPreviewAssets" BeforeTargets="Build">
-    <ItemGroup>
-      <KnowitUmbracoInstantBlockPreviewContentFiles Include="$(KnowitUmbracoInstantBlockPreviewContentFilesPath)" />
-    </ItemGroup>
-    <Message Text="Copying knowit-instantblockpreview files: $(KnowitUmbracoInstantBlockPreviewContentFilesPath) - #@(KnowitUmbracoInstantBlockPreviewContentFiles->Count()) files" Importance="high" />
-    <Copy SourceFiles="@(KnowitUmbracoInstantBlockPreviewContentFiles)" DestinationFiles="@(KnowitUmbracoInstantBlockPreviewContentFiles->'$(MSBuildProjectDirectory)\App_Plugins\knowit-instantblockpreview\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
-  </Target>
+	<Target Name="CopyKnowitUmbracoInstantBlockPreviewAssets" BeforeTargets="Build">
+		<ItemGroup>
+			<KnowitUmbracoInstantBlockPreviewContentFiles Include="$(KnowitUmbracoInstantBlockPreviewContentFilesPath)" />
+		</ItemGroup>
+		<Message Text="Copying knowit-instantblockpreview files: $(KnowitUmbracoInstantBlockPreviewContentFilesPath) - #@(KnowitUmbracoInstantBlockPreviewContentFiles->Count()) files" Importance="high" />
+		<Copy SourceFiles="@(KnowitUmbracoInstantBlockPreviewContentFiles)" DestinationFiles="@(KnowitUmbracoInstantBlockPreviewContentFiles->'$(MSBuildProjectDirectory)\App_Plugins\knowit-instantblockpreview\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+	</Target>
 
-  <Target Name="ClearKnowitUmbracoInstantBlockPreviewAssets" BeforeTargets="Clean">
-    <ItemGroup>
-      <KnowitUmbracoInstantBlockPreviewDir Include="$(MSBuildProjectDirectory)\App_Plugins\knowit-instantblockpreview\" />
-    </ItemGroup>
-    <Message Text="Clear old knowit-instantblockpreview data" Importance="high" />
-    <RemoveDir Directories="@(KnowitUmbracoInstantBlockPreviewDir)" />
-  </Target>
+	<Target Name="ClearKnowitUmbracoInstantBlockPreviewAssets" BeforeTargets="Clean">
+		<ItemGroup>
+			<KnowitUmbracoInstantBlockPreviewDir Include="$(MSBuildProjectDirectory)\App_Plugins\knowit-instantblockpreview\" />
+		</ItemGroup>
+		<Message Text="Clear old knowit-instantblockpreview data" Importance="high" />
+		<RemoveDir Directories="@(KnowitUmbracoInstantBlockPreviewDir)" />
+	</Target>
+
+
 </Project>

@@ -24,11 +24,18 @@ Choose your section accordingly. - Version 14 support of headless is in the work
 - MVC: Supports rendering through ViewComponents
 - Headless: Supports rendering with HTML fetched from an SSR app (if you're using Knowit.Umbraco.InstantBlockPreview.Headless)
 
-
 ## MVC
 ### Configuration
 
 Configuration is optional, if you are happy with the standard values, you don't need to add anything to your `appsettings.json`. 
+
+**(Intellisens support in 2.1.1 or newer)**  - You can add the following to appsettings-schema.json for intellisense support in your appsettings.json
+```json
+{
+      "$ref": "App_Plugins\\knowit-instantblockpreview\\appsettings-schema.Knowit.Umbraco.InstantBlockPreview.json#"
+}
+``` 
+
 
 The following values are available for configuration:
 

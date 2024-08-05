@@ -79,6 +79,33 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
     });
   }
 
+  parseBadKeys(content: any) {
+    for (const key in content) {
+      const value = content[key];
+
+      // content picker
+      if (Array.isArray(content[key])) {
+          let allItemsAreValid = content[key].every(item => item && typeof item.type === 'string' && typeof item.unique === 'string');
+
+          if (allItemsAreValid) {
+              for (let i = 0; i < content[key].length; i++) {
+                  const newItem = `umb://${content[key][i].type}/${content[key][i].unique}`;
+                  content[key][i] = newItem;
+              }
+              content[key] = content[key].join(',');
+          }
+      }
+      // number slider
+      if (value && typeof value === 'object' && 'from' in value && 'to' in value) {
+        // Check if 'from' and 'to' are numbers and are the same
+        if (typeof value.from === 'number' && typeof value.to === 'number' && value.from === value.to) {
+            content[key] = value.from;  // Replace the object with the number
+        }
+      }
+    }
+    return content;
+  }
+
   handleBlock(content : any, currentValue : any) {
     this.#showLoader = true;
     
@@ -97,26 +124,18 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
     
     const index = obj.contentData.findIndex((f: { udi: any; }) => f.udi == content.udi);
     
-    // the frontend outputs picker-values differently than what the backend expects
-    // so we need to convert them to the correct format
-    // a bit ugly, but we detect a picker by it having a type and unique property, and only that
-    for (const key in content) {
-      if (Array.isArray(content[key])) {
-          let allItemsAreValid = content[key].every(item => item && typeof item.type === 'string' && typeof item.unique === 'string');
-  
-          if (allItemsAreValid) {
-              for (let i = 0; i < content[key].length; i++) {
-                  const newItem = `umb://${content[key][i].type}/${content[key][i].unique}`;
-                  content[key][i] = newItem;
-              }
-              content[key] = content[key].join(',');
-          }
-      }
-    }
-    
     obj.contentData[index] = content;
     obj.target = content.udi;
-      
+    
+
+    for(let i = 0; i < obj.settingsData.length; i++) {
+      obj.settingsData[i] = this.parseBadKeys(obj.settingsData[i]);
+    }
+
+    for(let i = 0; i < obj.contentData.length; i++) {
+      obj.contentData[i] = this.parseBadKeys(obj.contentData[i]);
+    }
+    
     this.#currentValue = obj;
 
     const payload = {

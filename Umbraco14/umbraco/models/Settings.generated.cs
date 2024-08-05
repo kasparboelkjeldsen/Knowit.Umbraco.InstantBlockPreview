@@ -56,5 +56,12 @@ namespace Umbraco.Cms.Web.Common.PublishedModels
 		[global::System.Diagnostics.CodeAnalysis.MaybeNull]
 		[ImplementPropertyType("color")]
 		public virtual string Color => this.Value<string>(_publishedValueFallback, "color");
+
+		///<summary>
+		/// Slider
+		///</summary>
+		[global::System.CodeDom.Compiler.GeneratedCodeAttribute("Umbraco.ModelsBuilder.Embedded", "14.1.1+eb4fc97")]
+		[ImplementPropertyType("slider")]
+		public virtual decimal Slider => this.Value<decimal>(_publishedValueFallback, "slider");
 	}
 }

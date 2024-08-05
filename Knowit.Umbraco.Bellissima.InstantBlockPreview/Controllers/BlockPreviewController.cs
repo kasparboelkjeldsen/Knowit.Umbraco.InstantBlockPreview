@@ -74,21 +74,7 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 				var propType = iptype.GetPropertyType(propAlias);
 				controllerName = ptype.Alias;
 
-				// check if we need to filter on Alias
-				if(_settings.PackageSettings.EnableFor != null && _settings.PackageSettings.EnableFor.Any())
-				{
-					if (!_settings.PackageSettings.EnableFor.Contains(controllerName))
-					{
-						return Ok(new { html = PreviewConstants.BlockBeamValue });
-					}
-				}
-				if(_settings.PackageSettings.DisableFor != null && _settings.PackageSettings.DisableFor.Any())
-				{
-					if (_settings.PackageSettings.DisableFor.Contains(controllerName))
-					{
-						return Ok(new { html = PreviewConstants.BlockBeamValue });
-					}
-				}
+				
 
 				BlockGridModel bgm = null;
 				BlockListModel blm = null;
@@ -118,9 +104,26 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
                         bli = _blockHelper.DigForBlockListItem(item, payloadContentExtractor.Target);
                         if (bgi != null) break;
                     }
+                    controllerName = bli.Content.ContentType.Alias;
                 }
 
 				if (bgm == null && blm == null) return Ok(new { html = PreviewConstants.BlockBeamValue });
+
+                // check if we need to filter on Alias
+                if (_settings.PackageSettings.EnableFor != null && _settings.PackageSettings.EnableFor.Any())
+                {
+                    if (!_settings.PackageSettings.EnableFor.Contains(controllerName))
+                    {
+                        return Ok(new { html = PreviewConstants.BlockBeamValue });
+                    }
+                }
+                if (_settings.PackageSettings.DisableFor != null && _settings.PackageSettings.DisableFor.Any())
+                {
+                    if (_settings.PackageSettings.DisableFor.Contains(controllerName))
+                    {
+                        return Ok(new { html = PreviewConstants.BlockBeamValue });
+                    }
+                }
 
                 var blockInstanceItem = _blockHelper.BlockInstance(controllerName, blockType, bgm != null ? bgi : bli);
 
