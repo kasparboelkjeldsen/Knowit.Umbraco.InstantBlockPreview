@@ -19,7 +19,7 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
         public object BlockInstance(string controllerName, string blockType, object block)
         {
             var controllerKey = string.Empty;
-
+            var areas = block is BlockGridItem ? ((BlockGridItem)block).Areas : null;
             var model = block is BlockGridItem ? ((BlockGridItem)block).Content : ((BlockListItem)block).Content;
             var settings = block is BlockGridItem ? ((BlockGridItem)block).Settings : ((BlockListItem)block).Settings;
 
@@ -67,8 +67,16 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
                     Udi.Create("element",Guid.NewGuid()),
                     settings
             });
-
-            return blockGridItemInstance;
+            if(areas != null)
+            {
+                var blockGridItemInstanceWithAreas = (BlockGridItem)blockGridItemInstance;
+                blockGridItemInstanceWithAreas.Areas = areas;
+                return blockGridItemInstanceWithAreas;
+            }
+            else
+            {
+                return blockGridItemInstance;
+            }
         }
 
         public BlockGridItem DigForBlockGridItem(BlockGridItem model, string target)
