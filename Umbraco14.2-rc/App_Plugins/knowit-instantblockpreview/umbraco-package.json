@@ -1,0 +1,16 @@
+﻿{
+    "$schema": "../../../Umbraco14/umbraco-package-schema.json",
+    "id": "knowit-instantblockpreview",
+    "name": "knowit-instantblockpreview",
+    "allowPackageTelemetry": true,
+    "version": "1.0.0",
+    "extensions": [
+        {
+          "name": "knowit-instantblockpreview EntryPoint",
+          "alias": "knowit-instantblockpreview.entrypoint",
+          "type": "blockEditorCustomView",
+          "element": "/App_Plugins/knowit-instantblockpreview/knowit-instantblockpreview.js",
+          "elementName": "knowit-instant-block-preview"
+        }
+      ]
+}

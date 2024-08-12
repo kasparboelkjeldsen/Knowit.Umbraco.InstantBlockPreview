@@ -23,6 +23,7 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
                     BlockViewPath = "~/Views/Partials/blocklist/Components/",
                     GridViewPath = "~/Views/Partials/blockgrid/Components/",
                     RenderType = "razor",
+                    AreaReplace = true,
                 };
             }
             else PackageSettings = settings;
@@ -39,6 +40,7 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
             {
                 PackageSettings.RenderType = "razor";
             }
+
         }
     }
 }

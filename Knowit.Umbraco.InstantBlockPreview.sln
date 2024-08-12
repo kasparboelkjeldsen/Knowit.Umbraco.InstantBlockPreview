@@ -21,6 +21,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Umbraco14", "Umbraco14\Umbr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Knowit.Umbraco.Bellissima.InstantBlockPreview", "Knowit.Umbraco.Bellissima.InstantBlockPreview\Knowit.Umbraco.Bellissima.InstantBlockPreview.csproj", "{3996030D-1110-4204-841D-A818B197596A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco14.2-rc", "Umbraco14.2-rc\Umbraco14.2-rc.csproj", "{2007C416-775B-4208-AF39-D1440C91E380}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{3996030D-1110-4204-841D-A818B197596A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3996030D-1110-4204-841D-A818B197596A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3996030D-1110-4204-841D-A818B197596A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2007C416-775B-4208-AF39-D1440C91E380}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2007C416-775B-4208-AF39-D1440C91E380}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2007C416-775B-4208-AF39-D1440C91E380}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2007C416-775B-4208-AF39-D1440C91E380}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

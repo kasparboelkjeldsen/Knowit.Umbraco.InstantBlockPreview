@@ -6,7 +6,8 @@
     "scripts": {
         "build": "tsc && vite build",
         "watch": "vite build --watch",
-        "watch-v14": "cross-env OUT_DIR=./../../Umbraco14/App_Plugins/knowit-instantblockpreview vite build --watch"
+        "watch-v14": "cross-env OUT_DIR=./../../Umbraco14/App_Plugins/knowit-instantblockpreview vite build --watch",
+        "watch-v142rc": "cross-env OUT_DIR=./../../Umbraco14.2-rc/App_Plugins/knowit-instantblockpreview vite build --watch"
     },
     "dependencies": {
         "lit": "^3.1.4"

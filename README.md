@@ -45,7 +45,7 @@ The following values are available for configuration:
   "blockViewPath": "~/Views/Partials/blocklist/Components/",
   "rteViewPath": "~/Views/Partials/richtext/Components/",
   "injections": []
-  "areaReplace": true/false, 
+  "areaReplace": true, 
   "enableFor": [], // only v14 and newer, see below
   "disableFor": [], // only v14 and newer, see below
 }
