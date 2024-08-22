@@ -5,7 +5,6 @@ import { OpenAPI } from './api/index.ts';
 
 export const onInit: UmbEntryPointOnInit = async (_host, extensionRegistry) => {
     
-
     _host.consumeContext(UMB_AUTH_CONTEXT, async (auth) => {
         if (!auth) return;
 

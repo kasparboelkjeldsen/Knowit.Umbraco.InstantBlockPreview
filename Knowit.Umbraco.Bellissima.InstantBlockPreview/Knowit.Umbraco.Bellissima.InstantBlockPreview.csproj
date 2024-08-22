@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net8.0</TargetFrameworks>
@@ -16,7 +16,7 @@
 	  <RepositoryUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
 	  <SignAssembly>False</SignAssembly>
-	  <Version>2.1.3</Version>
+	  <Version>2.1.4</Version>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <Configurations>Debug;Release;</Configurations>
 	  <PackageIcon>icon.png</PackageIcon>
@@ -30,39 +30,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<Content Include="App_Plugins\knowit-instantblockpreview\**" ExcludeFromSingleFile="true" CopyToPublishDirectory="Always" />
 		<None Include="buildTransitive\**" Pack="true" PackagePath="buildTransitive" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Update="App_Plugins\knowit-instantblockpreview\knowit-instantblockpreview.js">
-			<PackagePath>contentFiles\any\any;content</PackagePath>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
-			<PackageCopyToOutput>true</PackageCopyToOutput>
-			<Pack>true</Pack>
-		</None>
-		<None Update="App_Plugins\knowit-instantblockpreview\knowit-instantblockpreview.js.map">
-			<PackagePath>contentFiles\any\any;content</PackagePath>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
-			<PackageCopyToOutput>true</PackageCopyToOutput>
-			<Pack>true</Pack>
-		</None>
-		<None Update="App_Plugins\knowit-instantblockpreview\umbraco-package.json">
-			<PackagePath>contentFiles\any\any;content</PackagePath>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
-			<PackageCopyToOutput>true</PackageCopyToOutput>
-			<Pack>true</Pack>
-		</None>
-		<None Update="App_Plugins\knowit-instantblockpreview\appsettings-schema.Knowit.Umbraco.InstantBlockPreview.json">
-			<PackagePath>contentFiles\any\any;content</PackagePath>
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-			<CopyToPublishDirectory>Always</CopyToPublishDirectory>
-			<PackageCopyToOutput>true</PackageCopyToOutput>
-			<Pack>true</Pack>
-		</None>
 	</ItemGroup>
 
 
@@ -76,5 +44,10 @@
 
 	<ItemGroup>
 	  <PackageReference Include="Fizzler.Systems.HtmlAgilityPack" Version="1.2.1" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="ui\**" Pack="true" PackagePath="content\ui" />
+		<None Include="buildTransitive\**" Pack="true" PackagePath="buildTransitive" />
 	</ItemGroup>
 </Project>

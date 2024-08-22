@@ -3,14 +3,13 @@
     "id": "knowit-instantblockpreview",
     "name": "knowit-instantblockpreview",
     "allowPackageTelemetry": true,
-    "version": "1.0.1",
+    "version": "2.0.0",
     "extensions": [
         {
           "name": "knowit-instantblockpreview EntryPoint",
           "alias": "knowit-instantblockpreview.entrypoint",
-          "type": "backofficeEntryPoint",
-          "element": "/App_Plugins/knowit-instantblockpreview/knowit-instantblockpreview.js",
-          "elementName": "knowit-instant-block-preview"
+          "type": "entryPoint",
+          "js": "/App_Plugins/knowit-instantblockpreview/knowit-instantblockpreview.js"
         }
       ]
 }
