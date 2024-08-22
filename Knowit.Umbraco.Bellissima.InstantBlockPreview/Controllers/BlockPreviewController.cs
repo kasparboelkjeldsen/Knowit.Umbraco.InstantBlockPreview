@@ -102,7 +102,7 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
                     foreach (var item in blm)
                     {
                         bli = _blockHelper.DigForBlockListItem(item, payloadContentExtractor.Target);
-                        if (bgi != null) break;
+                        if (bli != null) break;
                     }
                     controllerName = bli.Content.ContentType.Alias;
                 }
