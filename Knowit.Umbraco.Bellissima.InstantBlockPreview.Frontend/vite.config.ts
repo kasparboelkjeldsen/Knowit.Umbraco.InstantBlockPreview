@@ -5,7 +5,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 // Define the output directory from environment variables or fallback to default
-const outDir = process.env.OUT_DIR || './../wwwroot/app_plugins/knowit-instantblockpreview';
+const outDir = process.env.OUT_DIR || './../Knowit.Umbraco.Bellissima.InstantBlockPreview/ui';
 
 export default defineConfig({
     build: {
