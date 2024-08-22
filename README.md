@@ -46,6 +46,7 @@ The following values are available for configuration:
   "rteViewPath": "~/Views/Partials/richtext/Components/",
   "injections": []
   "areaReplace": true, 
+  "CollapsibleBlocks": false,
   "enableFor": [], // only v14 and newer, see below
   "disableFor": [], // only v14 and newer, see below
 }
@@ -56,6 +57,7 @@ The following values are available for configuration:
 - `rteViewPath` - The path to the richtext Block views. Default is `~/Views/Partials/blocklist/Components/`.
 - `injections` - In short, a way to add lines of code to the start of the preview-HTML. Use it to inject your web-components JS or your app or something else!
 - `areaReplace` - If set to true, will try to render grid areas wherever it finds the magic viewbag item "@ViewBag.renderGridAreaSlots"
+- `CollapsibleBlocks` - If set to true, will render blocks with a collapsible div around them.
 
 AreaReplace example: 
 

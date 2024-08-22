@@ -1,17 +1,17 @@
-import { LitElement as $, html as W, unsafeHTML as J, customElement as K } from "@umbraco-cms/backoffice/external/lit";
-import { UmbElementMixin as z } from "@umbraco-cms/backoffice/element-api";
-import { UMB_PROPERTY_CONTEXT as X } from "@umbraco-cms/backoffice/property";
-import { UMB_DOCUMENT_WORKSPACE_CONTEXT as V } from "@umbraco-cms/backoffice/document";
-import { UmbContextToken as U } from "@umbraco-cms/backoffice/context-api";
-import { observeMultiple as F } from "@umbraco-cms/backoffice/observable-api";
-import { debounce as Y } from "@umbraco-cms/backoffice/utils";
-import { O as n } from "./index-BI0tBnYC.js";
-class P extends Error {
+import { LitElement as W, html as J, unsafeHTML as K, css as z, customElement as X } from "@umbraco-cms/backoffice/external/lit";
+import { UmbElementMixin as V } from "@umbraco-cms/backoffice/element-api";
+import { UMB_PROPERTY_CONTEXT as Y } from "@umbraco-cms/backoffice/property";
+import { UMB_DOCUMENT_WORKSPACE_CONTEXT as Q } from "@umbraco-cms/backoffice/document";
+import { UmbContextToken as P } from "@umbraco-cms/backoffice/context-api";
+import { observeMultiple as j } from "@umbraco-cms/backoffice/observable-api";
+import { debounce as Z } from "@umbraco-cms/backoffice/utils";
+import { O as n } from "./index-DDN46J2w.js";
+class A extends Error {
   constructor(e, r, s) {
     super(s), this.name = "ApiError", this.url = r.url, this.status = r.status, this.statusText = r.statusText, this.body = r.body, this.request = e;
   }
 }
-class Q extends Error {
+class ee extends Error {
   constructor(e) {
     super(e), this.name = "CancelError";
   }
@@ -19,24 +19,24 @@ class Q extends Error {
     return !0;
   }
 }
-class Z {
+class te {
   constructor(e) {
     this._isResolved = !1, this._isRejected = !1, this._isCancelled = !1, this.cancelHandlers = [], this.promise = new Promise((r, s) => {
       this._resolve = r, this._reject = s;
-      const o = (d) => {
-        this._isResolved || this._isRejected || this._isCancelled || (this._isResolved = !0, this._resolve && this._resolve(d));
-      }, a = (d) => {
-        this._isResolved || this._isRejected || this._isCancelled || (this._isRejected = !0, this._reject && this._reject(d));
-      }, c = (d) => {
-        this._isResolved || this._isRejected || this._isCancelled || this.cancelHandlers.push(d);
+      const o = (i) => {
+        this._isResolved || this._isRejected || this._isCancelled || (this._isResolved = !0, this._resolve && this._resolve(i));
+      }, a = (i) => {
+        this._isResolved || this._isRejected || this._isCancelled || (this._isRejected = !0, this._reject && this._reject(i));
+      }, d = (i) => {
+        this._isResolved || this._isRejected || this._isCancelled || this.cancelHandlers.push(i);
       };
-      return Object.defineProperty(c, "isResolved", {
+      return Object.defineProperty(d, "isResolved", {
         get: () => this._isResolved
-      }), Object.defineProperty(c, "isRejected", {
+      }), Object.defineProperty(d, "isRejected", {
         get: () => this._isRejected
-      }), Object.defineProperty(c, "isCancelled", {
+      }), Object.defineProperty(d, "isCancelled", {
         get: () => this._isCancelled
-      }), e(o, a, c);
+      }), e(o, a, d);
     });
   }
   get [Symbol.toStringTag]() {
@@ -61,87 +61,87 @@ class Z {
           console.warn("Cancellation threw an error", e);
           return;
         }
-      this.cancelHandlers.length = 0, this._reject && this._reject(new Q("Request aborted"));
+      this.cancelHandlers.length = 0, this._reject && this._reject(new ee("Request aborted"));
     }
   }
   get isCancelled() {
     return this._isCancelled;
   }
 }
-const q = (t) => typeof t == "string", I = (t) => q(t) && t !== "", C = (t) => t instanceof Blob, G = (t) => t instanceof FormData, ee = (t) => {
+const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t instanceof Blob, H = (t) => t instanceof FormData, re = (t) => {
   try {
     return btoa(t);
   } catch {
     return Buffer.from(t).toString("base64");
   }
-}, te = (t) => {
+}, ae = (t) => {
   const e = [], r = (o, a) => {
     e.push(`${encodeURIComponent(o)}=${encodeURIComponent(String(a))}`);
   }, s = (o, a) => {
-    a != null && (a instanceof Date ? r(o, a.toISOString()) : Array.isArray(a) ? a.forEach((c) => s(o, c)) : typeof a == "object" ? Object.entries(a).forEach(([c, d]) => s(`${o}[${c}]`, d)) : r(o, a));
+    a != null && (a instanceof Date ? r(o, a.toISOString()) : Array.isArray(a) ? a.forEach((d) => s(o, d)) : typeof a == "object" ? Object.entries(a).forEach(([d, i]) => s(`${o}[${d}]`, i)) : r(o, a));
   };
   return Object.entries(t).forEach(([o, a]) => s(o, a)), e.length ? `?${e.join("&")}` : "";
-}, re = (t, e) => {
-  const r = encodeURI, s = e.url.replace("{api-version}", t.VERSION).replace(/{(.*?)}/g, (a, c) => {
-    var d;
-    return (d = e.path) != null && d.hasOwnProperty(c) ? r(String(e.path[c])) : a;
+}, oe = (t, e) => {
+  const r = encodeURI, s = e.url.replace("{api-version}", t.VERSION).replace(/{(.*?)}/g, (a, d) => {
+    var i;
+    return (i = e.path) != null && i.hasOwnProperty(d) ? r(String(e.path[d])) : a;
   }), o = t.BASE + s;
-  return e.query ? o + te(e.query) : o;
-}, ae = (t) => {
+  return e.query ? o + ae(e.query) : o;
+}, se = (t) => {
   if (t.formData) {
     const e = new FormData(), r = (s, o) => {
-      q(o) || C(o) ? e.append(s, o) : e.append(s, JSON.stringify(o));
+      _(o) || O(o) ? e.append(s, o) : e.append(s, JSON.stringify(o));
     };
     return Object.entries(t.formData).filter(([, s]) => s != null).forEach(([s, o]) => {
       Array.isArray(o) ? o.forEach((a) => r(s, a)) : r(s, o);
     }), e;
   }
-}, B = async (t, e) => typeof e == "function" ? e(t) : e, oe = async (t, e) => {
+}, R = async (t, e) => typeof e == "function" ? e(t) : e, ie = async (t, e) => {
   const [r, s, o, a] = await Promise.all([
     // @ts-ignore
-    B(e, t.TOKEN),
+    R(e, t.TOKEN),
     // @ts-ignore
-    B(e, t.USERNAME),
+    R(e, t.USERNAME),
     // @ts-ignore
-    B(e, t.PASSWORD),
+    R(e, t.PASSWORD),
     // @ts-ignore
-    B(e, t.HEADERS)
-  ]), c = Object.entries({
+    R(e, t.HEADERS)
+  ]), d = Object.entries({
     Accept: "application/json",
     ...a,
     ...e.headers
-  }).filter(([, d]) => d != null).reduce((d, [m, h]) => ({
-    ...d,
-    [m]: String(h)
+  }).filter(([, i]) => i != null).reduce((i, [p, h]) => ({
+    ...i,
+    [p]: String(h)
   }), {});
-  if (I(r) && (c.Authorization = `Bearer ${r}`), I(s) && I(o)) {
-    const d = ee(`${s}:${o}`);
-    c.Authorization = `Basic ${d}`;
+  if (S(r) && (d.Authorization = `Bearer ${r}`), S(s) && S(o)) {
+    const i = re(`${s}:${o}`);
+    d.Authorization = `Basic ${i}`;
   }
-  return e.body !== void 0 && (e.mediaType ? c["Content-Type"] = e.mediaType : C(e.body) ? c["Content-Type"] = e.body.type || "application/octet-stream" : q(e.body) ? c["Content-Type"] = "text/plain" : G(e.body) || (c["Content-Type"] = "application/json")), new Headers(c);
-}, se = (t) => {
+  return e.body !== void 0 && (e.mediaType ? d["Content-Type"] = e.mediaType : O(e.body) ? d["Content-Type"] = e.body.type || "application/octet-stream" : _(e.body) ? d["Content-Type"] = "text/plain" : H(e.body) || (d["Content-Type"] = "application/json")), new Headers(d);
+}, ne = (t) => {
   var e, r;
   if (t.body !== void 0)
-    return (e = t.mediaType) != null && e.includes("application/json") || (r = t.mediaType) != null && r.includes("+json") ? JSON.stringify(t.body) : q(t.body) || C(t.body) || G(t.body) ? t.body : JSON.stringify(t.body);
-}, ne = async (t, e, r, s, o, a, c) => {
-  const d = new AbortController();
-  let m = {
+    return (e = t.mediaType) != null && e.includes("application/json") || (r = t.mediaType) != null && r.includes("+json") ? JSON.stringify(t.body) : _(t.body) || O(t.body) || H(t.body) ? t.body : JSON.stringify(t.body);
+}, ce = async (t, e, r, s, o, a, d) => {
+  const i = new AbortController();
+  let p = {
     headers: a,
     body: s ?? o,
     method: e.method,
-    signal: d.signal
+    signal: i.signal
   };
-  t.WITH_CREDENTIALS && (m.credentials = t.CREDENTIALS);
+  t.WITH_CREDENTIALS && (p.credentials = t.CREDENTIALS);
   for (const h of t.interceptors.request._fns)
-    m = await h(m);
-  return c(() => d.abort()), await fetch(r, m);
-}, ie = (t, e) => {
+    p = await h(p);
+  return d(() => i.abort()), await fetch(r, p);
+}, de = (t, e) => {
   if (e) {
     const r = t.headers.get(e);
-    if (q(r))
+    if (_(r))
       return r;
   }
-}, ce = async (t) => {
+}, ue = async (t) => {
   if (t.status !== 204)
     try {
       const e = t.headers.get("Content-Type");
@@ -159,7 +159,7 @@ const q = (t) => typeof t == "string", I = (t) => q(t) && t !== "", C = (t) => t
     } catch (e) {
       console.error(e);
     }
-}, de = (t, e) => {
+}, he = (t, e) => {
   const s = {
     400: "Bad Request",
     401: "Unauthorized",
@@ -204,45 +204,45 @@ const q = (t) => typeof t == "string", I = (t) => q(t) && t !== "", C = (t) => t
     ...t.errors
   }[e.status];
   if (s)
-    throw new P(t, e, s);
+    throw new A(t, e, s);
   if (!e.ok) {
-    const o = e.status ?? "unknown", a = e.statusText ?? "unknown", c = (() => {
+    const o = e.status ?? "unknown", a = e.statusText ?? "unknown", d = (() => {
       try {
         return JSON.stringify(e.body, null, 2);
       } catch {
         return;
       }
     })();
-    throw new P(
+    throw new A(
       t,
       e,
-      `Generic Error: status: ${o}; status text: ${a}; body: ${c}`
+      `Generic Error: status: ${o}; status text: ${a}; body: ${d}`
     );
   }
-}, i = (t, e) => new Z(async (r, s, o) => {
+}, c = (t, e) => new te(async (r, s, o) => {
   try {
-    const a = re(t, e), c = ae(e), d = se(e), m = await oe(t, e);
+    const a = oe(t, e), d = se(e), i = ne(e), p = await ie(t, e);
     if (!o.isCancelled) {
-      let h = await ne(t, e, a, d, c, m, o);
-      for (const L of t.interceptors.response._fns)
-        h = await L(h);
-      const b = await ce(h), M = ie(h, e.responseHeader);
-      let O = b;
-      e.responseTransformer && h.ok && (O = await e.responseTransformer(b));
-      const S = {
+      let h = await ce(t, e, a, i, d, p, o);
+      for (const $ of t.interceptors.response._fns)
+        h = await $(h);
+      const y = await ue(h), T = de(h, e.responseHeader);
+      let U = y;
+      e.responseTransformer && h.ok && (U = await e.responseTransformer(y));
+      const F = {
         url: a,
         ok: h.ok,
         status: h.status,
         statusText: h.statusText,
-        body: M ?? O
+        body: T ?? U
       };
-      de(e, S), r(S.body);
+      he(e, F), r(F.body);
     }
   } catch (a) {
     s(a);
   }
 });
-class j {
+class x {
   /**
    * @param data The data for the request.
    * @param data.requestBody
@@ -250,7 +250,7 @@ class j {
    * @throws ApiError
    */
   static postDataType(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "POST",
       url: "/umbraco/management/api/v1/data-type",
       body: e.requestBody,
@@ -271,7 +271,7 @@ class j {
    * @throws ApiError
    */
   static getDataTypeById(e) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/data-type/{id}",
       path: {
@@ -291,7 +291,7 @@ class j {
    * @throws ApiError
    */
   static deleteDataTypeById(e) {
-    return i(n, {
+    return c(n, {
       method: "DELETE",
       url: "/umbraco/management/api/v1/data-type/{id}",
       path: {
@@ -314,7 +314,7 @@ class j {
    * @throws ApiError
    */
   static putDataTypeById(e) {
-    return i(n, {
+    return c(n, {
       method: "PUT",
       url: "/umbraco/management/api/v1/data-type/{id}",
       path: {
@@ -339,7 +339,7 @@ class j {
    * @throws ApiError
    */
   static postDataTypeByIdCopy(e) {
-    return i(n, {
+    return c(n, {
       method: "POST",
       url: "/umbraco/management/api/v1/data-type/{id}/copy",
       path: {
@@ -362,7 +362,7 @@ class j {
    * @throws ApiError
    */
   static getDataTypeByIdIsUsed(e) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/data-type/{id}/is-used",
       path: {
@@ -383,7 +383,7 @@ class j {
    * @throws ApiError
    */
   static putDataTypeByIdMove(e) {
-    return i(n, {
+    return c(n, {
       method: "PUT",
       url: "/umbraco/management/api/v1/data-type/{id}/move",
       path: {
@@ -406,7 +406,7 @@ class j {
    * @throws ApiError
    */
   static getDataTypeByIdReferences(e) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/data-type/{id}/references",
       path: {
@@ -424,7 +424,7 @@ class j {
    * @throws ApiError
    */
   static getDataTypeConfiguration() {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/data-type/configuration",
       errors: {
@@ -440,7 +440,7 @@ class j {
    * @throws ApiError
    */
   static postDataTypeFolder(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "POST",
       url: "/umbraco/management/api/v1/data-type/folder",
       body: e.requestBody,
@@ -461,7 +461,7 @@ class j {
    * @throws ApiError
    */
   static getDataTypeFolderById(e) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/data-type/folder/{id}",
       path: {
@@ -481,7 +481,7 @@ class j {
    * @throws ApiError
    */
   static deleteDataTypeFolderById(e) {
-    return i(n, {
+    return c(n, {
       method: "DELETE",
       url: "/umbraco/management/api/v1/data-type/folder/{id}",
       path: {
@@ -504,7 +504,7 @@ class j {
    * @throws ApiError
    */
   static putDataTypeFolderById(e) {
-    return i(n, {
+    return c(n, {
       method: "PUT",
       url: "/umbraco/management/api/v1/data-type/folder/{id}",
       path: {
@@ -532,7 +532,7 @@ class j {
    * @throws ApiError
    */
   static getFilterDataType(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/filter/data-type",
       query: {
@@ -555,7 +555,7 @@ class j {
    * @throws ApiError
    */
   static getItemDataType(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/item/data-type",
       query: {
@@ -575,7 +575,7 @@ class j {
    * @throws ApiError
    */
   static getItemDataTypeSearch(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/item/data-type/search",
       query: {
@@ -595,7 +595,7 @@ class j {
    * @throws ApiError
    */
   static getTreeDataTypeAncestors(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/tree/data-type/ancestors",
       query: {
@@ -617,7 +617,7 @@ class j {
    * @throws ApiError
    */
   static getTreeDataTypeChildren(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/tree/data-type/children",
       query: {
@@ -641,7 +641,7 @@ class j {
    * @throws ApiError
    */
   static getTreeDataTypeRoot(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/tree/data-type/root",
       query: {
@@ -656,7 +656,7 @@ class j {
     });
   }
 }
-class A {
+class G {
   /**
    * @param data The data for the request.
    * @param data.requestBody
@@ -664,7 +664,7 @@ class A {
    * @throws ApiError
    */
   static postDocumentType(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "POST",
       url: "/umbraco/management/api/v1/document-type",
       body: e.requestBody,
@@ -685,7 +685,7 @@ class A {
    * @throws ApiError
    */
   static getDocumentTypeById(e) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/document-type/{id}",
       path: {
@@ -705,7 +705,7 @@ class A {
    * @throws ApiError
    */
   static deleteDocumentTypeById(e) {
-    return i(n, {
+    return c(n, {
       method: "DELETE",
       url: "/umbraco/management/api/v1/document-type/{id}",
       path: {
@@ -727,7 +727,7 @@ class A {
    * @throws ApiError
    */
   static putDocumentTypeById(e) {
-    return i(n, {
+    return c(n, {
       method: "PUT",
       url: "/umbraco/management/api/v1/document-type/{id}",
       path: {
@@ -753,7 +753,7 @@ class A {
    * @throws ApiError
    */
   static getDocumentTypeByIdAllowedChildren(e) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/document-type/{id}/allowed-children",
       path: {
@@ -779,7 +779,7 @@ class A {
    * @throws ApiError
    */
   static getDocumentTypeByIdBlueprint(e) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/document-type/{id}/blueprint",
       path: {
@@ -803,7 +803,7 @@ class A {
    * @throws ApiError
    */
   static getDocumentTypeByIdCompositionReferences(e) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/document-type/{id}/composition-references",
       path: {
@@ -825,7 +825,7 @@ class A {
    * @throws ApiError
    */
   static postDocumentTypeByIdCopy(e) {
-    return i(n, {
+    return c(n, {
       method: "POST",
       url: "/umbraco/management/api/v1/document-type/{id}/copy",
       path: {
@@ -849,7 +849,7 @@ class A {
    * @throws ApiError
    */
   static getDocumentTypeByIdExport(e) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/document-type/{id}/export",
       path: {
@@ -870,7 +870,7 @@ class A {
    * @throws ApiError
    */
   static putDocumentTypeByIdImport(e) {
-    return i(n, {
+    return c(n, {
       method: "PUT",
       url: "/umbraco/management/api/v1/document-type/{id}/import",
       path: {
@@ -895,7 +895,7 @@ class A {
    * @throws ApiError
    */
   static putDocumentTypeByIdMove(e) {
-    return i(n, {
+    return c(n, {
       method: "PUT",
       url: "/umbraco/management/api/v1/document-type/{id}/move",
       path: {
@@ -920,7 +920,7 @@ class A {
    * @throws ApiError
    */
   static getDocumentTypeAllowedAtRoot(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/document-type/allowed-at-root",
       query: {
@@ -940,7 +940,7 @@ class A {
    * @throws ApiError
    */
   static postDocumentTypeAvailableCompositions(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "POST",
       url: "/umbraco/management/api/v1/document-type/available-compositions",
       body: e.requestBody,
@@ -956,7 +956,7 @@ class A {
    * @throws ApiError
    */
   static getDocumentTypeConfiguration() {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/document-type/configuration",
       errors: {
@@ -972,7 +972,7 @@ class A {
    * @throws ApiError
    */
   static postDocumentTypeFolder(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "POST",
       url: "/umbraco/management/api/v1/document-type/folder",
       body: e.requestBody,
@@ -993,7 +993,7 @@ class A {
    * @throws ApiError
    */
   static getDocumentTypeFolderById(e) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/document-type/folder/{id}",
       path: {
@@ -1013,7 +1013,7 @@ class A {
    * @throws ApiError
    */
   static deleteDocumentTypeFolderById(e) {
-    return i(n, {
+    return c(n, {
       method: "DELETE",
       url: "/umbraco/management/api/v1/document-type/folder/{id}",
       path: {
@@ -1036,7 +1036,7 @@ class A {
    * @throws ApiError
    */
   static putDocumentTypeFolderById(e) {
-    return i(n, {
+    return c(n, {
       method: "PUT",
       url: "/umbraco/management/api/v1/document-type/folder/{id}",
       path: {
@@ -1060,7 +1060,7 @@ class A {
    * @throws ApiError
    */
   static postDocumentTypeImport(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "POST",
       url: "/umbraco/management/api/v1/document-type/import",
       body: e.requestBody,
@@ -1081,7 +1081,7 @@ class A {
    * @throws ApiError
    */
   static getItemDocumentType(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/item/document-type",
       query: {
@@ -1101,7 +1101,7 @@ class A {
    * @throws ApiError
    */
   static getItemDocumentTypeSearch(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/item/document-type/search",
       query: {
@@ -1121,7 +1121,7 @@ class A {
    * @throws ApiError
    */
   static getTreeDocumentTypeAncestors(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/tree/document-type/ancestors",
       query: {
@@ -1143,7 +1143,7 @@ class A {
    * @throws ApiError
    */
   static getTreeDocumentTypeChildren(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/tree/document-type/children",
       query: {
@@ -1167,7 +1167,7 @@ class A {
    * @throws ApiError
    */
   static getTreeDocumentTypeRoot(e = {}) {
-    return i(n, {
+    return c(n, {
       method: "GET",
       url: "/umbraco/management/api/v1/tree/document-type/root",
       query: {
@@ -1182,57 +1182,59 @@ class A {
     });
   }
 }
-var ue = Object.defineProperty, he = Object.getOwnPropertyDescriptor, H = (t) => {
+var pe = Object.defineProperty, le = Object.getOwnPropertyDescriptor, M = (t) => {
   throw TypeError(t);
-}, pe = (t, e, r, s) => {
-  for (var o = s > 1 ? void 0 : s ? he(e, r) : e, a = t.length - 1, c; a >= 0; a--)
-    (c = t[a]) && (o = (s ? c(e, r, o) : c(o)) || o);
-  return s && o && ue(e, r, o), o;
-}, x = (t, e, r) => e.has(t) || H("Cannot " + r), u = (t, e, r) => (x(t, e, "read from private field"), r ? r.call(t) : e.get(t)), l = (t, e, r) => e.has(t) ? H("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(t) : e.set(t, r), p = (t, e, r, s) => (x(t, e, "write to private field"), e.set(t, r), r), f, y, E, D, R, N, g, _, v, T, k;
-let w = class extends z($) {
+}, me = (t, e, r, s) => {
+  for (var o = s > 1 ? void 0 : s ? le(e, r) : e, a = t.length - 1, d; a >= 0; a--)
+    (d = t[a]) && (o = (s ? d(e, r, o) : d(o)) || o);
+  return s && o && pe(e, r, o), o;
+}, L = (t, e, r) => e.has(t) || M("Cannot " + r), u = (t, e, r) => (L(t, e, "read from private field"), r ? r.call(t) : e.get(t)), m = (t, e, r) => e.has(t) ? M("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(t) : e.set(t, r), l = (t, e, r, s) => (L(t, e, "write to private field"), e.set(t, r), r), q, v, b, D, E, N, w, g, I, k, f, B;
+let C = class extends V(W) {
   constructor() {
-    super(), l(this, f), l(this, y), l(this, E), l(this, D), l(this, R), l(this, N), l(this, g), l(this, _, '<uui-loader style="margin-right: 20px"></uui-loader> Loading preview...'), l(this, v, !1), l(this, T, ""), l(this, k), p(this, f, {}), p(this, y, {}), p(this, T, this.blockBeam());
-    const t = new U("UmbBlockEntryContext"), e = new U("UmbBlockEntryContext");
-    this.consumeContext(V, (r) => {
-      p(this, D, r.getUnique()), p(this, N, r.getContentTypeId());
-    }), this.consumeContext(X, (r) => {
-      p(this, R, r.getAlias()), this.consumeContext(t, (s) => {
-        this.observe(s.label, (o) => {
-          p(this, g, o), p(this, T, this.blockBeam()), this.requestUpdate();
-        }), this.observe(F(s.content, r.value), ([o, a]) => {
-          const c = o;
-          u(this, y)[c.contentTypeKey] === void 0 ? A.getDocumentTypeById({ id: c.contentTypeKey }).then((d) => {
-            const m = d.properties.map((h) => j.getDataTypeById({ id: h.dataType.id }).then((b) => {
-              u(this, y)[h.alias] = b.editorAlias;
-            }));
-            Promise.all(m).then(() => {
-              this.handleBlock(c, a);
-            });
-          }) : this.handleBlock(c, a);
-        }), s.areas && this.observe(s.areas, (o) => {
-          p(this, k, o);
-        });
-      }), this.consumeContext(e, (s) => {
-        this.observe(s.label, (o) => {
-          p(this, g, o), p(this, T, this.blockBeam()), this.requestUpdate();
-        }), this.observe(F(s.content, r.value), ([o, a]) => {
-          const c = o;
-          u(this, y)[c.contentTypeKey] === void 0 ? A.getDocumentTypeById({ id: c.contentTypeKey }).then((d) => {
-            const m = d.properties.map((h) => j.getDataTypeById({ id: h.dataType.id }).then((b) => {
-              u(this, y)[h.alias] = b.editorAlias;
-            }));
-            Promise.all(m).then(() => {
-              this.handleBlock(c, a);
-            });
-          }) : this.handleBlock(c, a);
+    super(), m(this, q), m(this, v), m(this, b), m(this, D), m(this, E), m(this, N), m(this, w), m(this, g), m(this, I, '<uui-loader style="margin-right: 20px"></uui-loader> Loading preview...'), m(this, k, !1), m(this, f, ""), m(this, B), l(this, v, {}), l(this, b, {}), l(this, q, {}), l(this, f, this.blockBeam()), fetch("/api/blockpreview").then((t) => t.json()).then((t) => {
+      l(this, q, t);
+      const e = new P("UmbBlockEntryContext"), r = new P("UmbBlockEntryContext");
+      this.consumeContext(Q, (s) => {
+        l(this, E, s.getUnique()), l(this, w, s.getContentTypeId());
+      }), this.consumeContext(Y, (s) => {
+        l(this, N, s.getAlias()), this.consumeContext(e, (o) => {
+          this.observe(o.label, (a) => {
+            l(this, g, a), l(this, f, this.blockBeam()), this.requestUpdate();
+          }), this.observe(j(o.content, s.value), ([a, d]) => {
+            const i = a;
+            u(this, b)[i.contentTypeKey] === void 0 ? G.getDocumentTypeById({ id: i.contentTypeKey }).then((p) => {
+              const h = p.properties.map((y) => x.getDataTypeById({ id: y.dataType.id }).then((T) => {
+                u(this, b)[y.alias] = T.editorAlias;
+              }));
+              Promise.all(h).then(() => {
+                this.handleBlock(i, d);
+              });
+            }) : this.handleBlock(i, d);
+          }), o.areas && this.observe(o.areas, (a) => {
+            l(this, B, a);
+          });
+        }), this.consumeContext(r, (o) => {
+          this.observe(o.label, (a) => {
+            l(this, g, a), l(this, f, this.blockBeam()), this.requestUpdate();
+          }), this.observe(j(o.content, s.value), ([a, d]) => {
+            const i = a;
+            u(this, b)[i.contentTypeKey] === void 0 ? G.getDocumentTypeById({ id: i.contentTypeKey }).then((p) => {
+              const h = p.properties.map((y) => x.getDataTypeById({ id: y.dataType.id }).then((T) => {
+                u(this, b)[y.alias] = T.editorAlias;
+              }));
+              Promise.all(h).then(() => {
+                this.handleBlock(i, d);
+              });
+            }) : this.handleBlock(i, d);
+          });
         });
       });
     });
   }
   parseBadKeys(t) {
     for (const e in t) {
-      const r = t[e], s = u(this, y)[e];
-      if (console.log(e, { value: r, editorAlias: s }), s)
+      const r = t[e], s = u(this, b)[e];
+      if (s)
         switch (s) {
           case "Umbraco.Tags":
             t[e] = JSON.stringify(r);
@@ -1253,8 +1255,8 @@ let w = class extends z($) {
             break;
           case "Umbraco.MultiNodeTreePicker":
             for (let a = 0; a < t[e].length; a++) {
-              const c = `umb://${t[e][a].type}/${t[e][a].unique}`;
-              t[e][a] = c;
+              const d = `umb://${t[e][a].type}/${t[e][a].unique}`;
+              t[e][a] = d;
             }
             t[e] = t[e].join(",");
             break;
@@ -1263,23 +1265,23 @@ let w = class extends z($) {
     return t;
   }
   handleBlock(t, e) {
-    if (p(this, v, !0), !e) return;
+    if (l(this, k, !0), !e) return;
     const r = JSON.parse(JSON.stringify(e));
-    if (t = JSON.parse(JSON.stringify(t)), u(this, f)[t.udi] && JSON.stringify(u(this, f)[t.udi]) === JSON.stringify(t))
+    if (t = JSON.parse(JSON.stringify(t)), u(this, v)[t.udi] && JSON.stringify(u(this, v)[t.udi]) === JSON.stringify(t))
       return;
-    u(this, f)[t.udi] = t;
+    u(this, v)[t.udi] = t;
     const s = r.contentData.findIndex((a) => a.udi == t.udi);
     r.contentData[s] = t, r.target = t.udi;
     for (let a = 0; a < r.settingsData.length; a++)
       r.settingsData[a] = this.parseBadKeys(r.settingsData[a]);
     for (let a = 0; a < r.contentData.length; a++)
       r.contentData[a] = this.parseBadKeys(r.contentData[a]);
-    p(this, E, r);
+    l(this, D, r);
     const o = {
-      content: JSON.stringify(u(this, E)),
-      contentId: u(this, D),
-      propertyTypeAlias: u(this, R),
-      contentTypeId: u(this, N)
+      content: JSON.stringify(u(this, D)),
+      contentId: u(this, E),
+      propertyTypeAlias: u(this, N),
+      contentTypeId: u(this, w)
     };
     fetch("/api/blockpreview", {
       method: "POST",
@@ -1288,17 +1290,31 @@ let w = class extends z($) {
         "Content-Type": "application/json"
       }
     }).then((a) => a.json()).then((a) => {
-      if (p(this, v, !1), a.html === "blockbeam")
-        p(this, T, this.blockBeam());
+      if (l(this, k, !1), a.html === "blockbeam")
+        l(this, f, this.blockBeam());
       else {
         if (a.html.includes("###renderGridAreaSlots")) {
-          const m = this.areas();
-          a.html = a.html.replace("###renderGridAreaSlots", m);
+          const p = this.areas();
+          a.html = a.html.replace("###renderGridAreaSlots", p);
         }
-        p(this, T, '<div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">' + a.html + "</div>");
+        l(this, f, `
+        <div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">
+          <div id="kibp_collapsible">
+            <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${u(this, g)} &nbsp;&nbsp; (Click to maximize)</span></div>
+              <div class="kibp_content">
+                ${a.html}
+              </div>
+            </div>
+          </div>
+        </div>`);
       }
-      this.requestUpdate(), Y(() => {
+      this.requestUpdate(), Z(() => {
+        var h, y;
         this.manageScripts();
+        const i = (h = this.shadowRoot) == null ? void 0 : h.querySelector(".kibp_collaps"), p = (y = this.shadowRoot) == null ? void 0 : y.querySelector(".kibp_content");
+        u(this, q).collapsibleBlocks ? i == null || i.addEventListener("click", (T) => {
+          i.classList.toggle("active"), p == null || p.classList.toggle("hidden"), T.preventDefault(), T.stopImmediatePropagation();
+        }) : (i == null || i.classList.remove("kibp_collaps"), i == null || i.remove());
       }, 100)();
     });
   }
@@ -1314,9 +1330,9 @@ let w = class extends z($) {
     });
   }
   areas() {
-    return u(this, k) && u(this, k).length > 0 ? `
+    return u(this, B) && u(this, B).length > 0 ? `
       <umb-ref-grid-block standalone href="">
-        <span style="margin-right: 20px">${u(this, g)}</span> ${u(this, v) ? u(this, _) : ""}
+        <span style="margin-right: 20px">${u(this, g)}</span> ${u(this, k) ? u(this, I) : ""}
         <umb-block-grid-areas-container slot="areas"></umb-block-grid-areas-container>
       </umb-ref-grid-block>
       ` : "";
@@ -1324,30 +1340,77 @@ let w = class extends z($) {
   blockBeam() {
     return `
     <umb-ref-grid-block standalone href="">
-      <span style="margin-right: 20px">${u(this, g)}</span> ${u(this, v) ? u(this, _) : ""}
+      <span style="margin-right: 20px">${u(this, g)}</span> ${u(this, k) ? u(this, I) : ""}
 		</umb-ref-grid-block>`;
   }
   render() {
-    return W`${J(u(this, T))}`;
+    return J`${K(u(this, f))}`;
   }
 };
-f = /* @__PURE__ */ new WeakMap();
-y = /* @__PURE__ */ new WeakMap();
-E = /* @__PURE__ */ new WeakMap();
-D = /* @__PURE__ */ new WeakMap();
-R = /* @__PURE__ */ new WeakMap();
-N = /* @__PURE__ */ new WeakMap();
-g = /* @__PURE__ */ new WeakMap();
-_ = /* @__PURE__ */ new WeakMap();
+q = /* @__PURE__ */ new WeakMap();
 v = /* @__PURE__ */ new WeakMap();
-T = /* @__PURE__ */ new WeakMap();
+b = /* @__PURE__ */ new WeakMap();
+D = /* @__PURE__ */ new WeakMap();
+E = /* @__PURE__ */ new WeakMap();
+N = /* @__PURE__ */ new WeakMap();
+w = /* @__PURE__ */ new WeakMap();
+g = /* @__PURE__ */ new WeakMap();
+I = /* @__PURE__ */ new WeakMap();
 k = /* @__PURE__ */ new WeakMap();
-w = pe([
-  K("knowit-instant-block-preview")
-], w);
-const ke = w;
+f = /* @__PURE__ */ new WeakMap();
+B = /* @__PURE__ */ new WeakMap();
+C.styles = z`
+  .kibp_content.hidden {
+    height: 0;
+    overflow:hidden;
+  }
+  #kibp_collapsible:hover .kibp_collaps {
+    height: 25px;
+  }
+  .kibp_collaps {
+      height: 0px;
+      width: 150px;
+      background-color: #1b264f;
+      transition: all ease 0.4s;
+      color: white;
+      font-weight: bold;
+      position: fixed;
+      font-size: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      opacity: 0.8;
+      cursor: pointer;
+  }
+      .kibp_collaps span {
+        margin-left: 10px;
+      }
+
+.kibp_collaps .active {
+    display: none;
+}
+
+.kibp_collaps.active {
+    background-color: #86a0ff;
+    height: 50px !important;
+    width: 100%;
+    position: initial;
+}
+
+    .kibp_collaps.active .inactive {
+        display: none;
+    }
+
+    .kibp_collaps.active .active {
+        display: inline;
+    }
+  `;
+C = me([
+  X("knowit-instant-block-preview")
+], C);
+const Be = C;
 export {
-  w as InstantBlockPreview,
-  ke as default
+  C as InstantBlockPreview,
+  Be as default
 };
-//# sourceMappingURL=knowit-instant-block-preview-DuHtf16t.js.map
+//# sourceMappingURL=knowit-instant-block-preview-BLlfKzsD.js.map

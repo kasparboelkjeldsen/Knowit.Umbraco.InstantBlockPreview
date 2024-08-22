@@ -1,19 +1,39 @@
 angular.module("umbraco").controller("customBlockController", [
     '$scope',
     '$attrs',
+    '$element',
     'editorState',
     'eventsService',
-    function ($scope, $attrs, editorState) {
+    function ($scope, $attrs, $element, editorState) {
         const blockType = $attrs.blockType;
         let renderType = 'razor';
         $scope.enableBlockEdit = true;
 
+        const collapsibleElement = $element.find('#collapsible')[0];
+        const contentElement = $element.find('#contentDiv')[0];
+        const collaps = collapsibleElement.querySelector('.collaps');
+
         const apiEndpoints = {
             renderPartial: '/umbraco/api/PreviewRendering/RenderComponent',
+            settings: '/umbraco/api/PreviewRendering/Settings'
         };
 
         $scope.$watch('block.data', (newValue) => handleBlockDataChange(newValue, $scope.block.settingsData), true);
         $scope.$watch('block.settingsData', (newValue) => handleBlockDataChange($scope.block.data, newValue), true);
+
+        fetch(apiEndpoints.settings).then(res => res.json()).then(json => {
+            if (json.collapsibleBlocks) {
+                collaps.addEventListener('click', function (e) {
+                    collaps.classList.toggle('active');
+                    contentElement.classList.toggle('visible');
+                    e.preventDefault();
+                });
+            }
+            else {
+                collaps.classList.remove('collaps');
+                collaps.innerHTML = null;
+            }
+        });
 
 
 

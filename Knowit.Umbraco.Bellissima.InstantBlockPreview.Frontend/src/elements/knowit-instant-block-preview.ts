@@ -1,4 +1,4 @@
-﻿import { LitElement, html, customElement, unsafeHTML} from "@umbraco-cms/backoffice/external/lit";
+﻿import { LitElement, html, customElement, unsafeHTML, css} from "@umbraco-cms/backoffice/external/lit";
 import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api";
 import { UMB_PROPERTY_CONTEXT } from '@umbraco-cms/backoffice/property';
 import { UMB_DOCUMENT_WORKSPACE_CONTEXT } from "@umbraco-cms/backoffice/document";
@@ -12,6 +12,7 @@ import { DocumentTypeService, DataTypeService } from "../api";
 @customElement('knowit-instant-block-preview')
 export class InstantBlockPreview extends UmbElementMixin(LitElement) {
 
+  #settings: any | undefined = undefined;
   #contentVals : any |undefined = undefined;
   #definitions: any | undefined = undefined;
   #currentValue : any | undefined = undefined;
@@ -29,100 +30,104 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
 
     this.#contentVals = {};
     this.#definitions = {};
+    this.#settings = {};
     this.#htmlOutput = this.blockBeam();
 
-    // currently not exposed by the context-api, so we need to create our own
-    const UMB_BLOCK_GRID_ENTRY_CONTEXT = new UmbContextToken<any>('UmbBlockEntryContext')
-    const UMB_BLOCK_LIST_ENTRY_CONTEXT = new UmbContextToken<any>('UmbBlockEntryContext');
-    
-    // fetch id and type-id from the document
-    this.consumeContext(UMB_DOCUMENT_WORKSPACE_CONTEXT, (workspaceContext) => {
-      this.#currentId = workspaceContext.getUnique();
-      this.#documentTypeId = workspaceContext.getContentTypeId();
-    });
-
-
-    
-    this.consumeContext(UMB_PROPERTY_CONTEXT, (propertyContext) => {
-      this.#propertyType = propertyContext.getAlias();
-    
-      // handle block grid
-      this.consumeContext(UMB_BLOCK_GRID_ENTRY_CONTEXT, (context) => {
-        
-        // fetch the label of the block and init the blockbeam with the label
-        this.observe(context.label, (label) => {
-          this.#label = label as string;
-          this.#htmlOutput = this.blockBeam();
-          this.requestUpdate();
-        });
-        
-        // handle the block whenever content or value change
-        this.observe(observeMultiple(context.content, propertyContext.value), ([content, currentValue]) => {
-          const anyContent = content as any;
-
-          if (this.#definitions[anyContent.contentTypeKey] === undefined) {
-            DocumentTypeService.getDocumentTypeById({ id: anyContent.contentTypeKey }).then((response) => {
-              // Create an array of promises for all DataTypeService.getDataTypeById calls
-              const promises = response.properties.map((prop) => {
-                return DataTypeService.getDataTypeById({ id: prop.dataType.id }).then((dataType) => {
-                  this.#definitions[prop.alias] = dataType.editorAlias;
-                });
-              });
-
-              // Use Promise.all to wait for all DataTypeService.getDataTypeById promises to resolve
-              Promise.all(promises).then(() => {
-                // All datatypes are loaded, now handle the block
-                this.handleBlock(anyContent, currentValue);
-              });
-            });
-          } else {
-            this.handleBlock(anyContent, currentValue);
-          }
-
-        });
-
-        // handle areas
-        if(context.areas) {
-          this.observe(context.areas, areas => {
-            this.#areas = areas;
-          });
-        }
-      });
+    fetch('/api/blockpreview').then(response => response.json()).then(data => {
+      this.#settings = data;
+      // currently not exposed by the context-api, so we need to create our own
+      const UMB_BLOCK_GRID_ENTRY_CONTEXT = new UmbContextToken<any>('UmbBlockEntryContext')
+      const UMB_BLOCK_LIST_ENTRY_CONTEXT = new UmbContextToken<any>('UmbBlockEntryContext');
       
-      // handle block list
-      this.consumeContext(UMB_BLOCK_LIST_ENTRY_CONTEXT, (context) => {
-        this.observe(context.label, (label) => {
-          this.#label = label as string;
-          this.#htmlOutput = this.blockBeam();
-          this.requestUpdate();
-        });
+      // fetch id and type-id from the document
+      this.consumeContext(UMB_DOCUMENT_WORKSPACE_CONTEXT, (workspaceContext) => {
+        this.#currentId = workspaceContext.getUnique();
+        this.#documentTypeId = workspaceContext.getContentTypeId();
+      });
 
-        this.observe(observeMultiple(context.content, propertyContext.value), ([content, currentValue]) => {
+      this.consumeContext(UMB_PROPERTY_CONTEXT, (propertyContext) => {
+        this.#propertyType = propertyContext.getAlias();
+      
+        // handle block grid
+        this.consumeContext(UMB_BLOCK_GRID_ENTRY_CONTEXT, (context) => {
           
-          const anyContent = content as any;
+          // fetch the label of the block and init the blockbeam with the label
+          this.observe(context.label, (label) => {
+            this.#label = label as string;
+            this.#htmlOutput = this.blockBeam();
+            this.requestUpdate();
+          });
+          
+          // handle the block whenever content or value change
+          this.observe(observeMultiple(context.content, propertyContext.value), ([content, currentValue]) => {
+            const anyContent = content as any;
 
-          if (this.#definitions[anyContent.contentTypeKey] === undefined) {
-            DocumentTypeService.getDocumentTypeById({ id: anyContent.contentTypeKey }).then((response) => {
-              // Create an array of promises for all DataTypeService.getDataTypeById calls
-              const promises = response.properties.map((prop) => {
-                return DataTypeService.getDataTypeById({ id: prop.dataType.id }).then((dataType) => {
-                  this.#definitions[prop.alias] = dataType.editorAlias;
+            if (this.#definitions[anyContent.contentTypeKey] === undefined) {
+              DocumentTypeService.getDocumentTypeById({ id: anyContent.contentTypeKey }).then((response) => {
+                // Create an array of promises for all DataTypeService.getDataTypeById calls
+                const promises = response.properties.map((prop) => {
+                  return DataTypeService.getDataTypeById({ id: prop.dataType.id }).then((dataType) => {
+                    this.#definitions[prop.alias] = dataType.editorAlias;
+                  });
+                });
+
+                // Use Promise.all to wait for all DataTypeService.getDataTypeById promises to resolve
+                Promise.all(promises).then(() => {
+                  // All datatypes are loaded, now handle the block
+                  this.handleBlock(anyContent, currentValue);
                 });
               });
-          
-              // Use Promise.all to wait for all DataTypeService.getDataTypeById promises to resolve
-              Promise.all(promises).then(() => {
-                // All datatypes are loaded, now handle the block
-                this.handleBlock(anyContent, currentValue);
-              });
+            } else {
+              this.handleBlock(anyContent, currentValue);
+            }
+
+          });
+
+          // handle areas
+          if(context.areas) {
+            this.observe(context.areas, areas => {
+              this.#areas = areas;
             });
-          } else {
-            this.handleBlock(anyContent, currentValue);
           }
-          
+        });
+        
+        // handle block list
+        this.consumeContext(UMB_BLOCK_LIST_ENTRY_CONTEXT, (context) => {
+          this.observe(context.label, (label) => {
+            this.#label = label as string;
+            this.#htmlOutput = this.blockBeam();
+            this.requestUpdate();
+          });
+
+          this.observe(observeMultiple(context.content, propertyContext.value), ([content, currentValue]) => {
+            
+            const anyContent = content as any;
+
+            if (this.#definitions[anyContent.contentTypeKey] === undefined) {
+              DocumentTypeService.getDocumentTypeById({ id: anyContent.contentTypeKey }).then((response) => {
+                // Create an array of promises for all DataTypeService.getDataTypeById calls
+                const promises = response.properties.map((prop) => {
+                  return DataTypeService.getDataTypeById({ id: prop.dataType.id }).then((dataType) => {
+                    this.#definitions[prop.alias] = dataType.editorAlias;
+                  });
+                });
+            
+                // Use Promise.all to wait for all DataTypeService.getDataTypeById promises to resolve
+                Promise.all(promises).then(() => {
+                  // All datatypes are loaded, now handle the block
+                  this.handleBlock(anyContent, currentValue);
+                });
+              });
+            } else {
+              this.handleBlock(anyContent, currentValue);
+            }
+            
+          });
         });
       });
     });
+
+    
   }
 
   parseBadKeys(content: any) {
@@ -220,19 +225,95 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
           data.html = data.html.replace("###renderGridAreaSlots", areaHtml);
         }
 
-        this.#htmlOutput = '<div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">' + data.html + '</div>';
+        this.#htmlOutput = `
+        <div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">
+          <div id="kibp_collapsible">
+            <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${this.#label} &nbsp;&nbsp; (Click to maximize)</span></div>
+              <div class="kibp_content">
+                ${data.html}
+              </div>
+            </div>
+          </div>
+        </div>`;
       }
       this.requestUpdate();
 
       
       const debouncedScriptParser = debounce(() => {
         this.manageScripts();
+        
+        
+        const collaps = this.shadowRoot?.querySelector('.kibp_collaps');
+        const contentElement = this.shadowRoot?.querySelector('.kibp_content');
+
+        if(this.#settings.collapsibleBlocks) {
+          collaps?.addEventListener('click', (e) => {
+            
+            collaps.classList.toggle('active');
+            
+            contentElement?.classList.toggle('hidden');
+            e.preventDefault();
+            e.stopImmediatePropagation();
+          });
+        }
+        else {
+          collaps?.classList.remove('kibp_collaps');
+          collaps?.remove();
+        }
       }, 100);
   
       debouncedScriptParser();
     });
 
   }
+
+
+  static override styles = css`
+  .kibp_content.hidden {
+    height: 0;
+    overflow:hidden;
+  }
+  #kibp_collapsible:hover .kibp_collaps {
+    height: 25px;
+  }
+  .kibp_collaps {
+      height: 0px;
+      width: 150px;
+      background-color: #1b264f;
+      transition: all ease 0.4s;
+      color: white;
+      font-weight: bold;
+      position: fixed;
+      font-size: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      opacity: 0.8;
+      cursor: pointer;
+  }
+      .kibp_collaps span {
+        margin-left: 10px;
+      }
+
+.kibp_collaps .active {
+    display: none;
+}
+
+.kibp_collaps.active {
+    background-color: #86a0ff;
+    height: 50px !important;
+    width: 100%;
+    position: initial;
+}
+
+    .kibp_collaps.active .inactive {
+        display: none;
+    }
+
+    .kibp_collaps.active .active {
+        display: inline;
+    }
+  `
 
   manageScripts() {
     const scripts = this.shadowRoot?.querySelectorAll('script');

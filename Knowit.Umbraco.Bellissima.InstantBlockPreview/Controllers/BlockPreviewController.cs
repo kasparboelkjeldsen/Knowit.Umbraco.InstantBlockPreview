@@ -149,5 +149,11 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
                 return Ok(new { html = PreviewConstants.BlockBeamValue });
 			}
         }
+
+		[HttpGet]
+        public IActionResult Settings()
+		{
+			return Ok(_settings.PackageSettings);
+        }
     }
 }

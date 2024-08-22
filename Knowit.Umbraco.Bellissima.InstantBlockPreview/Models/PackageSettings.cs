@@ -50,5 +50,8 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Models
 
         [JsonProperty("debug")]
         public bool? Debug { get; set; }
+
+        [JsonProperty("collapsibleBlocks")]
+        public bool? CollapsibleBlocks { get; set; }
     }
 }

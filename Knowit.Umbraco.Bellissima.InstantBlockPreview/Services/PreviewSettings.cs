@@ -40,7 +40,10 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
             {
                 PackageSettings.RenderType = "razor";
             }
-
+            if(PackageSettings.AreaReplace == null  )
+            {
+                PackageSettings.AreaReplace = true;
+            }
         }
     }
 }

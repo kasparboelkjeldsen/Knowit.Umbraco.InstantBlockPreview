@@ -50,6 +50,12 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
             _logger = logger;
         }
 
+        [HttpGet("umbraco/api/PreviewRendering/Settings")]
+        public async Task<IActionResult> GetSettings()
+        {
+            return Ok(_settings.PackageSettings);
+        }
+
         [HttpPost("umbraco/api/PreviewRendering/RenderComponent")]
         public async Task<IActionResult> RenderComponent(RenderingPayload scope)
         {
@@ -81,7 +87,8 @@ namespace Knowit.Umbraco.InstantBlockPreview.Controllers.API
 
                 var viewPath = string.Empty;
                 if (scope.BlockType == "grid") viewPath = _settings.PackageSettings.GridViewPath + formattedViewPath;
-                else if (scope.BlockType == "list") viewPath = _settings.PackageSettings.BlockViewPath + formattedViewPath;
+                else if (scope.BlockType == "list") 
+                    viewPath = _settings.PackageSettings.BlockViewPath + formattedViewPath;
                 else if (scope.BlockType == "rte") viewPath = _settings.PackageSettings.RteViewPath + formattedViewPath;
                 //var viewPath = (scope.BlockType == "grid" ? _settings.PackageSettings.GridViewPath : _settings.PackageSettings.BlockViewPath) + formattedViewPath;
 
