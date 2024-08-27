@@ -223,18 +223,27 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
         if(containsRenderGridAreaSlots) {
           const areaHtml = this.areas();
           data.html = data.html.replace("###renderGridAreaSlots", areaHtml);
-        }
-
-        this.#htmlOutput = `
-        <div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">
-          <div id="kibp_collapsible">
-            <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${this.#label} &nbsp;&nbsp; (Click to maximize)</span></div>
-              <div class="kibp_content">
-                ${data.html}
+          this.#htmlOutput = `
+            <div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">
+              <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${this.#label} &nbsp;&nbsp; (Click to maximize)</span></div>
+                <div class="kibp_content">
+                  ${data.html}
+                </div>
               </div>
-            </div>
-          </div>
-        </div>`;
+            </div>`;
+        }
+        else {
+          this.#htmlOutput = `
+            <div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">
+              <div id="kibp_collapsible">
+                <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${this.#label} &nbsp;&nbsp; (Click to maximize)</span></div>
+                  <div class="kibp_content">
+                    ${data.html}
+                  </div>
+                </div>
+              </div>
+            </div>`;
+        }
       }
       this.requestUpdate();
 
