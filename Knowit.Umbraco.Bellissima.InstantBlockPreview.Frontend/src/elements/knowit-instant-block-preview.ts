@@ -283,7 +283,8 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
       transition: all ease 0.4s;
       color: white;
       font-weight: bold;
-      position: fixed;
+      position: absolute;
+      top: 0;
       font-size: 12px;
       overflow: hidden;
       display: flex;
