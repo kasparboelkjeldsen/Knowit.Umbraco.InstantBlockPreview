@@ -76,4 +76,8 @@
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\Knowit.Umbraco.Bellissima.InstantBlockPreview\Knowit.Umbraco.Bellissima.InstantBlockPreview.csproj" />
+  </ItemGroup>
+
 </Project>
