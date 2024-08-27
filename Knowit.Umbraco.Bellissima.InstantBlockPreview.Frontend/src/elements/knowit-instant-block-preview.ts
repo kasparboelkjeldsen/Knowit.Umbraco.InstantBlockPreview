@@ -220,11 +220,12 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
         this.#htmlOutput = this.blockBeam();  
       else {
         const containsRenderGridAreaSlots = data.html.includes("###renderGridAreaSlots");
+        const divStyle = this.#settings.divInlineStyle ? `style="${this.#settings.divInlineStyle}"` : "";
         if(containsRenderGridAreaSlots) {
           const areaHtml = this.areas();
           data.html = data.html.replace("###renderGridAreaSlots", areaHtml);
           this.#htmlOutput = `
-            <div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">
+            <div class="kibp_defaultDivStyle" ${divStyle}">
               <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${this.#label} &nbsp;&nbsp; (Click to maximize)</span></div>
                 <div class="kibp_content">
                   ${data.html}
@@ -234,7 +235,7 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
         }
         else {
           this.#htmlOutput = `
-            <div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">
+            <div class="kibp_defaultDivStyle" ${divStyle}">
               <div id="kibp_collapsible">
                 <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${this.#label} &nbsp;&nbsp; (Click to maximize)</span></div>
                   <div class="kibp_content">
@@ -282,6 +283,12 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
     height: 0;
     overflow:hidden;
   }
+
+  .kibp_defaultDivStyle {
+    border: 1px solid var(--uui-color-border,#d8d7d9);
+    min-height: 50px; box-sizing: border-box;
+  }
+
   #kibp_collapsible:hover .kibp_collaps {
     height: 25px;
   }

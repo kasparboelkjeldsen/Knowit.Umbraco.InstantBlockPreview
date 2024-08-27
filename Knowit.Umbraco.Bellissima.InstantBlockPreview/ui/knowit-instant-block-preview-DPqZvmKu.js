@@ -1,12 +1,12 @@
-import { LitElement as W, html as J, unsafeHTML as K, css as z, customElement as X } from "@umbraco-cms/backoffice/external/lit";
+import { LitElement as W, html as J, unsafeHTML as z, css as K, customElement as X } from "@umbraco-cms/backoffice/external/lit";
 import { UmbElementMixin as V } from "@umbraco-cms/backoffice/element-api";
 import { UMB_PROPERTY_CONTEXT as Y } from "@umbraco-cms/backoffice/property";
 import { UMB_DOCUMENT_WORKSPACE_CONTEXT as Q } from "@umbraco-cms/backoffice/document";
 import { UmbContextToken as P } from "@umbraco-cms/backoffice/context-api";
 import { observeMultiple as j } from "@umbraco-cms/backoffice/observable-api";
 import { debounce as Z } from "@umbraco-cms/backoffice/utils";
-import { O as n } from "./index-DDN46J2w.js";
-class A extends Error {
+import { O as n } from "./index-D5H2GnOB.js";
+class x extends Error {
   constructor(e, r, s) {
     super(s), this.name = "ApiError", this.url = r.url, this.status = r.status, this.statusText = r.statusText, this.body = r.body, this.request = e;
   }
@@ -110,9 +110,9 @@ const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t
     Accept: "application/json",
     ...a,
     ...e.headers
-  }).filter(([, i]) => i != null).reduce((i, [p, h]) => ({
+  }).filter(([, i]) => i != null).reduce((i, [l, h]) => ({
     ...i,
-    [p]: String(h)
+    [l]: String(h)
   }), {});
   if (S(r) && (d.Authorization = `Bearer ${r}`), S(s) && S(o)) {
     const i = re(`${s}:${o}`);
@@ -125,16 +125,16 @@ const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t
     return (e = t.mediaType) != null && e.includes("application/json") || (r = t.mediaType) != null && r.includes("+json") ? JSON.stringify(t.body) : _(t.body) || O(t.body) || H(t.body) ? t.body : JSON.stringify(t.body);
 }, ce = async (t, e, r, s, o, a, d) => {
   const i = new AbortController();
-  let p = {
+  let l = {
     headers: a,
     body: s ?? o,
     method: e.method,
     signal: i.signal
   };
-  t.WITH_CREDENTIALS && (p.credentials = t.CREDENTIALS);
+  t.WITH_CREDENTIALS && (l.credentials = t.CREDENTIALS);
   for (const h of t.interceptors.request._fns)
-    p = await h(p);
-  return d(() => i.abort()), await fetch(r, p);
+    l = await h(l);
+  return d(() => i.abort()), await fetch(r, l);
 }, de = (t, e) => {
   if (e) {
     const r = t.headers.get(e);
@@ -204,7 +204,7 @@ const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t
     ...t.errors
   }[e.status];
   if (s)
-    throw new A(t, e, s);
+    throw new x(t, e, s);
   if (!e.ok) {
     const o = e.status ?? "unknown", a = e.statusText ?? "unknown", d = (() => {
       try {
@@ -213,7 +213,7 @@ const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t
         return;
       }
     })();
-    throw new A(
+    throw new x(
       t,
       e,
       `Generic Error: status: ${o}; status text: ${a}; body: ${d}`
@@ -221,12 +221,12 @@ const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t
   }
 }, c = (t, e) => new te(async (r, s, o) => {
   try {
-    const a = oe(t, e), d = se(e), i = ne(e), p = await ie(t, e);
+    const a = oe(t, e), d = se(e), i = ne(e), l = await ie(t, e);
     if (!o.isCancelled) {
-      let h = await ce(t, e, a, i, d, p, o);
+      let h = await ce(t, e, a, i, d, l, o);
       for (const $ of t.interceptors.response._fns)
         h = await $(h);
-      const y = await ue(h), T = de(h, e.responseHeader);
+      const y = await ue(h), b = de(h, e.responseHeader);
       let U = y;
       e.responseTransformer && h.ok && (U = await e.responseTransformer(y));
       const F = {
@@ -234,7 +234,7 @@ const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t
         ok: h.ok,
         status: h.status,
         statusText: h.statusText,
-        body: T ?? U
+        body: b ?? U
       };
       he(e, F), r(F.body);
     }
@@ -242,7 +242,7 @@ const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t
     s(a);
   }
 });
-class x {
+class A {
   /**
    * @param data The data for the request.
    * @param data.requestBody
@@ -1188,39 +1188,39 @@ var pe = Object.defineProperty, le = Object.getOwnPropertyDescriptor, M = (t) =>
   for (var o = s > 1 ? void 0 : s ? le(e, r) : e, a = t.length - 1, d; a >= 0; a--)
     (d = t[a]) && (o = (s ? d(e, r, o) : d(o)) || o);
   return s && o && pe(e, r, o), o;
-}, L = (t, e, r) => e.has(t) || M("Cannot " + r), u = (t, e, r) => (L(t, e, "read from private field"), r ? r.call(t) : e.get(t)), m = (t, e, r) => e.has(t) ? M("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(t) : e.set(t, r), l = (t, e, r, s) => (L(t, e, "write to private field"), e.set(t, r), r), q, v, b, D, E, N, w, g, I, k, f, B;
+}, L = (t, e, r) => e.has(t) || M("Cannot " + r), u = (t, e, r) => (L(t, e, "read from private field"), r ? r.call(t) : e.get(t)), m = (t, e, r) => e.has(t) ? M("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(t) : e.set(t, r), p = (t, e, r, s) => (L(t, e, "write to private field"), e.set(t, r), r), q, g, f, D, E, N, w, v, I, k, T, B;
 let C = class extends V(W) {
   constructor() {
-    super(), m(this, q), m(this, v), m(this, b), m(this, D), m(this, E), m(this, N), m(this, w), m(this, g), m(this, I, '<uui-loader style="margin-right: 20px"></uui-loader> Loading preview...'), m(this, k, !1), m(this, f, ""), m(this, B), l(this, v, {}), l(this, b, {}), l(this, q, {}), l(this, f, this.blockBeam()), fetch("/api/blockpreview").then((t) => t.json()).then((t) => {
-      l(this, q, t);
+    super(), m(this, q), m(this, g), m(this, f), m(this, D), m(this, E), m(this, N), m(this, w), m(this, v), m(this, I, '<uui-loader style="margin-right: 20px"></uui-loader> Loading preview...'), m(this, k, !1), m(this, T, ""), m(this, B), p(this, g, {}), p(this, f, {}), p(this, q, {}), p(this, T, this.blockBeam()), fetch("/api/blockpreview").then((t) => t.json()).then((t) => {
+      p(this, q, t);
       const e = new P("UmbBlockEntryContext"), r = new P("UmbBlockEntryContext");
       this.consumeContext(Q, (s) => {
-        l(this, E, s.getUnique()), l(this, w, s.getContentTypeId());
+        p(this, E, s.getUnique()), p(this, w, s.getContentTypeId());
       }), this.consumeContext(Y, (s) => {
-        l(this, N, s.getAlias()), this.consumeContext(e, (o) => {
+        p(this, N, s.getAlias()), this.consumeContext(e, (o) => {
           this.observe(o.label, (a) => {
-            l(this, g, a), l(this, f, this.blockBeam()), this.requestUpdate();
+            p(this, v, a), p(this, T, this.blockBeam()), this.requestUpdate();
           }), this.observe(j(o.content, s.value), ([a, d]) => {
             const i = a;
-            u(this, b)[i.contentTypeKey] === void 0 ? G.getDocumentTypeById({ id: i.contentTypeKey }).then((p) => {
-              const h = p.properties.map((y) => x.getDataTypeById({ id: y.dataType.id }).then((T) => {
-                u(this, b)[y.alias] = T.editorAlias;
+            u(this, f)[i.contentTypeKey] === void 0 ? G.getDocumentTypeById({ id: i.contentTypeKey }).then((l) => {
+              const h = l.properties.map((y) => A.getDataTypeById({ id: y.dataType.id }).then((b) => {
+                u(this, f)[y.alias] = b.editorAlias;
               }));
               Promise.all(h).then(() => {
                 this.handleBlock(i, d);
               });
             }) : this.handleBlock(i, d);
           }), o.areas && this.observe(o.areas, (a) => {
-            l(this, B, a);
+            p(this, B, a);
           });
         }), this.consumeContext(r, (o) => {
           this.observe(o.label, (a) => {
-            l(this, g, a), l(this, f, this.blockBeam()), this.requestUpdate();
+            p(this, v, a), p(this, T, this.blockBeam()), this.requestUpdate();
           }), this.observe(j(o.content, s.value), ([a, d]) => {
             const i = a;
-            u(this, b)[i.contentTypeKey] === void 0 ? G.getDocumentTypeById({ id: i.contentTypeKey }).then((p) => {
-              const h = p.properties.map((y) => x.getDataTypeById({ id: y.dataType.id }).then((T) => {
-                u(this, b)[y.alias] = T.editorAlias;
+            u(this, f)[i.contentTypeKey] === void 0 ? G.getDocumentTypeById({ id: i.contentTypeKey }).then((l) => {
+              const h = l.properties.map((y) => A.getDataTypeById({ id: y.dataType.id }).then((b) => {
+                u(this, f)[y.alias] = b.editorAlias;
               }));
               Promise.all(h).then(() => {
                 this.handleBlock(i, d);
@@ -1233,7 +1233,7 @@ let C = class extends V(W) {
   }
   parseBadKeys(t) {
     for (const e in t) {
-      const r = t[e], s = u(this, b)[e];
+      const r = t[e], s = u(this, f)[e];
       if (s)
         switch (s) {
           case "Umbraco.Tags":
@@ -1265,18 +1265,18 @@ let C = class extends V(W) {
     return t;
   }
   handleBlock(t, e) {
-    if (l(this, k, !0), !e) return;
+    if (p(this, k, !0), !e) return;
     const r = JSON.parse(JSON.stringify(e));
-    if (t = JSON.parse(JSON.stringify(t)), u(this, v)[t.udi] && JSON.stringify(u(this, v)[t.udi]) === JSON.stringify(t))
+    if (t = JSON.parse(JSON.stringify(t)), u(this, g)[t.udi] && JSON.stringify(u(this, g)[t.udi]) === JSON.stringify(t))
       return;
-    u(this, v)[t.udi] = t;
+    u(this, g)[t.udi] = t;
     const s = r.contentData.findIndex((a) => a.udi == t.udi);
     r.contentData[s] = t, r.target = t.udi;
     for (let a = 0; a < r.settingsData.length; a++)
       r.settingsData[a] = this.parseBadKeys(r.settingsData[a]);
     for (let a = 0; a < r.contentData.length; a++)
       r.contentData[a] = this.parseBadKeys(r.contentData[a]);
-    l(this, D, r);
+    p(this, D, r);
     const o = {
       content: JSON.stringify(u(this, D)),
       contentId: u(this, E),
@@ -1290,30 +1290,35 @@ let C = class extends V(W) {
         "Content-Type": "application/json"
       }
     }).then((a) => a.json()).then((a) => {
-      if (l(this, k, !1), a.html === "blockbeam")
-        l(this, f, this.blockBeam());
-      else {
-        if (a.html.includes("###renderGridAreaSlots")) {
-          const p = this.areas();
-          a.html = a.html.replace("###renderGridAreaSlots", p);
-        }
-        l(this, f, `
-        <div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">
-          <div id="kibp_collapsible">
-            <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${u(this, g)} &nbsp;&nbsp; (Click to maximize)</span></div>
-              <div class="kibp_content">
-                ${a.html}
+      if (p(this, k, !1), a.html === "blockbeam")
+        p(this, T, this.blockBeam());
+      else if (a.html.includes("###renderGridAreaSlots")) {
+        const l = this.areas();
+        a.html = a.html.replace("###renderGridAreaSlots", l), p(this, T, `
+            <div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">
+              <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${u(this, v)} &nbsp;&nbsp; (Click to maximize)</span></div>
+                <div class="kibp_content">
+                  ${a.html}
+                </div>
               </div>
-            </div>
-          </div>
-        </div>`);
-      }
+            </div>`);
+      } else
+        p(this, T, `
+            <div style="border: 1px solid var(--uui-color-border,#d8d7d9); min-height: 50px; box-sizing: border-box;">
+              <div id="kibp_collapsible">
+                <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${u(this, v)} &nbsp;&nbsp; (Click to maximize)</span></div>
+                  <div class="kibp_content">
+                    ${a.html}
+                  </div>
+                </div>
+              </div>
+            </div>`);
       this.requestUpdate(), Z(() => {
         var h, y;
         this.manageScripts();
-        const i = (h = this.shadowRoot) == null ? void 0 : h.querySelector(".kibp_collaps"), p = (y = this.shadowRoot) == null ? void 0 : y.querySelector(".kibp_content");
-        u(this, q).collapsibleBlocks ? i == null || i.addEventListener("click", (T) => {
-          i.classList.toggle("active"), p == null || p.classList.toggle("hidden"), T.preventDefault(), T.stopImmediatePropagation();
+        const i = (h = this.shadowRoot) == null ? void 0 : h.querySelector(".kibp_collaps"), l = (y = this.shadowRoot) == null ? void 0 : y.querySelector(".kibp_content");
+        u(this, q).collapsibleBlocks ? i == null || i.addEventListener("click", (b) => {
+          i.classList.toggle("active"), l == null || l.classList.toggle("hidden"), b.preventDefault(), b.stopImmediatePropagation();
         }) : (i == null || i.classList.remove("kibp_collaps"), i == null || i.remove());
       }, 100)();
     });
@@ -1332,7 +1337,7 @@ let C = class extends V(W) {
   areas() {
     return u(this, B) && u(this, B).length > 0 ? `
       <umb-ref-grid-block standalone href="">
-        <span style="margin-right: 20px">${u(this, g)}</span> ${u(this, k) ? u(this, I) : ""}
+        <span style="margin-right: 20px">${u(this, v)}</span> ${u(this, k) ? u(this, I) : ""}
         <umb-block-grid-areas-container slot="areas"></umb-block-grid-areas-container>
       </umb-ref-grid-block>
       ` : "";
@@ -1340,26 +1345,26 @@ let C = class extends V(W) {
   blockBeam() {
     return `
     <umb-ref-grid-block standalone href="">
-      <span style="margin-right: 20px">${u(this, g)}</span> ${u(this, k) ? u(this, I) : ""}
+      <span style="margin-right: 20px">${u(this, v)}</span> ${u(this, k) ? u(this, I) : ""}
 		</umb-ref-grid-block>`;
   }
   render() {
-    return J`${K(u(this, f))}`;
+    return J`${z(u(this, T))}`;
   }
 };
 q = /* @__PURE__ */ new WeakMap();
-v = /* @__PURE__ */ new WeakMap();
-b = /* @__PURE__ */ new WeakMap();
+g = /* @__PURE__ */ new WeakMap();
+f = /* @__PURE__ */ new WeakMap();
 D = /* @__PURE__ */ new WeakMap();
 E = /* @__PURE__ */ new WeakMap();
 N = /* @__PURE__ */ new WeakMap();
 w = /* @__PURE__ */ new WeakMap();
-g = /* @__PURE__ */ new WeakMap();
+v = /* @__PURE__ */ new WeakMap();
 I = /* @__PURE__ */ new WeakMap();
 k = /* @__PURE__ */ new WeakMap();
-f = /* @__PURE__ */ new WeakMap();
+T = /* @__PURE__ */ new WeakMap();
 B = /* @__PURE__ */ new WeakMap();
-C.styles = z`
+C.styles = K`
   .kibp_content.hidden {
     height: 0;
     overflow:hidden;
@@ -1374,7 +1379,8 @@ C.styles = z`
       transition: all ease 0.4s;
       color: white;
       font-weight: bold;
-      position: fixed;
+      position: absolute;
+      top: 0;
       font-size: 12px;
       overflow: hidden;
       display: flex;
@@ -1413,4 +1419,4 @@ export {
   C as InstantBlockPreview,
   Be as default
 };
-//# sourceMappingURL=knowit-instant-block-preview-BLlfKzsD.js.map
+//# sourceMappingURL=knowit-instant-block-preview-DPqZvmKu.js.map

@@ -47,6 +47,7 @@ The following values are available for configuration:
   "injections": []
   "areaReplace": true, 
   "CollapsibleBlocks": false,
+  "divInlineStyle": "",
   "enableFor": [], // only v14 and newer, see below
   "disableFor": [], // only v14 and newer, see below
 }
@@ -58,6 +59,7 @@ The following values are available for configuration:
 - `injections` - In short, a way to add lines of code to the start of the preview-HTML. Use it to inject your web-components JS or your app or something else!
 - `areaReplace` - If set to true, will try to render grid areas wherever it finds the magic viewbag item "@ViewBag.renderGridAreaSlots"
 - `CollapsibleBlocks` - If set to true, will render blocks with a collapsible div around them.
+- `divInlineStyle` - Inline style configuration for the div element containing the block rendered as a string in a style attribute.
 
 AreaReplace example: 
 
