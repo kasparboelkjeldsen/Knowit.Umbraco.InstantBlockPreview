@@ -6,7 +6,7 @@
 	  <Product>Knowit.Umbraco.InstantBlockPreview</Product>
 	  <PackageId>Knowit.Umbraco.InstantBlockPreview</PackageId>
 	  <Title>Knowit.Umbraco.InstantBlockPreview</Title>
-	  <Description>Umbraco v14.1 or newer! Instant block and grid previews in Umbraco without saving your documents</Description>
+	  <Description>Instant block and grid previews in Umbraco without saving your documents</Description>
 	  <PackageTags>umbraco;plugin;package;umbraco-marketplace;knowit;umbraco-14</PackageTags>
 	  <Authors>KasparBoelKjeldsen</Authors>
 	  <Company>Knowit Experience Copenhagen</Company>
@@ -16,7 +16,7 @@
 	  <RepositoryUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
 	  <SignAssembly>False</SignAssembly>
-	  <Version>2.1.7</Version>
+	  <Version>2.1.8</Version>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <Configurations>Debug;Release;</Configurations>
 	  <PackageIcon>icon.png</PackageIcon>
