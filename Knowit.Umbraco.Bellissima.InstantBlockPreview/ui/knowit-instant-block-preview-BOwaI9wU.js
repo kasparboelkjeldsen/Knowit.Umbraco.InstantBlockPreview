@@ -1,17 +1,18 @@
-import { LitElement as W, html as J, unsafeHTML as K, css as z, customElement as X } from "@umbraco-cms/backoffice/external/lit";
-import { UmbElementMixin as V } from "@umbraco-cms/backoffice/element-api";
-import { UMB_PROPERTY_CONTEXT as Y } from "@umbraco-cms/backoffice/property";
-import { UMB_DOCUMENT_WORKSPACE_CONTEXT as Q } from "@umbraco-cms/backoffice/document";
-import { UmbContextToken as P } from "@umbraco-cms/backoffice/context-api";
-import { observeMultiple as j } from "@umbraco-cms/backoffice/observable-api";
-import { debounce as Z } from "@umbraco-cms/backoffice/utils";
-import { O as n } from "./index-RpIElxGb.js";
-class A extends Error {
+import { LitElement as z, html as D, unsafeHTML as A, css as X, customElement as V } from "@umbraco-cms/backoffice/external/lit";
+import { UmbElementMixin as Y } from "@umbraco-cms/backoffice/element-api";
+import { UMB_PROPERTY_CONTEXT as Q } from "@umbraco-cms/backoffice/property";
+import { UMB_DOCUMENT_WORKSPACE_CONTEXT as Z } from "@umbraco-cms/backoffice/document";
+import { UmbContextToken as x } from "@umbraco-cms/backoffice/context-api";
+import { observeMultiple as G } from "@umbraco-cms/backoffice/observable-api";
+import { debounce as ee } from "@umbraco-cms/backoffice/utils";
+import { O as n } from "./index-BdvufcEH.js";
+import "@umbraco-cms/backoffice/ufm";
+class H extends Error {
   constructor(e, r, s) {
     super(s), this.name = "ApiError", this.url = r.url, this.status = r.status, this.statusText = r.statusText, this.body = r.body, this.request = e;
   }
 }
-class ee extends Error {
+class te extends Error {
   constructor(e) {
     super(e), this.name = "CancelError";
   }
@@ -19,7 +20,7 @@ class ee extends Error {
     return !0;
   }
 }
-class te {
+class re {
   constructor(e) {
     this._isResolved = !1, this._isRejected = !1, this._isCancelled = !1, this.cancelHandlers = [], this.promise = new Promise((r, s) => {
       this._resolve = r, this._reject = s;
@@ -61,87 +62,87 @@ class te {
           console.warn("Cancellation threw an error", e);
           return;
         }
-      this.cancelHandlers.length = 0, this._reject && this._reject(new ee("Request aborted"));
+      this.cancelHandlers.length = 0, this._reject && this._reject(new te("Request aborted"));
     }
   }
   get isCancelled() {
     return this._isCancelled;
   }
 }
-const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t instanceof Blob, H = (t) => t instanceof FormData, re = (t) => {
+const _ = (t) => typeof t == "string", U = (t) => _(t) && t !== "", F = (t) => t instanceof Blob, L = (t) => t instanceof FormData, ae = (t) => {
   try {
     return btoa(t);
   } catch {
     return Buffer.from(t).toString("base64");
   }
-}, ae = (t) => {
+}, oe = (t) => {
   const e = [], r = (o, a) => {
     e.push(`${encodeURIComponent(o)}=${encodeURIComponent(String(a))}`);
   }, s = (o, a) => {
     a != null && (a instanceof Date ? r(o, a.toISOString()) : Array.isArray(a) ? a.forEach((d) => s(o, d)) : typeof a == "object" ? Object.entries(a).forEach(([d, i]) => s(`${o}[${d}]`, i)) : r(o, a));
   };
   return Object.entries(t).forEach(([o, a]) => s(o, a)), e.length ? `?${e.join("&")}` : "";
-}, oe = (t, e) => {
+}, se = (t, e) => {
   const r = encodeURI, s = e.url.replace("{api-version}", t.VERSION).replace(/{(.*?)}/g, (a, d) => {
     var i;
     return (i = e.path) != null && i.hasOwnProperty(d) ? r(String(e.path[d])) : a;
   }), o = t.BASE + s;
-  return e.query ? o + ae(e.query) : o;
-}, se = (t) => {
+  return e.query ? o + oe(e.query) : o;
+}, ie = (t) => {
   if (t.formData) {
     const e = new FormData(), r = (s, o) => {
-      _(o) || O(o) ? e.append(s, o) : e.append(s, JSON.stringify(o));
+      _(o) || F(o) ? e.append(s, o) : e.append(s, JSON.stringify(o));
     };
     return Object.entries(t.formData).filter(([, s]) => s != null).forEach(([s, o]) => {
       Array.isArray(o) ? o.forEach((a) => r(s, a)) : r(s, o);
     }), e;
   }
-}, D = async (t, e) => typeof e == "function" ? e(t) : e, ie = async (t, e) => {
+}, E = async (t, e) => typeof e == "function" ? e(t) : e, ne = async (t, e) => {
   const [r, s, o, a] = await Promise.all([
     // @ts-ignore
-    D(e, t.TOKEN),
+    E(e, t.TOKEN),
     // @ts-ignore
-    D(e, t.USERNAME),
+    E(e, t.USERNAME),
     // @ts-ignore
-    D(e, t.PASSWORD),
+    E(e, t.PASSWORD),
     // @ts-ignore
-    D(e, t.HEADERS)
+    E(e, t.HEADERS)
   ]), d = Object.entries({
     Accept: "application/json",
     ...a,
     ...e.headers
-  }).filter(([, i]) => i != null).reduce((i, [p, h]) => ({
+  }).filter(([, i]) => i != null).reduce((i, [l, h]) => ({
     ...i,
-    [p]: String(h)
+    [l]: String(h)
   }), {});
-  if (S(r) && (d.Authorization = `Bearer ${r}`), S(s) && S(o)) {
-    const i = re(`${s}:${o}`);
+  if (U(r) && (d.Authorization = `Bearer ${r}`), U(s) && U(o)) {
+    const i = ae(`${s}:${o}`);
     d.Authorization = `Basic ${i}`;
   }
-  return e.body !== void 0 && (e.mediaType ? d["Content-Type"] = e.mediaType : O(e.body) ? d["Content-Type"] = e.body.type || "application/octet-stream" : _(e.body) ? d["Content-Type"] = "text/plain" : H(e.body) || (d["Content-Type"] = "application/json")), new Headers(d);
-}, ne = (t) => {
+  return e.body !== void 0 && (e.mediaType ? d["Content-Type"] = e.mediaType : F(e.body) ? d["Content-Type"] = e.body.type || "application/octet-stream" : _(e.body) ? d["Content-Type"] = "text/plain" : L(e.body) || (d["Content-Type"] = "application/json")), new Headers(d);
+}, ce = (t) => {
   var e, r;
   if (t.body !== void 0)
-    return (e = t.mediaType) != null && e.includes("application/json") || (r = t.mediaType) != null && r.includes("+json") ? JSON.stringify(t.body) : _(t.body) || O(t.body) || H(t.body) ? t.body : JSON.stringify(t.body);
-}, ce = async (t, e, r, s, o, a, d) => {
+    return (e = t.mediaType) != null && e.includes("application/json") || (r = t.mediaType) != null && r.includes("+json") ? JSON.stringify(t.body) : _(t.body) || F(t.body) || L(t.body) ? t.body : JSON.stringify(t.body);
+}, de = async (t, e, r, s, o, a, d) => {
   const i = new AbortController();
-  let p = {
+  let l = {
     headers: a,
     body: s ?? o,
     method: e.method,
     signal: i.signal
   };
-  t.WITH_CREDENTIALS && (p.credentials = t.CREDENTIALS);
+  t.WITH_CREDENTIALS && (l.credentials = t.CREDENTIALS);
   for (const h of t.interceptors.request._fns)
-    p = await h(p);
-  return d(() => i.abort()), await fetch(r, p);
-}, de = (t, e) => {
+    l = await h(l);
+  return d(() => i.abort()), await fetch(r, l);
+}, ue = (t, e) => {
   if (e) {
     const r = t.headers.get(e);
     if (_(r))
       return r;
   }
-}, ue = async (t) => {
+}, he = async (t) => {
   if (t.status !== 204)
     try {
       const e = t.headers.get("Content-Type");
@@ -159,7 +160,7 @@ const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t
     } catch (e) {
       console.error(e);
     }
-}, he = (t, e) => {
+}, pe = (t, e) => {
   const s = {
     400: "Bad Request",
     401: "Unauthorized",
@@ -204,7 +205,7 @@ const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t
     ...t.errors
   }[e.status];
   if (s)
-    throw new A(t, e, s);
+    throw new H(t, e, s);
   if (!e.ok) {
     const o = e.status ?? "unknown", a = e.statusText ?? "unknown", d = (() => {
       try {
@@ -213,36 +214,36 @@ const _ = (t) => typeof t == "string", S = (t) => _(t) && t !== "", O = (t) => t
         return;
       }
     })();
-    throw new A(
+    throw new H(
       t,
       e,
       `Generic Error: status: ${o}; status text: ${a}; body: ${d}`
     );
   }
-}, c = (t, e) => new te(async (r, s, o) => {
+}, c = (t, e) => new re(async (r, s, o) => {
   try {
-    const a = oe(t, e), d = se(e), i = ne(e), p = await ie(t, e);
+    const a = se(t, e), d = ie(e), i = ce(e), l = await ne(t, e);
     if (!o.isCancelled) {
-      let h = await ce(t, e, a, i, d, p, o);
-      for (const L of t.interceptors.response._fns)
-        h = await L(h);
-      const y = await ue(h), b = de(h, e.responseHeader);
-      let U = y;
-      e.responseTransformer && h.ok && (U = await e.responseTransformer(y));
-      const F = {
+      let h = await de(t, e, a, i, d, l, o);
+      for (const K of t.interceptors.response._fns)
+        h = await K(h);
+      const y = await he(h), b = ue(h, e.responseHeader);
+      let P = y;
+      e.responseTransformer && h.ok && (P = await e.responseTransformer(y));
+      const j = {
         url: a,
         ok: h.ok,
         status: h.status,
         statusText: h.statusText,
-        body: b ?? U
+        body: b ?? P
       };
-      he(e, F), r(F.body);
+      pe(e, j), r(j.body);
     }
   } catch (a) {
     s(a);
   }
 });
-class x {
+class M {
   /**
    * @param data The data for the request.
    * @param data.requestBody
@@ -656,7 +657,7 @@ class x {
     });
   }
 }
-class G {
+class $ {
   /**
    * @param data The data for the request.
    * @param data.requestBody
@@ -1182,28 +1183,28 @@ class G {
     });
   }
 }
-var pe = Object.defineProperty, le = Object.getOwnPropertyDescriptor, M = (t) => {
+var le = Object.defineProperty, me = Object.getOwnPropertyDescriptor, W = (t) => {
   throw TypeError(t);
-}, me = (t, e, r, s) => {
-  for (var o = s > 1 ? void 0 : s ? le(e, r) : e, a = t.length - 1, d; a >= 0; a--)
+}, ye = (t, e, r, s) => {
+  for (var o = s > 1 ? void 0 : s ? me(e, r) : e, a = t.length - 1, d; a >= 0; a--)
     (d = t[a]) && (o = (s ? d(e, r, o) : d(o)) || o);
-  return s && o && pe(e, r, o), o;
-}, $ = (t, e, r) => e.has(t) || M("Cannot " + r), u = (t, e, r) => ($(t, e, "read from private field"), r ? r.call(t) : e.get(t)), m = (t, e, r) => e.has(t) ? M("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(t) : e.set(t, r), l = (t, e, r, s) => ($(t, e, "write to private field"), e.set(t, r), r), g, k, f, E, R, N, w, v, I, q, T, B;
-let C = class extends V(W) {
+  return s && o && le(e, r, o), o;
+}, J = (t, e, r) => e.has(t) || W("Cannot " + r), u = (t, e, r) => (J(t, e, "read from private field"), r ? r.call(t) : e.get(t)), m = (t, e, r) => e.has(t) ? W("Cannot add the same private member more than once") : e instanceof WeakSet ? e.add(t) : e.set(t, r), p = (t, e, r, s) => (J(t, e, "write to private field"), e.set(t, r), r), g, k, f, R, w, N, I, v, C, q, T, B, S;
+let O = class extends Y(z) {
   constructor() {
-    super(), m(this, g), m(this, k), m(this, f), m(this, E), m(this, R), m(this, N), m(this, w), m(this, v), m(this, I, '<uui-loader style="margin-right: 20px"></uui-loader> Loading preview...'), m(this, q, !1), m(this, T, ""), m(this, B), l(this, k, {}), l(this, f, {}), l(this, g, {}), l(this, T, this.blockBeam()), fetch("/api/blockpreview").then((t) => t.json()).then((t) => {
-      l(this, g, t);
-      const e = new P("UmbBlockEntryContext"), r = new P("UmbBlockEntryContext");
-      this.consumeContext(Q, (s) => {
-        l(this, R, s.getUnique()), l(this, w, s.getContentTypeId());
-      }), this.consumeContext(Y, (s) => {
-        l(this, N, s.getAlias()), this.consumeContext(e, (o) => {
+    super(), m(this, g), m(this, k), m(this, f), m(this, R), m(this, w), m(this, N), m(this, I), m(this, v), m(this, C, '<uui-loader style="margin-right: 20px"></uui-loader> Loading preview...'), m(this, q, !1), m(this, T), m(this, B), m(this, S), p(this, k, {}), p(this, f, {}), p(this, g, {}), p(this, T, this.blockBeam()), fetch("/api/blockpreview").then((t) => t.json()).then((t) => {
+      p(this, g, t);
+      const e = new x("UmbBlockEntryContext"), r = new x("UmbBlockEntryContext");
+      this.consumeContext(Z, (s) => {
+        p(this, w, s.getUnique()), p(this, I, s.getContentTypeId());
+      }), this.consumeContext(Q, (s) => {
+        p(this, N, s.getAlias()), this.consumeContext(e, (o) => {
           this.observe(o.label, (a) => {
-            l(this, v, a), l(this, T, this.blockBeam()), this.requestUpdate();
-          }), this.observe(j(o.content, s.value), ([a, d]) => {
+            p(this, v, a), p(this, T, this.blockBeam()), this.requestUpdate();
+          }), this.observe(G(o.content, s.value), ([a, d]) => {
             const i = a;
-            u(this, f)[i.contentTypeKey] === void 0 ? G.getDocumentTypeById({ id: i.contentTypeKey }).then((p) => {
-              const h = p.properties.map((y) => x.getDataTypeById({ id: y.dataType.id }).then((b) => {
+            p(this, S, i), u(this, f)[i.contentTypeKey] === void 0 ? $.getDocumentTypeById({ id: i.contentTypeKey }).then((l) => {
+              const h = l.properties.map((y) => M.getDataTypeById({ id: y.dataType.id }).then((b) => {
                 u(this, f)[y.alias] = b.editorAlias;
               }));
               Promise.all(h).then(() => {
@@ -1211,15 +1212,15 @@ let C = class extends V(W) {
               });
             }) : this.handleBlock(i, d);
           }), o.areas && this.observe(o.areas, (a) => {
-            l(this, B, a);
+            p(this, B, a);
           });
         }), this.consumeContext(r, (o) => {
           this.observe(o.label, (a) => {
-            l(this, v, a), l(this, T, this.blockBeam()), this.requestUpdate();
-          }), this.observe(j(o.content, s.value), ([a, d]) => {
+            p(this, v, a), p(this, T, this.blockBeam()), this.requestUpdate();
+          }), this.observe(G(o.content, s.value), ([a, d]) => {
             const i = a;
-            u(this, f)[i.contentTypeKey] === void 0 ? G.getDocumentTypeById({ id: i.contentTypeKey }).then((p) => {
-              const h = p.properties.map((y) => x.getDataTypeById({ id: y.dataType.id }).then((b) => {
+            u(this, f)[i.contentTypeKey] === void 0 ? $.getDocumentTypeById({ id: i.contentTypeKey }).then((l) => {
+              const h = l.properties.map((y) => M.getDataTypeById({ id: y.dataType.id }).then((b) => {
                 u(this, f)[y.alias] = b.editorAlias;
               }));
               Promise.all(h).then(() => {
@@ -1265,7 +1266,7 @@ let C = class extends V(W) {
     return t;
   }
   handleBlock(t, e) {
-    if (l(this, q, !0), !e) return;
+    if (p(this, q, !0), !e) return;
     const r = JSON.parse(JSON.stringify(e));
     if (t = JSON.parse(JSON.stringify(t)), u(this, k)[t.udi] && JSON.stringify(u(this, k)[t.udi]) === JSON.stringify(t))
       return;
@@ -1276,12 +1277,12 @@ let C = class extends V(W) {
       r.settingsData[a] = this.parseBadKeys(r.settingsData[a]);
     for (let a = 0; a < r.contentData.length; a++)
       r.contentData[a] = this.parseBadKeys(r.contentData[a]);
-    l(this, E, r);
+    p(this, R, r);
     const o = {
-      content: JSON.stringify(u(this, E)),
-      contentId: u(this, R),
+      content: JSON.stringify(u(this, R)),
+      contentId: u(this, w),
       propertyTypeAlias: u(this, N),
-      contentTypeId: u(this, w)
+      contentTypeId: u(this, I)
     };
     fetch("/api/blockpreview", {
       method: "POST",
@@ -1290,38 +1291,38 @@ let C = class extends V(W) {
         "Content-Type": "application/json"
       }
     }).then((a) => a.json()).then((a) => {
-      if (l(this, q, !1), a.html === "blockbeam")
-        l(this, T, this.blockBeam());
+      if (p(this, q, !1), a.html === "blockbeam")
+        p(this, T, this.blockBeam());
       else {
-        const i = a.html.includes("###renderGridAreaSlots"), p = u(this, g).divInlineStyle ? `style="${u(this, g).divInlineStyle}"` : "";
+        const i = a.html.includes("###renderGridAreaSlots"), l = u(this, g).divInlineStyle ? `style="${u(this, g).divInlineStyle}"` : "";
         if (i) {
           const h = this.areas();
-          a.html = a.html.replace("###renderGridAreaSlots", h), l(this, T, `
-            <div class="kibp_defaultDivStyle" ${p}">
+          a.html = a.html.replace("###renderGridAreaSlots", h), p(this, T, D`
+            <div class="kibp_defaultDivStyle" ${l}">
               <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${u(this, v)} &nbsp;&nbsp; (Click to maximize)</span></div>
                 <div class="kibp_content">
-                  ${a.html}
+                ${A(a.html)}
                 </div>
               </div>
             </div>`);
         } else
-          l(this, T, `
-            <div class="kibp_defaultDivStyle" ${p}">
+          p(this, T, D`
+            <div class="kibp_defaultDivStyle" ${l}">
               <div id="kibp_collapsible">
                 <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${u(this, v)} &nbsp;&nbsp; (Click to maximize)</span></div>
                   <div class="kibp_content">
-                    ${a.html}
+                    ${A(a.html)}
                   </div>
                 </div>
               </div>
             </div>`);
       }
-      this.requestUpdate(), Z(() => {
+      this.requestUpdate(), ee(() => {
         var h, y;
         this.manageScripts();
-        const i = (h = this.shadowRoot) == null ? void 0 : h.querySelector(".kibp_collaps"), p = (y = this.shadowRoot) == null ? void 0 : y.querySelector(".kibp_content");
+        const i = (h = this.shadowRoot) == null ? void 0 : h.querySelector(".kibp_collaps"), l = (y = this.shadowRoot) == null ? void 0 : y.querySelector(".kibp_content");
         u(this, g).collapsibleBlocks ? i == null || i.addEventListener("click", (b) => {
-          i.classList.toggle("active"), p == null || p.classList.toggle("hidden"), b.preventDefault(), b.stopImmediatePropagation();
+          i.classList.toggle("active"), l == null || l.classList.toggle("hidden"), b.preventDefault(), b.stopImmediatePropagation();
         }) : (i == null || i.classList.remove("kibp_collaps"), i == null || i.remove());
       }, 100)();
     });
@@ -1340,34 +1341,36 @@ let C = class extends V(W) {
   areas() {
     return u(this, B) && u(this, B).length > 0 ? `
       <umb-ref-grid-block standalone href="">
-        <span style="margin-right: 20px">${u(this, v)}</span> ${u(this, q) ? u(this, I) : ""}
+        <span style="margin-right: 20px">${u(this, v)}</span> ${u(this, q) ? u(this, C) : ""}
         <umb-block-grid-areas-container slot="areas"></umb-block-grid-areas-container>
       </umb-ref-grid-block>
       ` : "";
   }
   blockBeam() {
-    return `
+    return D`
     <umb-ref-grid-block standalone href="">
-      <span style="margin-right: 20px">${u(this, v)}</span> ${u(this, q) ? u(this, I) : ""}
+      <umb-ufm-render inline .markdown=${u(this, v)} .value=${u(this, S)}></umb-ufm-render>
+      ${u(this, q) ? u(this, C) : ""}
 		</umb-ref-grid-block>`;
   }
   render() {
-    return J`${K(u(this, T))}`;
+    return D`${u(this, T)}`;
   }
 };
 g = /* @__PURE__ */ new WeakMap();
 k = /* @__PURE__ */ new WeakMap();
 f = /* @__PURE__ */ new WeakMap();
-E = /* @__PURE__ */ new WeakMap();
 R = /* @__PURE__ */ new WeakMap();
-N = /* @__PURE__ */ new WeakMap();
 w = /* @__PURE__ */ new WeakMap();
-v = /* @__PURE__ */ new WeakMap();
+N = /* @__PURE__ */ new WeakMap();
 I = /* @__PURE__ */ new WeakMap();
+v = /* @__PURE__ */ new WeakMap();
+C = /* @__PURE__ */ new WeakMap();
 q = /* @__PURE__ */ new WeakMap();
 T = /* @__PURE__ */ new WeakMap();
 B = /* @__PURE__ */ new WeakMap();
-C.styles = z`
+S = /* @__PURE__ */ new WeakMap();
+O.styles = X`
   .kibp_content.hidden {
     height: 0;
     overflow:hidden;
@@ -1420,12 +1423,12 @@ C.styles = z`
         display: inline;
     }
   `;
-C = me([
-  X("knowit-instant-block-preview")
-], C);
-const Be = C;
+O = ye([
+  V("knowit-instant-block-preview")
+], O);
+const De = O;
 export {
-  C as InstantBlockPreview,
-  Be as default
+  O as InstantBlockPreview,
+  De as default
 };
-//# sourceMappingURL=knowit-instant-block-preview-CjtgxHiU.js.map
+//# sourceMappingURL=knowit-instant-block-preview-BOwaI9wU.js.map

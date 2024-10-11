@@ -1,5 +1,7 @@
-﻿import { LitElement, html, customElement, unsafeHTML, css} from "@umbraco-cms/backoffice/external/lit";
+﻿import { LitElement, html, customElement, unsafeHTML, css, TemplateResult} from "@umbraco-cms/backoffice/external/lit";
 import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api";
+import { UMB_BLOCK_GRID_ENTRY_CONTEXT } from '@umbraco-cms/backoffice/block-grid';
+import { UMB_BLOCK_LIST_ENTRY_CONTEXT } from '@umbraco-cms/backoffice/block-list';
 import { UMB_PROPERTY_CONTEXT } from '@umbraco-cms/backoffice/property';
 import { UMB_DOCUMENT_WORKSPACE_CONTEXT } from "@umbraco-cms/backoffice/document";
 import { UmbWorkspaceUniqueType } from "@umbraco-cms/backoffice/workspace";
@@ -8,13 +10,15 @@ import { observeMultiple } from "@umbraco-cms/backoffice/observable-api";
 import { debounce } from "@umbraco-cms/backoffice/utils";
 import { DocumentTypeService, DataTypeService } from "../api";
 
+import '@umbraco-cms/backoffice/ufm';
 
 @customElement('knowit-instant-block-preview')
 export class InstantBlockPreview extends UmbElementMixin(LitElement) {
 
+  
+  
   #settings: any | undefined = undefined;
   #contentVals : any |undefined = undefined;
-  #definitions: any | undefined = undefined;
   #currentValue : any | undefined = undefined;
   #currentId : UmbWorkspaceUniqueType | undefined = undefined;
   #propertyType: string | undefined = undefined;
@@ -22,22 +26,80 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
   #label: string | undefined = undefined;
   #loader = `<uui-loader style="margin-right: 20px"></uui-loader> Loading preview...`;
   #showLoader = false;
-  #htmlOutput = ``;
+  #htmlOutput : TemplateResult | undefined = undefined;
   #areas: any | undefined = undefined;
+  #content: any | undefined = undefined;
+
+  static typeKeys : any | undefined = [];
+  static typeDefinitions :any | undefined = {};
+  static override styles = css`
+  .kibp_content.hidden {
+    height: 0;
+    overflow:hidden;
+  }
+
+  .kibp_defaultDivStyle {
+    border: 1px solid var(--uui-color-border,#d8d7d9);
+    min-height: 50px; box-sizing: border-box;
+  }
+
+  #kibp_collapsible:hover .kibp_collaps {
+    height: 25px;
+  }
+  .kibp_collaps {
+      height: 0px;
+      width: 150px;
+      background-color: #1b264f;
+      transition: all ease 0.4s;
+      color: white;
+      font-weight: bold;
+      position: absolute;
+      top: 0;
+      font-size: 12px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      opacity: 0.8;
+      cursor: pointer;
+  }
+      .kibp_collaps span {
+        margin-left: 10px;
+      }
+
+.kibp_collaps .active {
+    display: none;
+}
+
+.kibp_collaps.active {
+    background-color: #86a0ff;
+    height: 50px !important;
+    width: 100%;
+    position: initial;
+}
+
+    .kibp_collaps.active .inactive {
+        display: none;
+    }
+
+    .kibp_collaps.active .active {
+        display: inline;
+    }
+  `
+
 
   constructor() {
     super();
-
+    
     this.#contentVals = {};
-    this.#definitions = {};
+    
     this.#settings = {};
     this.#htmlOutput = this.blockBeam();
 
     fetch('/api/blockpreview').then(response => response.json()).then(data => {
       this.#settings = data;
       // currently not exposed by the context-api, so we need to create our own
-      const UMB_BLOCK_GRID_ENTRY_CONTEXT = new UmbContextToken<any>('UmbBlockEntryContext')
-      const UMB_BLOCK_LIST_ENTRY_CONTEXT = new UmbContextToken<any>('UmbBlockEntryContext');
+      //const UMB_BLOCK_GRID_ENTRY_CONTEXT = new UmbContextToken<any>('UmbBlockEntryContext')
+      //const UMB_BLOCK_LIST_ENTRY_CONTEXT = new UmbContextToken<any>('UmbBlockEntryContext');
       
       // fetch id and type-id from the document
       this.consumeContext(UMB_DOCUMENT_WORKSPACE_CONTEXT, (workspaceContext) => {
@@ -58,16 +120,23 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
             this.requestUpdate();
           });
           
-          // handle the block whenever content or value change
-          this.observe(observeMultiple(context.content, propertyContext.value), ([content, currentValue]) => {
-            const anyContent = content as any;
 
-            if (this.#definitions[anyContent.contentTypeKey] === undefined) {
+          debugger;
+          // handle the block whenever content or value change
+          console.log('is it here?')
+          this.observe(observeMultiple([context.contentKey, propertyContext.value]), ([content, currentValue]) => {
+            console.log("content",content)
+            const anyContent = content as any;
+            this.#content = anyContent;
+            
+            if (InstantBlockPreview.typeKeys.find((x: any) => x == anyContent.contentTypeKey) === undefined) {
+              
               DocumentTypeService.getDocumentTypeById({ id: anyContent.contentTypeKey }).then((response) => {
                 // Create an array of promises for all DataTypeService.getDataTypeById calls
                 const promises = response.properties.map((prop) => {
                   return DataTypeService.getDataTypeById({ id: prop.dataType.id }).then((dataType) => {
-                    this.#definitions[prop.alias] = dataType.editorAlias;
+                    InstantBlockPreview.typeDefinitions[prop.alias] = { alias: prop.alias, editorAlias: dataType.editorAlias};
+                    InstantBlockPreview.typeKeys.push(anyContent.contentTypeKey);
                   });
                 });
 
@@ -103,12 +172,14 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
             
             const anyContent = content as any;
 
-            if (this.#definitions[anyContent.contentTypeKey] === undefined) {
+            if (InstantBlockPreview.typeKeys.find(x => x == anyContent.contentTypeKey) === undefined) {
+              
               DocumentTypeService.getDocumentTypeById({ id: anyContent.contentTypeKey }).then((response) => {
                 // Create an array of promises for all DataTypeService.getDataTypeById calls
                 const promises = response.properties.map((prop) => {
                   return DataTypeService.getDataTypeById({ id: prop.dataType.id }).then((dataType) => {
-                    this.#definitions[prop.alias] = dataType.editorAlias;
+                    InstantBlockPreview.typeDefinitions[prop.alias] = { alias: prop.alias, editorAlias: dataType.editorAlias};
+                    InstantBlockPreview.typeKeys.push(anyContent.contentTypeKey);
                   });
                 });
             
@@ -133,7 +204,9 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
   parseBadKeys(content: any) {
     for (const key in content) {
       const value = content[key];
-      const editorAlias = this.#definitions[key];
+      
+
+      const editorAlias = InstantBlockPreview.typeDefinitions[key]?.editorAlias;
       
       if(editorAlias) {
         switch(editorAlias) {
@@ -224,22 +297,22 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
         if(containsRenderGridAreaSlots) {
           const areaHtml = this.areas();
           data.html = data.html.replace("###renderGridAreaSlots", areaHtml);
-          this.#htmlOutput = `
+          this.#htmlOutput = html`
             <div class="kibp_defaultDivStyle" ${divStyle}">
               <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${this.#label} &nbsp;&nbsp; (Click to maximize)</span></div>
                 <div class="kibp_content">
-                  ${data.html}
+                ${unsafeHTML(data.html)}
                 </div>
               </div>
             </div>`;
         }
         else {
-          this.#htmlOutput = `
+          this.#htmlOutput = html`
             <div class="kibp_defaultDivStyle" ${divStyle}">
               <div id="kibp_collapsible">
                 <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${this.#label} &nbsp;&nbsp; (Click to maximize)</span></div>
                   <div class="kibp_content">
-                    ${data.html}
+                    ${unsafeHTML(data.html)}
                   </div>
                 </div>
               </div>
@@ -276,61 +349,6 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
     });
 
   }
-
-
-  static override styles = css`
-  .kibp_content.hidden {
-    height: 0;
-    overflow:hidden;
-  }
-
-  .kibp_defaultDivStyle {
-    border: 1px solid var(--uui-color-border,#d8d7d9);
-    min-height: 50px; box-sizing: border-box;
-  }
-
-  #kibp_collapsible:hover .kibp_collaps {
-    height: 25px;
-  }
-  .kibp_collaps {
-      height: 0px;
-      width: 150px;
-      background-color: #1b264f;
-      transition: all ease 0.4s;
-      color: white;
-      font-weight: bold;
-      position: absolute;
-      top: 0;
-      font-size: 12px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      opacity: 0.8;
-      cursor: pointer;
-  }
-      .kibp_collaps span {
-        margin-left: 10px;
-      }
-
-.kibp_collaps .active {
-    display: none;
-}
-
-.kibp_collaps.active {
-    background-color: #86a0ff;
-    height: 50px !important;
-    width: 100%;
-    position: initial;
-}
-
-    .kibp_collaps.active .inactive {
-        display: none;
-    }
-
-    .kibp_collaps.active .active {
-        display: inline;
-    }
-  `
 
   manageScripts() {
     const scripts = this.shadowRoot?.querySelectorAll('script');
@@ -371,14 +389,15 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
 
   blockBeam() {
     // todo, fix href
-    return `
+    return html`
     <umb-ref-grid-block standalone href="">
-      <span style="margin-right: 20px">${this.#label}</span> ${this.#showLoader ? this.#loader : ''}
+      <umb-ufm-render inline .markdown=${this.#label} .value=${this.#content}></umb-ufm-render>
+      ${this.#showLoader ? this.#loader : ''}
 		</umb-ref-grid-block>`
   }
 
   render() {
-    return html`${unsafeHTML(this.#htmlOutput)}`;
+    return html`${this.#htmlOutput}`;
   }
 }
 

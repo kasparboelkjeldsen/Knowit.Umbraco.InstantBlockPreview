@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 	  <ContentTargetFolders>.</ContentTargetFolders>
 	  <Product>Knowit.Umbraco.InstantBlockPreview</Product>
 	  <PackageId>Knowit.Umbraco.InstantBlockPreview</PackageId>
@@ -16,7 +16,7 @@
 	  <RepositoryUrl>https://github.com/kasparboelkjeldsen/Knowit.Umbraco.InstantBlockPreview</RepositoryUrl>
 	  <RepositoryType>git</RepositoryType>
 	  <SignAssembly>False</SignAssembly>
-	  <Version>2.1.8</Version>
+	  <Version>2.2.1</Version>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <Configurations>Debug;Release;</Configurations>
 	  <PackageIcon>icon.png</PackageIcon>
@@ -29,6 +29,11 @@
 		<PackageReference Include="Umbraco.Cms.Web.Website" Version="[14.1.0,15.0.0)" />
 	</ItemGroup>
 
+	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
+		<PackageReference Include="Umbraco.Cms.Core" Version="[15.0-rc1,16.0.0)" />
+		<PackageReference Include="Umbraco.Cms.Web.Common" Version="[15.0-rc1,16.0.0)" />
+		<PackageReference Include="Umbraco.Cms.Web.Website" Version="[15.0-rc1,16.0.0)" />
+	</ItemGroup>
 	<ItemGroup>
 		<None Include="buildTransitive\**" Pack="true" PackagePath="buildTransitive" />
 	</ItemGroup>
