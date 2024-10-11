@@ -5,33 +5,41 @@ import { UMB_BLOCK_LIST_ENTRY_CONTEXT } from '@umbraco-cms/backoffice/block-list
 import { UMB_PROPERTY_CONTEXT } from '@umbraco-cms/backoffice/property';
 import { UMB_DOCUMENT_WORKSPACE_CONTEXT } from "@umbraco-cms/backoffice/document";
 import { UmbWorkspaceUniqueType } from "@umbraco-cms/backoffice/workspace";
-import { UmbContextToken } from "@umbraco-cms/backoffice/context-api";
 import { observeMultiple } from "@umbraco-cms/backoffice/observable-api";
 import { debounce } from "@umbraco-cms/backoffice/utils";
-import { DocumentTypeService, DataTypeService } from "../api";
+import { DocumentTypeService, DataTypeService, DataTypeResponseModel } from "../api";
 
 import '@umbraco-cms/backoffice/ufm';
+import { UmbBlockDataType } from "@umbraco-cms/backoffice/block";
 
 @customElement('knowit-instant-block-preview')
 export class InstantBlockPreview extends UmbElementMixin(LitElement) {
 
   
-  
+  #contentKey: string | undefined;
+  #propertyType: string | undefined;
   #settings: any | undefined = undefined;
-  #contentVals : any |undefined = undefined;
-  #currentValue : any | undefined = undefined;
+  #currentSettings: UmbBlockDataType | undefined;
+  #currentContent: UmbBlockDataType | undefined;
+  #currentValue: any | undefined;
+  
   #currentId : UmbWorkspaceUniqueType | undefined = undefined;
-  #propertyType: string | undefined = undefined;
   #documentTypeId: string | undefined = undefined;
+  #contentElementTypeKey : string | undefined = undefined;
+  #settingsElementTypeKey : string | null | undefined;
   #label: string | undefined = undefined;
-  #loader = `<uui-loader style="margin-right: 20px"></uui-loader> Loading preview...`;
+  #loader = `Loading preview...`;
   #showLoader = false;
   #htmlOutput : TemplateResult | undefined = undefined;
-  #areas: any | undefined = undefined;
+  
   #content: any | undefined = undefined;
 
-  static typeKeys : any | undefined = [];
-  static typeDefinitions :any | undefined = {};
+  #contentTypeKey: string | undefined;
+
+  #contentCache: Map<any,any> | undefined = undefined;
+  static typeKeys: string[] = [];
+  static typeDefinitions: { [editorAlias: string]: DataTypeResponseModel } = {};
+
   static override styles = css`
   .kibp_content.hidden {
     height: 0;
@@ -89,216 +97,143 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
 
   constructor() {
     super();
-    
-    this.#contentVals = {};
-    
-    this.#settings = {};
+    this.#contentCache = new Map();
     this.#htmlOutput = this.blockBeam();
 
-    fetch('/api/blockpreview').then(response => response.json()).then(data => {
-      this.#settings = data;
-      // currently not exposed by the context-api, so we need to create our own
-      //const UMB_BLOCK_GRID_ENTRY_CONTEXT = new UmbContextToken<any>('UmbBlockEntryContext')
-      //const UMB_BLOCK_LIST_ENTRY_CONTEXT = new UmbContextToken<any>('UmbBlockEntryContext');
-      
-      // fetch id and type-id from the document
-      this.consumeContext(UMB_DOCUMENT_WORKSPACE_CONTEXT, (workspaceContext) => {
-        this.#currentId = workspaceContext.getUnique();
-        this.#documentTypeId = workspaceContext.getContentTypeId();
-      });
+    this.init();
+  }
 
-      this.consumeContext(UMB_PROPERTY_CONTEXT, (propertyContext) => {
-        this.#propertyType = propertyContext.getAlias();
-      
-        // handle block grid
-        this.consumeContext(UMB_BLOCK_GRID_ENTRY_CONTEXT, (context) => {
-          
-          // fetch the label of the block and init the blockbeam with the label
-          this.observe(context.label, (label) => {
-            this.#label = label as string;
-            this.#htmlOutput = this.blockBeam();
-            this.requestUpdate();
-          });
-          
-
-          debugger;
-          // handle the block whenever content or value change
-          console.log('is it here?')
-          this.observe(observeMultiple([context.contentKey, propertyContext.value]), ([content, currentValue]) => {
-            console.log("content",content)
-            const anyContent = content as any;
-            this.#content = anyContent;
-            
-            if (InstantBlockPreview.typeKeys.find((x: any) => x == anyContent.contentTypeKey) === undefined) {
-              
-              DocumentTypeService.getDocumentTypeById({ id: anyContent.contentTypeKey }).then((response) => {
-                // Create an array of promises for all DataTypeService.getDataTypeById calls
-                const promises = response.properties.map((prop) => {
-                  return DataTypeService.getDataTypeById({ id: prop.dataType.id }).then((dataType) => {
-                    InstantBlockPreview.typeDefinitions[prop.alias] = { alias: prop.alias, editorAlias: dataType.editorAlias};
-                    InstantBlockPreview.typeKeys.push(anyContent.contentTypeKey);
-                  });
-                });
-
-                // Use Promise.all to wait for all DataTypeService.getDataTypeById promises to resolve
-                Promise.all(promises).then(() => {
-                  // All datatypes are loaded, now handle the block
-                  this.handleBlock(anyContent, currentValue);
-                });
-              });
-            } else {
-              this.handleBlock(anyContent, currentValue);
-            }
-
-          });
-
-          // handle areas
-          if(context.areas) {
-            this.observe(context.areas, areas => {
-              this.#areas = areas;
-            });
-          }
-        });
-        
-        // handle block list
-        this.consumeContext(UMB_BLOCK_LIST_ENTRY_CONTEXT, (context) => {
-          this.observe(context.label, (label) => {
-            this.#label = label as string;
-            this.#htmlOutput = this.blockBeam();
-            this.requestUpdate();
-          });
-
-          this.observe(observeMultiple(context.content, propertyContext.value), ([content, currentValue]) => {
-            
-            const anyContent = content as any;
-
-            if (InstantBlockPreview.typeKeys.find(x => x == anyContent.contentTypeKey) === undefined) {
-              
-              DocumentTypeService.getDocumentTypeById({ id: anyContent.contentTypeKey }).then((response) => {
-                // Create an array of promises for all DataTypeService.getDataTypeById calls
-                const promises = response.properties.map((prop) => {
-                  return DataTypeService.getDataTypeById({ id: prop.dataType.id }).then((dataType) => {
-                    InstantBlockPreview.typeDefinitions[prop.alias] = { alias: prop.alias, editorAlias: dataType.editorAlias};
-                    InstantBlockPreview.typeKeys.push(anyContent.contentTypeKey);
-                  });
-                });
-            
-                // Use Promise.all to wait for all DataTypeService.getDataTypeById promises to resolve
-                Promise.all(promises).then(() => {
-                  // All datatypes are loaded, now handle the block
-                  this.handleBlock(anyContent, currentValue);
-                });
-              });
-            } else {
-              this.handleBlock(anyContent, currentValue);
-            }
-            
-          });
-        });
+  async init() {
+    this.#settings = await fetch('/api/blockpreview');
+    
+    this.consumeContext(UMB_DOCUMENT_WORKSPACE_CONTEXT, (workspaceContext) => {
+      this.#currentId = workspaceContext.getUnique();
+      this.#documentTypeId = workspaceContext.getContentTypeId();
+    });
+    this.consumeContext(UMB_PROPERTY_CONTEXT, (propertyContext) => {
+      this.#propertyType = propertyContext.getAlias();
+      this.observe(propertyContext.value, (value) => {
+        this.#currentValue = value;
+        this.handleBlock();
       });
     });
 
-    
+    this.consumeContext(UMB_BLOCK_GRID_ENTRY_CONTEXT, async (context) => {
+        
+      this.#label = context.getLabel();
+      this.#htmlOutput = this.blockBeam();
+      this.requestUpdate();
+      
+      this.observe(context.contentTypeKey, (contentTypeKey) => {
+        this.#contentTypeKey = contentTypeKey;
+      });
+      
+      this.observe(context.contentKey, (contentKey) => {
+        this.#contentKey = contentKey;
+      });
+
+      this.observe(context.contentElementTypeKey, (contentKey) => {
+        this.#contentElementTypeKey = contentKey;
+      });
+
+      this.observe(context.settingsElementTypeKey, (contentKey) => {
+        this.#settingsElementTypeKey = contentKey;
+      });
+      // Use a separate array for the promises, await their resolution with Promise.all()
+      await this.GetDataTypes();
+
+      context.settingsValues().then(async (settings) => {
+        this.observe(settings, async (settings) => {
+          this.#currentSettings = settings;
+          this.handleBlock();
+        });
+      });
+
+      context.contentValues().then(async (blockContent) => {
+        this.observe(blockContent, async (content) => {
+          this.#currentContent = content;
+          this.handleBlock();
+        });
+      });
+    });
   }
 
-  parseBadKeys(content: any) {
-    for (const key in content) {
-      const value = content[key];
-      
-
-      const editorAlias = InstantBlockPreview.typeDefinitions[key]?.editorAlias;
-      
-      if(editorAlias) {
-        switch(editorAlias) {
-          case "Umbraco.Tags":
-            content[key] = JSON.stringify(value);
-          break;
-          case "Umbraco.ContentPicker":
-            const newItem = `umb://document/${value}`;
-            content[key] = newItem;
-          break;
-          case "Umbraco.DropDown.Flexible": 
-            content[key] = JSON.stringify(value);
-          break;
-          case "Umbraco.CheckBoxList": 
-            content[key] = JSON.stringify(value);
-          break;
-
-          case "Umbraco.MultipleTextstring": 
-            content[key] = value.join('\n');
-          break;
-          case "Umbraco.MultiNodeTreePicker": 
-            for (let i = 0; i < content[key].length; i++) {
-              const newItem = `umb://${content[key][i].type}/${content[key][i].unique}`;
-              content[key][i] = newItem;
-            }
-            content[key] = content[key].join(',');
-          break;
-        }
-      }
-    }
-    return content;
+  MarryContentAndValue(content :UmbBlockDataType, value: any) {
+    const mutableContent = JSON.parse(JSON.stringify(content));
+    const values = value.contentData.find((x: { contentTypeKey: string | undefined; }) => x.contentTypeKey === this.#contentTypeKey).values;
+    values.forEach((v: { alias: string | number; value: any; }) => {
+      mutableContent[v.alias] = v.value;
+    });
+    return mutableContent as UmbBlockDataType;
   }
+  async fetchBlockPreview(payload : any) {
+    if(this.#contentCache === undefined) this.#contentCache = new Map();
+    // Convert the payload to a string to use as a key in the cache
+    const payloadKey = JSON.stringify(payload);
 
-  handleBlock(content : any, currentValue : any) {
-    this.#showLoader = true;
-    
-    if(!currentValue) return;
-    // make them mutable
-    const obj = JSON.parse(JSON.stringify(currentValue));
-    content = JSON.parse(JSON.stringify(content));
-    
-    // only process if the content has changed
-    if(this.#contentVals[content.udi] && JSON.stringify(this.#contentVals[content.udi]) === JSON.stringify(content)) {
-      return;
+    // Check if we have a cached response for the same payload
+    if (this.#contentCache.has(payloadKey)) {
+      return this.#contentCache.get(payloadKey); // Return the cached response
     }
-    
-
-    this.#contentVals[content.udi] = content;
-    
-    const index = obj.contentData.findIndex((f: { udi: any; }) => f.udi == content.udi);
-    
-    obj.contentData[index] = content;
-    obj.target = content.udi;
-    
-
-    for(let i = 0; i < obj.settingsData.length; i++) {
-      obj.settingsData[i] = this.parseBadKeys(obj.settingsData[i]);
-    }
-
-    for(let i = 0; i < obj.contentData.length; i++) {
-      obj.contentData[i] = this.parseBadKeys(obj.contentData[i]);
-    }
-    
-    this.#currentValue = obj;
-
-    const payload = {
-      content: JSON.stringify(this.#currentValue),
-      contentId: this.#currentId,
-      propertyTypeAlias: this.#propertyType,
-      contentTypeId: this.#documentTypeId,
-    }
-
-    fetch('/api/blockpreview', {
+    console.log('api')
+    // If no cached response, make the network request
+    const response = await fetch('/api/blockpreview', {
       method: 'POST',
-      body: JSON.stringify(payload),
+      body: payloadKey, // Reuse the stringified payload
       headers: {
         'Content-Type': 'application/json'
       }
-    })
-    .then(response => response.json()).then(data => {
-      
-      this.#showLoader = false;
-      if(data.html === "blockbeam")
-        this.#htmlOutput = this.blockBeam();  
-      else {
+    });
+
+    const data = await response.json();
+
+    // Cache the response using the payload as the key
+    this.#contentCache.set(payloadKey, data);
+
+    // Return the response data
+    return data;
+  }
+  async handleBlock() {
+    
+    this.#showLoader = true;
+    
+    if(this.#currentContent == null) return;
+
+    const content = this.#currentContent;
+    const settings = this.#currentSettings;
+    
+    const marriedContent = this.MarryContentAndValue(content, this.#currentValue);
+
+    const goodContent = this.parseBadKeys(marriedContent);
+    const goodSettings = settings ? this.parseBadKeys(settings) : settings;
+    
+    
+
+    const payload = {
+      content: JSON.stringify(goodContent),
+      settings: JSON.stringify(goodSettings),
+      contentId: this.#currentId,
+      propertyTypeAlias: this.#propertyType,
+      contentTypeId: this.#documentTypeId,
+      contentElementTypeKey: this.#contentElementTypeKey,
+      settingsElementTypeKey: this.#settingsElementTypeKey,
+      blockType: 'grid',
+    }
+
+
+    const data = await this.fetchBlockPreview(payload);
+    this.#showLoader = false;
+    if(data.html === "blockbeam")
+      this.#htmlOutput = this.blockBeam();  
+    else {
+
         const containsRenderGridAreaSlots = data.html.includes("###renderGridAreaSlots");
         const divStyle = this.#settings.divInlineStyle ? `style="${this.#settings.divInlineStyle}"` : "";
         if(containsRenderGridAreaSlots) {
           const areaHtml = this.areas();
           data.html = data.html.replace("###renderGridAreaSlots", areaHtml);
           this.#htmlOutput = html`
-            <div class="kibp_defaultDivStyle" ${divStyle}">
+            <div class="kibp_defaultDivStyle" ${divStyle}>
               <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${this.#label} &nbsp;&nbsp; (Click to maximize)</span></div>
                 <div class="kibp_content">
                 ${unsafeHTML(data.html)}
@@ -308,7 +243,7 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
         }
         else {
           this.#htmlOutput = html`
-            <div class="kibp_defaultDivStyle" ${divStyle}">
+            <div class="kibp_defaultDivStyle" ${divStyle}>
               <div id="kibp_collapsible">
                 <div class="kibp_collaps"><span class="inactive">- &nbsp;&nbsp; Click to minimize</span><span class="active">+ &nbsp;&nbsp; ${this.#label} &nbsp;&nbsp; (Click to maximize)</span></div>
                   <div class="kibp_content">
@@ -318,37 +253,105 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
               </div>
             </div>`;
         }
-      }
-      this.requestUpdate();
-
+    }
+    this.requestUpdate();
+    
+    const debouncedScriptParser = debounce(() => {
+      this.manageScripts();
       
-      const debouncedScriptParser = debounce(() => {
-        this.manageScripts();
-        
-        
-        const collaps = this.shadowRoot?.querySelector('.kibp_collaps');
-        const contentElement = this.shadowRoot?.querySelector('.kibp_content');
+      
+      const collaps = this.shadowRoot?.querySelector('.kibp_collaps');
+      const contentElement = this.shadowRoot?.querySelector('.kibp_content');
 
-        if(this.#settings.collapsibleBlocks) {
-          collaps?.addEventListener('click', (e) => {
-            
-            collaps.classList.toggle('active');
-            
-            contentElement?.classList.toggle('hidden');
-            e.preventDefault();
-            e.stopImmediatePropagation();
-          });
-        }
-        else {
-          collaps?.classList.remove('kibp_collaps');
-          collaps?.remove();
-        }
-      }, 100);
-  
-      debouncedScriptParser();
+      if(this.#settings.collapsibleBlocks) {
+        collaps?.addEventListener('click', (e) => {
+          
+          collaps.classList.toggle('active');
+          
+          contentElement?.classList.toggle('hidden');
+          e.preventDefault();
+          e.stopImmediatePropagation();
+        });
+      }
+      else {
+        collaps?.classList.remove('kibp_collaps');
+        collaps?.remove();
+      }
+    }, 100);
+
+    debouncedScriptParser();
+  }
+
+  private async GetDataTypes() {
+    const documentType = await DocumentTypeService.getDocumentTypeById({ id: this.#contentTypeKey as string });
+
+    const propertyPromises = documentType.properties.map(async (property) => {
+      const dataTypeId = property.dataType.id;
+
+      // Check if the dataType is already in typeDefinitions
+      let editorAlias = InstantBlockPreview.typeKeys.find(alias => InstantBlockPreview.typeDefinitions[alias]?.id === dataTypeId);
+
+      if (!editorAlias) {
+        // If not cached, fetch it
+        const dataType = await DataTypeService.getDataTypeById({ id: dataTypeId });
+        editorAlias = dataType.editorAlias;
+
+        // Add the fetched dataType to both arrays, ensure the push is synchronous
+        InstantBlockPreview.typeKeys.push(this.#contentTypeKey as string);
+        InstantBlockPreview.typeDefinitions[property.alias] = dataType;
+      }
+
+      return editorAlias;
     });
 
+    // Await for all properties to be processed
+    await Promise.all(propertyPromises);
   }
+
+  parseBadKeys(content: UmbBlockDataType) {
+    const mutableContent = JSON.parse(JSON.stringify(content));
+    for (const key in mutableContent) {
+      
+      const value = mutableContent[key];
+      
+
+      const editorAlias = InstantBlockPreview.typeDefinitions[key]?.editorAlias;
+      
+      if(editorAlias) {
+        switch(editorAlias) {
+          case "Umbraco.Tags":
+            mutableContent[key] = JSON.stringify(value);
+          break;
+          case "Umbraco.Decimal":
+            mutableContent[key] = JSON.stringify(value);
+            break;
+          case "Umbraco.ContentPicker":
+            const newItem = `umb://document/${value}`;
+            mutableContent[key] = newItem;
+          break;
+          case "Umbraco.DropDown.Flexible": 
+          mutableContent[key] = JSON.stringify(value);
+          break;
+          case "Umbraco.CheckBoxList": 
+          mutableContent[key] = JSON.stringify(value);
+          break;
+
+          case "Umbraco.MultipleTextstring": 
+          mutableContent[key] = value.join('\n');
+          break;
+          case "Umbraco.MultiNodeTreePicker": 
+            for (let i = 0; i < mutableContent[key].length; i++) {
+              const newItem = `umb://${mutableContent[key][i].type}/${mutableContent[key][i].unique}`;
+              mutableContent[key][i] = newItem;
+            }
+            mutableContent[key] = mutableContent[key].join(',');
+          break;
+        }
+      }
+    }
+    return mutableContent as UmbBlockDataType;
+  }
+
 
   manageScripts() {
     const scripts = this.shadowRoot?.querySelectorAll('script');
@@ -376,14 +379,12 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
 
   areas() {
     // todo, fix href
-    return this.#areas && this.#areas.length > 0
-    ? `
+    return`
       <umb-ref-grid-block standalone href="">
         <span style="margin-right: 20px">${this.#label}</span> ${this.#showLoader ? this.#loader : ''}
         <umb-block-grid-areas-container slot="areas"></umb-block-grid-areas-container>
       </umb-ref-grid-block>
-      `
-    : '';
+      `;
 
   }
 

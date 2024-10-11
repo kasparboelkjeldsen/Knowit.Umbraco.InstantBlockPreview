@@ -3,18 +3,22 @@ using Knowit.Umbraco.Bellissima.InstantBlockPreview.Models;
 using Knowit.Umbraco.Bellissima.InstantBlockPreview.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Umbraco.Cms.Core;
+using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.Models.Blocks;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.PropertyEditors;
 using Umbraco.Cms.Core.PropertyEditors.ValueConverters;
+using Umbraco.Cms.Core.PublishedCache;
 using Umbraco.Cms.Core.Services;
 using Umbraco.Cms.Core.Web;
 
@@ -32,14 +36,17 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 		private readonly ILogger _logger;
 		private readonly IFakeViewEngine _fakeViewEngine;
 		private readonly IBlockHelper _blockHelper;
-
+        private readonly IPublishedValueFallback _publishedValueFallback;
+        private readonly ModelsBuilderSettings modelsBuilderSettings;
         public BlockPreviewController(
 			IFakeViewEngine fakeViewEngine,
             IPreviewSettings previewSettings,
             IBlockHelper blockHelper,
 			IContentTypeService contentTypeService,
 			IPublishedContentTypeFactory publishedContentTypeFactory,
-			BlockGridPropertyValueConverter blockGridPropertyValueConverter,
+            IPublishedValueFallback publishedValueFallback,
+
+            BlockGridPropertyValueConverter blockGridPropertyValueConverter,
             BlockListPropertyValueConverter blockListPropertyValueConverter,
 			ILogger logger)
         {
@@ -50,32 +57,62 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
 			_blockListPropertyValueConverter = blockListPropertyValueConverter;
             _contentTypeService = contentTypeService;
 			_publishedContentTypeFactory = publishedContentTypeFactory;
-			_logger = logger;
-		}
+            _publishedValueFallback = publishedValueFallback;
+            _logger = logger;
+            modelsBuilderSettings = new ModelsBuilderSettings();
+        }
 
 
         [HttpPost]
         public async Task<IActionResult> Render([FromBody] RenderingPayloadBellissima scope)
 		{
 			var content = scope.Content;
-			var payloadContentExtractor = JsonSerializer.Deserialize<PayloadContentExtractor>(content);
-			var pageAlias = scope.ContentTypeId;
-            var propAlias = scope.PropertyTypeAlias;
-			var elementTypeId = payloadContentExtractor.ContentData.First().ContentTypeKey;
-			var controllerName = string.Empty;
-            var blockType = string.Empty;
+            var settings = scope.Settings;
+            var elementTypeId = scope.ContentElementTypeKey;
+            var settingsElementTypeId = scope.SettingsElementTypeKey;
+            var controllerName = string.Empty;
+            var blockType = scope.BlockType;
 			var htmlString = string.Empty;
-
-			try
+            
+            
+            try
 			{
-				var ctype = _contentTypeService.Get(Guid.Parse(pageAlias));
-				var ptype = _contentTypeService.Get(Guid.Parse(elementTypeId));
-				var iptype = _publishedContentTypeFactory.CreateContentType(ctype);
-				var propType = iptype.GetPropertyType(propAlias);
-				controllerName = ptype.Alias;
+                var contentModel = _blockHelper.TypedIPublishedElement(elementTypeId, content);
+                var settingsModel = settings != null ? _blockHelper.TypedIPublishedElement(settingsElementTypeId, settings) : null;
+                controllerName = _contentTypeService.Get(Guid.Parse(elementTypeId)).Name;
+                var blockItemType = blockType == PreviewConstants.BlockTypeGrid ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
+                Type[] typeArray = settings != null ? [contentModel.GetType(), settingsModel.GetType()] : [contentModel.GetType()];
+                Type blockElementType = blockItemType.MakeGenericType(typeArray);
+                ConstructorInfo? ctor = blockElementType.GetConstructor(new[]
+               {
+                    typeof(Udi),
+                    contentModel.GetType(),
+                    typeof(Udi),
+                    settings != null ? settings.GetType() : typeof(IPublishedElement)
+                });
 
-				
+                object blockGridItemInstance = ctor!.Invoke(new object[]
+                {
+                        Udi.Create("element",Guid.NewGuid()),
+                        contentModel!,
+                        Udi.Create("element",Guid.NewGuid()),
+                        settingsModel
+                });
+                //Type[] typeArray = settingsType != null ? [controllerType, settingsType] : [controllerType];
+                //var blockElementType = blockItemType.MakeGenericType(typeArray);
 
+
+                /*
+            var ctype = _contentTypeService.Get(Guid.Parse(pageAlias));
+            var ptype = _contentTypeService.Get(Guid.Parse(elementTypeId));
+            var iptype = _publishedContentTypeFactory.CreateContentType(ctype);
+
+
+            var test = iptype.GetType();
+            var propType = iptype.GetPropertyType(propAlias);
+            controllerName = ptype.Alias;
+            */
+                /*
 				BlockGridModel bgm = null;
 				BlockListModel blm = null;
 				BlockGridItem bgi = null;
@@ -124,9 +161,11 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
                         return Ok(new { html = PreviewConstants.BlockBeamValue });
                     }
                 }
+				*/
 
-                var blockInstanceItem = _blockHelper.BlockInstance(controllerName, blockType, bgm != null ? bgi : bli);
 
+                object blockInstanceItem = blockGridItemInstance;// _blockHelper.BlockInstance(controllerName, blockType, bgm != null ? bgi : bli);
+                
                 var formattedViewPath = string.Format("{0}.cshtml", controllerName);
 				var viewPath = (blockType == PreviewConstants.BlockTypeGrid ? _settings.PackageSettings.GridViewPath : _settings.PackageSettings.BlockViewPath) + formattedViewPath;
 

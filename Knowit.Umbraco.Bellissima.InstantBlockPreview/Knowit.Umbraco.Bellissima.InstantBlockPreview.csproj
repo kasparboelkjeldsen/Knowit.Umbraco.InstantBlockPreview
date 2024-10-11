@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+    <TargetFrameworks>net9.0</TargetFrameworks>
 	  <ContentTargetFolders>.</ContentTargetFolders>
 	  <Product>Knowit.Umbraco.InstantBlockPreview</Product>
 	  <PackageId>Knowit.Umbraco.InstantBlockPreview</PackageId>
@@ -21,13 +21,6 @@
 	  <Configurations>Debug;Release;</Configurations>
 	  <PackageIcon>icon.png</PackageIcon>
   </PropertyGroup>
-
-
-	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
-		<PackageReference Include="Umbraco.Cms.Core" Version="[14.1.0,15.0.0)" />
-		<PackageReference Include="Umbraco.Cms.Web.Common" Version="[14.1.0,15.0.0)" />
-		<PackageReference Include="Umbraco.Cms.Web.Website" Version="[14.1.0,15.0.0)" />
-	</ItemGroup>
 
 	<ItemGroup Condition="'$(TargetFramework)' == 'net9.0'">
 		<PackageReference Include="Umbraco.Cms.Core" Version="[15.0-rc1,16.0.0)" />
