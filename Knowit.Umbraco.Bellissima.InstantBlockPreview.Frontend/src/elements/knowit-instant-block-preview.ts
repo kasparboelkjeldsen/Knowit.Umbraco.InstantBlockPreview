@@ -10,13 +10,11 @@ import { debounce } from "@umbraco-cms/backoffice/utils";
 import { DocumentTypeService, DataTypeService, DataTypeResponseModel } from "../api";
 
 import '@umbraco-cms/backoffice/ufm';
-import { UmbBlockDataType } from "@umbraco-cms/backoffice/block";
+import { UMB_BLOCK_ENTRY_CONTEXT, UmbBlockDataType } from "@umbraco-cms/backoffice/block";
 
 @customElement('knowit-instant-block-preview')
 export class InstantBlockPreview extends UmbElementMixin(LitElement) {
 
-  
-  
   #propertyType: string | undefined;
   #settings: any | undefined = undefined;
   #currentSettings: UmbBlockDataType | undefined;
@@ -126,12 +124,10 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
       });
     });
 
-    console.log('editor1',editorNode);
-    this.consumeContext(UMB_BLOCK_GRID_ENTRY_CONTEXT, async (context) => {
-      this.#blockType = 'grid';
+    
+    this.consumeContext(UMB_BLOCK_ENTRY_CONTEXT, async (context) => {
       
-      if(editorNode == "UMB-PROPERTY-EDITOR-UI-BLOCK-LIST") return;
-
+      this.#blockType = editorNode == "UMB-PROPERTY-EDITOR-UI-BLOCK-LIST" ? "list" : "grid";
       
       this.#label = context.getLabel();
       this.#htmlOutput = this.blockBeam();
@@ -165,46 +161,6 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
         });
       });
     });
-
-    this.consumeContext(UMB_BLOCK_LIST_ENTRY_CONTEXT, async (context) => {
-      
-      this.#blockType = 'list';
-
-      if(editorNode != "UMB-PROPERTY-EDITOR-UI-BLOCK-LIST") return;
-
-      this.#label = context.getLabel();
-      this.#htmlOutput = this.blockBeam();
-      this.requestUpdate();
-      
-      this.observe(context.contentTypeKey, (contentTypeKey) => {
-        this.#contentTypeKey = contentTypeKey;
-      });
-
-      this.observe(context.contentElementTypeKey, (contentKey) => {
-        this.#contentElementTypeKey = contentKey;
-      });
-
-      this.observe(context.settingsElementTypeKey, (contentKey) => {
-        this.#settingsElementTypeKey = contentKey;
-      });
-      // Use a separate array for the promises, await their resolution with Promise.all()
-      await this.GetDataTypes();
-
-      context.settingsValues().then(async (settings) => {
-        this.observe(settings, async (settings) => {
-          this.#currentSettings = settings;
-          this.handleBlock();
-        });
-      });
-
-      context.contentValues().then(async (blockContent) => {
-        this.observe(blockContent, async (content) => {
-          this.#currentContent = content;
-          this.handleBlock();
-        });
-      });
-    });
-      
   }
 
   MarryContentAndValue(content :UmbBlockDataType, values: any) {
@@ -215,6 +171,7 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
     });
     return mutableContent as UmbBlockDataType;
   }
+
   async fetchBlockPreview(payload : any) {
     if(this.#contentCache === undefined) this.#contentCache = new Map();
     // Convert the payload to a string to use as a key in the cache
@@ -256,8 +213,6 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
 
     const goodContent = this.parseBadKeys(marriedContent);
     const goodSettings = settings ? this.parseBadKeys(marriedSettings) : settings;
-    
-    
 
     const payload = {
       content: JSON.stringify(goodContent),
@@ -269,7 +224,6 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
       settingsElementTypeKey: this.#settingsElementTypeKey,
       blockType: this.#blockType,
     }
-
 
     const data = await this.fetchBlockPreview(payload);
     this.#showLoader = false;
