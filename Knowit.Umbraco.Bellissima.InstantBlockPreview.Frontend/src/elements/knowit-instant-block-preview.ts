@@ -16,13 +16,13 @@ import { UmbBlockDataType } from "@umbraco-cms/backoffice/block";
 export class InstantBlockPreview extends UmbElementMixin(LitElement) {
 
   
-  #contentKey: string | undefined;
+  
   #propertyType: string | undefined;
   #settings: any | undefined = undefined;
   #currentSettings: UmbBlockDataType | undefined;
   #currentContent: UmbBlockDataType | undefined;
   #currentValue: any | undefined;
-  
+  #blockType: string | undefined = undefined;
   #currentId : UmbWorkspaceUniqueType | undefined = undefined;
   #documentTypeId: string | undefined = undefined;
   #contentElementTypeKey : string | undefined = undefined;
@@ -119,17 +119,13 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
     });
 
     this.consumeContext(UMB_BLOCK_GRID_ENTRY_CONTEXT, async (context) => {
-        
+      this.#blockType = 'grid';
       this.#label = context.getLabel();
       this.#htmlOutput = this.blockBeam();
       this.requestUpdate();
       
       this.observe(context.contentTypeKey, (contentTypeKey) => {
         this.#contentTypeKey = contentTypeKey;
-      });
-      
-      this.observe(context.contentKey, (contentKey) => {
-        this.#contentKey = contentKey;
       });
 
       this.observe(context.contentElementTypeKey, (contentKey) => {
@@ -156,11 +152,48 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
         });
       });
     });
+
+    this.consumeContext(UMB_BLOCK_LIST_ENTRY_CONTEXT, async (context) => {
+      console.log('ææææhh')
+      this.#blockType = 'list';
+      this.#label = context.getLabel();
+      this.#htmlOutput = this.blockBeam();
+      this.requestUpdate();
+      
+      this.observe(context.contentTypeKey, (contentTypeKey) => {
+        this.#contentTypeKey = contentTypeKey;
+      });
+
+      this.observe(context.contentElementTypeKey, (contentKey) => {
+        this.#contentElementTypeKey = contentKey;
+      });
+
+      this.observe(context.settingsElementTypeKey, (contentKey) => {
+        this.#settingsElementTypeKey = contentKey;
+      });
+      // Use a separate array for the promises, await their resolution with Promise.all()
+      await this.GetDataTypes();
+
+      context.settingsValues().then(async (settings) => {
+        this.observe(settings, async (settings) => {
+          this.#currentSettings = settings;
+          this.handleBlock();
+        });
+      });
+
+      context.contentValues().then(async (blockContent) => {
+        this.observe(blockContent, async (content) => {
+          this.#currentContent = content;
+          this.handleBlock();
+        });
+      });
+    });
+      
   }
 
-  MarryContentAndValue(content :UmbBlockDataType, value: any) {
+  MarryContentAndValue(content :UmbBlockDataType, values: any) {
     const mutableContent = JSON.parse(JSON.stringify(content));
-    const values = value.contentData.find((x: { contentTypeKey: string | undefined; }) => x.contentTypeKey === this.#contentTypeKey).values;
+
     values.forEach((v: { alias: string | number; value: any; }) => {
       mutableContent[v.alias] = v.value;
     });
@@ -175,7 +208,7 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
     if (this.#contentCache.has(payloadKey)) {
       return this.#contentCache.get(payloadKey); // Return the cached response
     }
-    console.log('api')
+
     // If no cached response, make the network request
     const response = await fetch('/api/blockpreview', {
       method: 'POST',
@@ -202,10 +235,11 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
     const content = this.#currentContent;
     const settings = this.#currentSettings;
     
-    const marriedContent = this.MarryContentAndValue(content, this.#currentValue);
+    const marriedContent = this.MarryContentAndValue(content, this.#currentValue.contentData.find((x: { contentTypeKey: string | undefined; }) => x.contentTypeKey === this.#contentTypeKey).values);
+    const marriedSettings = settings ? this.MarryContentAndValue(content, this.#currentValue.settingsData.find((x: { contentTypeKey: string | undefined; }) => x.contentTypeKey === this.#contentTypeKey).values) : settings;
 
     const goodContent = this.parseBadKeys(marriedContent);
-    const goodSettings = settings ? this.parseBadKeys(settings) : settings;
+    const goodSettings = settings ? this.parseBadKeys(marriedSettings) : settings;
     
     
 
@@ -217,7 +251,7 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
       contentTypeId: this.#documentTypeId,
       contentElementTypeKey: this.#contentElementTypeKey,
       settingsElementTypeKey: this.#settingsElementTypeKey,
-      blockType: 'grid',
+      blockType: this.#blockType,
     }
 
 
@@ -308,7 +342,7 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
     await Promise.all(propertyPromises);
   }
 
-  parseBadKeys(content: UmbBlockDataType) {
+  parseBadKeys(content: UmbBlockDataType | undefined) {
     const mutableContent = JSON.parse(JSON.stringify(content));
     for (const key in mutableContent) {
       

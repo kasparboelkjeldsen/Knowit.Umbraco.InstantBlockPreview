@@ -88,7 +88,7 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
         {
             return element.ValueKind switch
             {
-                JsonValueKind.Object => ConvertJsonElement(JsonSerializer.Deserialize<Dictionary<string, object?>>(element.GetRawText())),
+                JsonValueKind.Object => element.GetRawText(),
                 JsonValueKind.Array => ConvertJsonArray(element),
                 JsonValueKind.String => element.GetString(),
                 JsonValueKind.Number => element.TryGetInt64(out long l) ? l : (object)element.GetDouble(),

@@ -1,5 +1,5 @@
-import { UmbEntryPointOnInit } from '@umbraco-cms/backoffice/extension-api';
-import { ManifestBlockEditorCustomView } from '@umbraco-cms/backoffice/extension-registry';
+import { ManifestElementWithElementName, UmbEntryPointOnInit } from '@umbraco-cms/backoffice/extension-api';
+
 import { UMB_AUTH_CONTEXT } from '@umbraco-cms/backoffice/auth';
 import { OpenAPI } from './api/index.ts';
 
@@ -15,7 +15,7 @@ export const onInit: UmbEntryPointOnInit = async (_host, extensionRegistry) => {
         OpenAPI.CREDENTIALS = umbOpenApi.credentials;
     });
   
-    const manifestBlockPreview : ManifestBlockEditorCustomView = {
+    const manifestBlockPreview : ManifestElementWithElementName = {
         alias: 'knowit-instant-block-preview',
         name: 'Knowit Instant Block Preview',
         type: 'blockEditorCustomView',
