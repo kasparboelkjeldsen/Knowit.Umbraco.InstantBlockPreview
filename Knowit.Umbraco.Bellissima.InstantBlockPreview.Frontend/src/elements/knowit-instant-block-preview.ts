@@ -110,16 +110,29 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
       this.#currentId = workspaceContext.getUnique();
       this.#documentTypeId = workspaceContext.getContentTypeId();
     });
+    let editorNode = "";
     this.consumeContext(UMB_PROPERTY_CONTEXT, (propertyContext) => {
       this.#propertyType = propertyContext.getAlias();
+      
+      
+      
       this.observe(propertyContext.value, (value) => {
         this.#currentValue = value;
         this.handleBlock();
       });
+
+      this.observe(propertyContext.editor, (editor) => {
+        editorNode = editor?.tagName ?? "";
+      });
     });
 
+    console.log('editor1',editorNode);
     this.consumeContext(UMB_BLOCK_GRID_ENTRY_CONTEXT, async (context) => {
       this.#blockType = 'grid';
+      
+      if(editorNode == "UMB-PROPERTY-EDITOR-UI-BLOCK-LIST") return;
+
+      
       this.#label = context.getLabel();
       this.#htmlOutput = this.blockBeam();
       this.requestUpdate();
@@ -154,8 +167,11 @@ export class InstantBlockPreview extends UmbElementMixin(LitElement) {
     });
 
     this.consumeContext(UMB_BLOCK_LIST_ENTRY_CONTEXT, async (context) => {
-      console.log('ææææhh')
+      
       this.#blockType = 'list';
+
+      if(editorNode != "UMB-PROPERTY-EDITOR-UI-BLOCK-LIST") return;
+
       this.#label = context.getLabel();
       this.#htmlOutput = this.blockBeam();
       this.requestUpdate();
