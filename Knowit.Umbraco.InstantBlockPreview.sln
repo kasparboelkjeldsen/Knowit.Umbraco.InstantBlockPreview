@@ -11,6 +11,8 @@ Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "Knowit.Umbraco.Bellissima.I
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco-15.0-rc1", "Umbraco\Umbraco-15.0-rc1\Umbraco-15.0-rc1.csproj", "{3F3729C2-6DDF-4BD3-A15C-274F063C5656}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Umbraco-15.0.0-rc1-nuget", "Umbraco\Umbraco-15.0.0-rc1-nuget\Umbraco-15.0.0-rc1-nuget.csproj", "{8BB5BCDD-ED7F-4857-80B4-D92DEFB80605}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -31,12 +33,17 @@ Global
 		{3F3729C2-6DDF-4BD3-A15C-274F063C5656}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3F3729C2-6DDF-4BD3-A15C-274F063C5656}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3F3729C2-6DDF-4BD3-A15C-274F063C5656}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8BB5BCDD-ED7F-4857-80B4-D92DEFB80605}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8BB5BCDD-ED7F-4857-80B4-D92DEFB80605}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8BB5BCDD-ED7F-4857-80B4-D92DEFB80605}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8BB5BCDD-ED7F-4857-80B4-D92DEFB80605}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{3F3729C2-6DDF-4BD3-A15C-274F063C5656} = {1C25C5B3-E5AC-4D3A-B22B-429614D63E37}
+		{8BB5BCDD-ED7F-4857-80B4-D92DEFB80605} = {1C25C5B3-E5AC-4D3A-B22B-429614D63E37}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {9CCC26E6-1E21-4E0C-B5F5-A803BE335338}

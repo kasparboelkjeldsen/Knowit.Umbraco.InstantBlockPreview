@@ -1,11 +1,8 @@
 ﻿import { LitElement, html, customElement, unsafeHTML, css, TemplateResult} from "@umbraco-cms/backoffice/external/lit";
 import { UmbElementMixin } from "@umbraco-cms/backoffice/element-api";
-import { UMB_BLOCK_GRID_ENTRY_CONTEXT } from '@umbraco-cms/backoffice/block-grid';
-import { UMB_BLOCK_LIST_ENTRY_CONTEXT } from '@umbraco-cms/backoffice/block-list';
 import { UMB_PROPERTY_CONTEXT } from '@umbraco-cms/backoffice/property';
 import { UMB_DOCUMENT_WORKSPACE_CONTEXT } from "@umbraco-cms/backoffice/document";
 import { UmbWorkspaceUniqueType } from "@umbraco-cms/backoffice/workspace";
-import { observeMultiple } from "@umbraco-cms/backoffice/observable-api";
 import { debounce } from "@umbraco-cms/backoffice/utils";
 import { DocumentTypeService, DataTypeService, DataTypeResponseModel } from "../api";
 
