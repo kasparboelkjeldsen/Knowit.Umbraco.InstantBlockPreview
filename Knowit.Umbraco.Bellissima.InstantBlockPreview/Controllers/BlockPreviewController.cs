@@ -29,15 +29,11 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
     public class BlockPreviewController : Controller
     {
         private readonly IPreviewSettings _settings;
-        private readonly BlockGridPropertyValueConverter _blockGridPropertyValueConverter;
-        private readonly BlockListPropertyValueConverter _blockListPropertyValueConverter;
         private readonly IContentTypeService _contentTypeService;
-        private readonly IPublishedContentTypeFactory _publishedContentTypeFactory;
+        
 		private readonly ILogger _logger;
 		private readonly IFakeViewEngine _fakeViewEngine;
 		private readonly IBlockHelper _blockHelper;
-        private readonly IPublishedValueFallback _publishedValueFallback;
-        private readonly ModelsBuilderSettings modelsBuilderSettings;
         public BlockPreviewController(
 			IFakeViewEngine fakeViewEngine,
             IPreviewSettings previewSettings,
@@ -53,13 +49,8 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
             _fakeViewEngine = fakeViewEngine;
             _settings = previewSettings;
             _blockHelper = blockHelper;
-            _blockGridPropertyValueConverter = blockGridPropertyValueConverter;
-			_blockListPropertyValueConverter = blockListPropertyValueConverter;
             _contentTypeService = contentTypeService;
-			_publishedContentTypeFactory = publishedContentTypeFactory;
-            _publishedValueFallback = publishedValueFallback;
             _logger = logger;
-            modelsBuilderSettings = new ModelsBuilderSettings();
         }
 
 
@@ -77,35 +68,18 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Controllers
             
             try
 			{
+                controllerName = _contentTypeService.Get(Guid.Parse(elementTypeId)).Alias;
+                controllerName = char.ToUpper(controllerName[0]) + controllerName.Substring(1);
                 var contentModel = _blockHelper.TypedIPublishedElement(elementTypeId, content);
                 var settingsModel = settings != null ? _blockHelper.TypedIPublishedElement(settingsElementTypeId, settings) : null;
-                controllerName = _contentTypeService.Get(Guid.Parse(elementTypeId)).Name;
-                object blockInstanceItem;
 
-                    var blockItemType = blockType == PreviewConstants.BlockTypeGrid ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
-                    Type[] typeArray = settings != null ? [contentModel.GetType(), settingsModel.GetType()] : [contentModel.GetType()];
-                    Type blockElementType = blockItemType.MakeGenericType(typeArray);
-                    ConstructorInfo? ctor = blockElementType.GetConstructor(new[]
-                   {
-                    typeof(Udi),
-                    contentModel.GetType(),
-                    typeof(Udi),
-                    settings != null ? settings.GetType() : typeof(IPublishedElement)
-                    });
+                var blockInstanceItem = _blockHelper.TypedGenericBlock(contentModel, settingsModel, blockType);
 
-                    blockInstanceItem = ctor!.Invoke(new object[]
-                    {
-                        Udi.Create("element",Guid.NewGuid()),
-                        contentModel!,
-                        Udi.Create("element",Guid.NewGuid()),
-                        settingsModel
-                    });
-      
-                
                 var formattedViewPath = string.Format("{0}.cshtml", controllerName);
 				var viewPath = (blockType == PreviewConstants.BlockTypeGrid ? _settings.PackageSettings.GridViewPath : _settings.PackageSettings.BlockViewPath) + formattedViewPath;
 
 				Dictionary<string, object> viewData = new Dictionary<string, object>();
+
 				if (blockType == PreviewConstants.BlockTypeGrid && _settings.PackageSettings.AreaReplace.HasValue && _settings.PackageSettings.AreaReplace.Value)
                     viewData[PreviewConstants.ViewDataRenderGridAreaSlot] = PreviewConstants.RenderGridAreaSlotValue;
                 

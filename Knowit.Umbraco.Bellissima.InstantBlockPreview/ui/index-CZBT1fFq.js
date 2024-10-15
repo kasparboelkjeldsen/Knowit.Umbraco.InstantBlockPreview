@@ -36,7 +36,7 @@ const s = {
     name: "Knowit Instant Block Preview",
     type: "blockEditorCustomView",
     elementName: "knowit-instant-block-preview",
-    js: () => import("./knowit-instant-block-preview-BnqEE8iW.js")
+    js: () => import("./knowit-instant-block-preview-C06YWKED.js")
   };
   e.register(t);
 };
@@ -44,4 +44,4 @@ export {
   s as O,
   a as o
 };
-//# sourceMappingURL=index-B1O-rD1q.js.map
+//# sourceMappingURL=index-CZBT1fFq.js.map

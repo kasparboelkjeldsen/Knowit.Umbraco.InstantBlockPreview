@@ -1,26 +1,20 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Umbraco.Cms.Core;
 using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.Models.Blocks;
 using Umbraco.Cms.Core.Models.PublishedContent;
 using Umbraco.Cms.Core.PublishedCache;
 using Umbraco.Cms.Core.Services;
-using Umbraco.Extensions;
-using static Microsoft.AspNetCore.Razor.Language.TagHelperMetadata;
 
 namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
 {
     public class BlockHelper : IBlockHelper
     {
-        static readonly ConcurrentDictionary<string, (Type, Type, Type)> controllerToTypes = new();
         private readonly IContentTypeService _contentTypeService;
         private readonly IPublishedContentTypeFactory _publishedContentTypeFactory;
         private readonly IPublishedValueFallback _publishedValueFallback;
@@ -36,31 +30,56 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
             modelsBuilderSettings = new ModelsBuilderSettings();
         }
 
-        public object TypedIPublishedElement(string type, string content)
+        public IPublishedElement TypedIPublishedElement(string type, string content)
         {
             var elementtype = _contentTypeService.Get(Guid.Parse(type));
             var publishedElementType = _publishedContentTypeFactory.CreateContentType(elementtype);
 
-
-            Dictionary<string, object?> data = JsonSerializer.Deserialize<Dictionary<string, object?>>(content);
-            Dictionary<string, object?> deserializedData = ConvertJsonElement(data);
+            Dictionary<string, object> data = JsonSerializer.Deserialize<Dictionary<string, object>>(content);
+            Dictionary<string, object> deserializedData = ConvertJsonElement(data);
             IPublishedElement publishedElement = new PublishedElement(publishedElementType, Guid.NewGuid(), deserializedData, true);
 
-            var elementModelName = elementtype.Name;
+            var elementModelName = elementtype.Alias;
+            elementModelName = char.ToUpper(elementModelName[0]) + elementModelName.Substring(1);
             var modelsNameSpace = modelsBuilderSettings.ModelsNamespace;
-            string fullTypeName = $"{modelsNameSpace}.{elementModelName}";
+            var fullTypeName = $"{modelsNameSpace}.{elementModelName}";
+
             Assembly targetAssembly = AppDomain.CurrentDomain
                 .GetAssemblies()
                 .FirstOrDefault(assembly => assembly.GetTypes().Any(t => t.FullName == fullTypeName));
 
             Type modelType = targetAssembly.GetType(fullTypeName);
-            object[] constructorArgs = new object[] { publishedElement, _publishedValueFallback };
+            object[] constructorArgs = [publishedElement, _publishedValueFallback];
             object modelInstance = Activator.CreateInstance(modelType, constructorArgs);
 
-            return modelInstance;
+            return (IPublishedElement)modelInstance;
         }
 
-        public static Dictionary<string, object?> ConvertJsonElement(Dictionary<string, object?> dictionary)
+        public IBlockReference<IPublishedElement, IPublishedElement> TypedGenericBlock(IPublishedElement contentModel, IPublishedElement settingsModel, string blockType)
+        {
+            var blockItemType = blockType == PreviewConstants.BlockTypeGrid ? typeof(BlockGridItem<>) : typeof(BlockListItem<>);
+            Type[] typeArray = settingsModel != null ? [contentModel.GetType(), settingsModel.GetType()] : [contentModel.GetType()];
+            Type blockElementType = blockItemType.MakeGenericType(typeArray);
+            ConstructorInfo? ctor = blockElementType.GetConstructor(
+           [
+                typeof(Udi),
+                contentModel.GetType(),
+                typeof(Udi),
+                    settingsModel != null ? settingsModel.GetType() : typeof(IPublishedElement)
+                    ]);
+
+            var blockInstanceItem = ctor!.Invoke(
+            [
+                        Udi.Create("element",Guid.NewGuid()),
+                        contentModel!,
+                        Udi.Create("element",Guid.NewGuid()),
+                        settingsModel
+            ]);
+
+            return (IBlockReference<IPublishedElement, IPublishedElement>)blockInstanceItem;
+        }
+
+        private Dictionary<string, object> ConvertJsonElement(Dictionary<string, object> dictionary)
         {
             var result = new Dictionary<string, object?>();
 
@@ -84,12 +103,12 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
         }
 
         // Converts individual JsonElement to its base type
-        public static object? ConvertJsonValue(JsonElement element)
+        private object ConvertJsonValue(JsonElement element)
         {
             return element.ValueKind switch
             {
                 JsonValueKind.Object => element.GetRawText(),
-                JsonValueKind.Array => ConvertJsonArray(element),
+                JsonValueKind.Array => element.GetRawText(),
                 JsonValueKind.String => element.GetString(),
                 JsonValueKind.Number => element.TryGetInt64(out long l) ? l : (object)element.GetDouble(),
                 JsonValueKind.True => true,
@@ -100,7 +119,7 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
         }
 
         // Handles conversion of JSON arrays
-        public static object?[] ConvertJsonArray(JsonElement arrayElement)
+        private object[] ConvertJsonArray(JsonElement arrayElement)
         {
             var result = new List<object?>();
 
@@ -111,5 +130,6 @@ namespace Knowit.Umbraco.Bellissima.InstantBlockPreview.Services
 
             return result.ToArray();
         }
+
     }
 }
